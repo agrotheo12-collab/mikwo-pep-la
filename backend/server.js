@@ -78,6 +78,11 @@ app.use(express.urlencoded({ extended: true }));
 
 // ======================================================
 
+console.log(
+  "DATABASE_URL présente:",
+  Boolean(process.env.DATABASE_URL)
+);
+
 const pool = process.env.DATABASE_URL
 
   ? new Pool({
