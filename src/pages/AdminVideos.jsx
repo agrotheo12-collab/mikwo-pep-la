@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./AdminVideos.css";
-const API_URL = "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL;
 const categories = [
   { id: 1, nom: "Politique" },
   { id: 2, nom: "Société" },

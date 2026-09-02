@@ -4,7 +4,7 @@ import Hls from "hls.js";
 import cover from "../assets/cover.PNG";
 import "./Accueil.css";
 
-const API_URL = "http://localhost:3000";
+const API_URL = import.meta.env.VITE_API_URL;
 
 // =====================================================
 // MEDIA URL

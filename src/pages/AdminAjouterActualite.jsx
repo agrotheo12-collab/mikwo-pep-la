@@ -136,7 +136,7 @@ function AdminAjouterActualite() {
       data.append("image", image);
 
       const response = await fetch(
-        "http://localhost:3000/api/articles",
+        `${import.meta.env.VITE_API_URL}/api/articles`, 
         {
           method: "POST",
 

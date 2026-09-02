@@ -152,10 +152,10 @@ const getImageUrl = (imageUrl) => {
   }
 
   if (imageUrl.startsWith("/")) {
-    return `http://localhost:3000${imageUrl}`;
+    return `${import.meta.env.VITE_API_URL}${imageUrl}`;
   }
 
-  return `http://localhost:3000/${imageUrl}`;
+  return `${import.meta.env.VITE_API_URL}/${imageUrl}`;
 };
 
 // ======================================================
