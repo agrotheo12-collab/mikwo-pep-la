@@ -1,0 +1,488 @@
+/* =====================================================
+   FOOTER — MIKWO PÈP LA
+===================================================== */
+
+.site-footer {
+  width: 100%;
+  color: #ffffff;
+}
+
+
+/* =====================================================
+   FOOTER PRINCIPAL
+===================================================== */
+
+.footer-main {
+  position: relative;
+  overflow: hidden;
+
+  background-image:
+    linear-gradient(
+      rgba(0, 0, 0, 0.78),
+      rgba(0, 0, 0, 0.78)
+    ),
+    url("../assets/logo.JPG");
+
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+
+  border-top: 4px solid #d71920;
+}
+
+
+/* =====================================================
+   CONTAINER
+===================================================== */
+
+.footer-container {
+  width: min(1200px, 92%);
+  margin: 0 auto;
+}
+
+
+/* =====================================================
+   FOOTER MAIN CONTENT
+===================================================== */
+
+.footer-main .footer-container {
+  display: grid;
+  grid-template-columns:
+    1.4fr
+    0.8fr
+    1fr;
+
+  gap: 60px;
+
+  padding: 55px 0;
+}
+
+
+/* =====================================================
+   FOOTER COLUMNS
+===================================================== */
+
+.footer-column {
+  min-width: 0;
+}
+
+.footer-column h3 {
+  margin: 0 0 20px;
+
+  color: #ffffff;
+
+  font-size: 17px;
+  font-weight: 800;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.6px;
+
+  position: relative;
+
+  padding-bottom: 10px;
+}
+
+.footer-column h3::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  bottom: 0;
+
+  width: 42px;
+  height: 3px;
+
+  background: #d71920;
+}
+
+
+/* =====================================================
+   BRAND
+===================================================== */
+
+.footer-brand {
+  max-width: 400px;
+}
+
+
+/* =====================================================
+   LOGO
+===================================================== */
+
+.footer-logo {
+  display: inline-flex;
+  align-items: center;
+
+  margin-bottom: 18px;
+
+  text-decoration: none;
+}
+
+.footer-logo img {
+  width: auto;
+  height: 75px;
+
+  display: block;
+
+  object-fit: contain;
+
+  transition: transform 0.2s ease;
+}
+
+.footer-logo:hover img {
+  transform: scale(1.03);
+}
+
+
+/* =====================================================
+   DESCRIPTION
+===================================================== */
+
+.footer-brand > p {
+  margin: 0;
+
+  max-width: 380px;
+
+  color: rgba(255, 255, 255, 0.85);
+
+  font-size: 14px;
+
+  line-height: 1.7;
+}
+
+
+/* =====================================================
+   RÉSEAUX SOCIAUX
+===================================================== */
+
+.footer-socials {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  margin-top: 22px;
+}
+
+.footer-socials a {
+  width: 40px;
+  height: 40px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #ffffff;
+
+  background: rgba(255, 255, 255, 0.08);
+
+  border: 1px solid rgba(255, 255, 255, 0.35);
+
+  border-radius: 50%;
+
+  text-decoration: none;
+
+  font-size: 17px;
+  font-weight: 800;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.footer-socials a:hover {
+  background: #d71920;
+
+  border-color: #d71920;
+
+  transform: translateY(-3px);
+}
+
+
+/* =====================================================
+   NAVIGATION
+===================================================== */
+
+.footer-links {
+  display: flex;
+  flex-direction: column;
+
+  gap: 10px;
+}
+
+.footer-links a {
+  position: relative;
+
+  width: fit-content;
+
+  color: rgba(255, 255, 255, 0.82);
+
+  text-decoration: none;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  transition:
+    color 0.2s ease,
+    padding-left 0.2s ease;
+}
+
+.footer-links a::before {
+  content: "›";
+
+  margin-right: 8px;
+
+  color: #d71920;
+
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.footer-links a:hover {
+  color: #ffffff;
+
+  padding-left: 5px;
+}
+
+
+/* =====================================================
+   CONTACT
+===================================================== */
+
+.footer-contact {
+  display: flex;
+  flex-direction: column;
+
+  gap: 22px;
+}
+
+.footer-contact-item {
+  display: flex;
+  align-items: flex-start;
+
+  gap: 13px;
+}
+
+
+/* =====================================================
+   CONTACT ICON
+===================================================== */
+
+.footer-contact-icon {
+  width: 40px;
+  height: 40px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(215, 25, 32, 0.9);
+
+  border-radius: 50%;
+
+  font-size: 17px;
+}
+
+
+/* =====================================================
+   CONTACT TEXT
+===================================================== */
+
+.footer-contact-item > div {
+  display: flex;
+  flex-direction: column;
+
+  gap: 5px;
+}
+
+.footer-contact-item strong {
+  color: #ffffff;
+
+  font-size: 13px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 0.5px;
+}
+
+
+/* =====================================================
+   TELEPHONE + WHATSAPP LINKS
+===================================================== */
+
+.footer-contact-item a {
+  width: fit-content;
+
+  color: rgba(255, 255, 255, 0.82);
+
+  text-decoration: none;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+
+  transition: color 0.2s ease;
+}
+
+.footer-contact-item a:hover {
+  color: #ffffff;
+}
+
+
+/* =====================================================
+   FOOTER BOTTOM
+===================================================== */
+
+.footer-bottom {
+  background: #0057a8;
+
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+
+/* =====================================================
+   FOOTER BOTTOM CONTAINER
+===================================================== */
+
+.footer-bottom-inner {
+  min-height: 65px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+
+/* =====================================================
+   FOOTER BOTTOM TEXT
+===================================================== */
+
+.footer-bottom p {
+  margin: 0;
+
+  color: rgba(255, 255, 255, 0.9);
+
+  font-size: 13px;
+
+  line-height: 1.5;
+}
+
+
+/* =====================================================
+   TABLET
+===================================================== */
+
+@media (max-width: 900px) {
+
+  .footer-main .footer-container {
+    grid-template-columns:
+      1fr
+      1fr;
+
+    gap: 40px;
+  }
+
+  .footer-brand {
+    max-width: 100%;
+  }
+
+  .footer-contact {
+    gap: 18px;
+  }
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 650px) {
+
+  .footer-main .footer-container {
+    width: 92%;
+
+    grid-template-columns: 1fr;
+
+    gap: 35px;
+
+    padding: 45px 0;
+  }
+
+  .footer-brand {
+    max-width: 100%;
+  }
+
+  .footer-logo img {
+    height: 65px;
+  }
+
+  .footer-column h3 {
+    font-size: 16px;
+  }
+
+  .footer-bottom-inner {
+    min-height: auto;
+
+    padding: 18px 0;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    text-align: center;
+
+    gap: 7px;
+  }
+
+  .footer-bottom p {
+    font-size: 12px;
+  }
+}
+
+
+/* =====================================================
+   PETIT MOBILE
+===================================================== */
+
+@media (max-width: 400px) {
+
+  .footer-main .footer-container {
+    padding: 38px 0;
+  }
+
+  .footer-logo img {
+    height: 58px;
+  }
+
+  .footer-socials a {
+    width: 37px;
+    height: 37px;
+
+    font-size: 15px;
+  }
+
+  .footer-contact-item a {
+    font-size: 13px;
+  }
+}
+
+
+/* =====================================================
+   ACCESSIBILITÉ
+===================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+  .footer-logo img,
+  .footer-socials a,
+  .footer-links a {
+    transition: none;
+  }
+}

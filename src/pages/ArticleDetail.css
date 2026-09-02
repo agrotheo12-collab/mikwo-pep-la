@@ -1,0 +1,135 @@
+.article-detail-page {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding: 40px 20px 80px;
+}
+
+.article-detail-container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.article-back {
+  display: inline-block;
+  margin-bottom: 25px;
+  color: #d71920;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.article-back:hover {
+  text-decoration: underline;
+}
+
+.article-detail {
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.article-detail-category {
+  display: inline-block;
+  background: #d71920;
+  color: #ffffff;
+  padding: 7px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.article-detail-title {
+  margin: 0;
+  color: #111111;
+  font-size: 42px;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.article-detail-meta {
+  margin-top: 18px;
+  margin-bottom: 30px;
+  color: #666666;
+  font-size: 14px;
+}
+
+.article-detail-image {
+  width: 100%;
+  margin-bottom: 35px;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.article-detail-image img {
+  width: 100%;
+  max-height: 600px;
+  display: block;
+  object-fit: cover;
+}
+
+.article-detail-content {
+  max-width: 850px;
+  margin: 0 auto;
+}
+
+.article-detail-content p {
+  margin: 0 0 22px;
+  color: #222222;
+  font-size: 19px;
+  line-height: 1.8;
+}
+
+.article-loading {
+  text-align: center;
+  padding: 80px 20px;
+  font-size: 18px;
+}
+
+.article-not-found {
+  background: #ffffff;
+  text-align: center;
+  padding: 80px 20px;
+  border-radius: 8px;
+}
+
+.article-not-found h1 {
+  margin-bottom: 15px;
+  color: #111111;
+}
+
+.article-not-found p {
+  color: #666666;
+  margin-bottom: 25px;
+}
+
+.article-not-found a {
+  color: #d71920;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .article-detail-page {
+    padding: 25px 15px 50px;
+  }
+
+  .article-detail {
+    padding: 25px 20px;
+  }
+
+  .article-detail-title {
+    font-size: 30px;
+  }
+
+  .article-detail-content p {
+    font-size: 17px;
+    line-height: 1.7;
+  }
+
+  .article-detail-image img {
+    max-height: 400px;
+  }
+}

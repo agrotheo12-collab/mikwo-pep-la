@@ -1,0 +1,568 @@
+/* =========================================================
+   ADMIN ACTUALITÉS - MIKWO PÈP LA
+   ========================================================= */
+
+.admin-actualites-page {
+  min-height: 100vh;
+  background: #f4f6f9;
+  padding: 110px 24px 60px;
+  color: #111827;
+}
+
+.admin-actualites-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.admin-actualites-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.admin-section-label {
+  display: inline-block;
+  color: #d71920;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.admin-actualites-header h1 {
+  margin: 0;
+  font-size: 42px;
+  line-height: 1.1;
+  font-weight: 900;
+  color: #111827;
+}
+
+.admin-actualites-header p {
+  margin: 10px 0 0;
+  color: #6b7280;
+  font-size: 16px;
+}
+
+/* =========================================================
+   BOUTONS
+   ========================================================= */
+
+.admin-btn-primary,
+.admin-btn-secondary,
+.admin-action-edit,
+.admin-action-delete {
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.admin-btn-primary {
+  background: #d71920;
+  color: #fff;
+  padding: 13px 22px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 14px;
+  box-shadow:
+    0 5px 15px rgba(215, 25, 32, 0.2);
+}
+
+.admin-btn-primary:hover {
+  background: #b9141a;
+  transform: translateY(-1px);
+  box-shadow:
+    0 8px 20px rgba(215, 25, 32, 0.28);
+}
+
+.admin-btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.admin-btn-secondary {
+  background: #e5e7eb;
+  color: #111827;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.admin-btn-secondary:hover {
+  background: #d1d5db;
+}
+
+/* =========================================================
+   MESSAGES
+   ========================================================= */
+
+.admin-message {
+  padding: 15px 18px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.admin-message-error {
+  background: #fee2e2;
+  color: #991b1b;
+  border-left: 4px solid #dc2626;
+}
+
+.admin-message-success {
+  background: #dcfce7;
+  color: #166534;
+  border-left: 4px solid #16a34a;
+}
+
+/* =========================================================
+   FORM CARD
+   ========================================================= */
+
+.admin-article-form-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  box-shadow:
+    0 8px 30px rgba(15, 23, 42, 0.06);
+  margin-bottom: 40px;
+  overflow: hidden;
+}
+
+.admin-card-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 25px 28px;
+  border-bottom: 1px solid #e5e7eb;
+  background:
+    linear-gradient(
+      135deg,
+      #fff 0%,
+      #f8fafc 100%
+    );
+}
+
+.admin-card-title span {
+  color: #1d4ed8;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+}
+
+.admin-card-title h2 {
+  margin: 5px 0 0;
+  font-size: 24px;
+  color: #111827;
+}
+
+/* =========================================================
+   FORM
+   ========================================================= */
+
+.admin-article-form {
+  padding: 28px;
+}
+
+.admin-form-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.admin-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-form-full {
+  grid-column: 1 / -1;
+}
+
+.admin-form-group label {
+  margin-bottom: 8px;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.admin-form-group input,
+.admin-form-group select,
+.admin-form-group textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  color: #111827;
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.admin-form-group input,
+.admin-form-group select {
+  height: 48px;
+  padding: 0 14px;
+}
+
+.admin-form-group textarea {
+  min-height: 260px;
+  padding: 14px;
+  resize: vertical;
+  line-height: 1.7;
+}
+
+.admin-form-group input:focus,
+.admin-form-group select:focus,
+.admin-form-group textarea:focus {
+  border-color: #1d4ed8;
+  box-shadow:
+    0 0 0 3px
+    rgba(29, 78, 216, 0.1);
+}
+
+.admin-form-group small {
+  margin-top: 6px;
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.admin-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 25px;
+  padding-top: 22px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* =========================================================
+   LISTE
+   ========================================================= */
+
+.admin-articles-list-section {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow:
+    0 8px 30px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+}
+
+.admin-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 25px 28px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-list-header h2 {
+  margin: 3px 0 0;
+  font-size: 24px;
+  color: #111827;
+}
+
+.admin-articles-count {
+  background: #eff6ff;
+  color: #1d4ed8;
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+/* =========================================================
+   TABLE
+   ========================================================= */
+
+.admin-articles-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.admin-articles-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.admin-articles-table th {
+  background: #f8fafc;
+  color: #374151;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-articles-table td {
+  padding: 18px 20px;
+  border-bottom: 1px solid #eef0f3;
+  vertical-align: middle;
+  font-size: 14px;
+  color: #374151;
+}
+
+.admin-articles-table tbody tr {
+  transition:
+    background 0.2s ease;
+}
+
+.admin-articles-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.admin-articles-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* =========================================================
+   ARTICLE CELL
+   ========================================================= */
+
+.admin-article-title-cell {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 300px;
+}
+
+.admin-article-title-cell img {
+  width: 70px;
+  height: 52px;
+  object-fit: cover;
+  border-radius: 7px;
+  background: #e5e7eb;
+  flex-shrink: 0;
+}
+
+.admin-article-title-cell > div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.admin-article-title-cell strong {
+  color: #111827;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.admin-article-title-cell span {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+/* =========================================================
+   STATUT
+   ========================================================= */
+
+.admin-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.admin-status-publie {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.admin-status-brouillon {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.admin-status-archive {
+  background: #e5e7eb;
+  color: #4b5563;
+}
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.admin-table-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-action-edit,
+.admin-action-delete {
+  padding: 8px 11px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.admin-action-edit {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.admin-action-edit:hover {
+  background: #dbeafe;
+}
+
+.admin-action-delete {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.admin-action-delete:hover {
+  background: #fee2e2;
+}
+
+.admin-action-delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   EMPTY
+   ========================================================= */
+
+.admin-empty-state {
+  text-align: center;
+  padding: 70px 30px;
+  color: #6b7280;
+}
+
+.admin-empty-state strong {
+  display: block;
+  color: #111827;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.admin-empty-state p {
+  margin: 0;
+  font-size: 14px;
+}
+
+/* =========================================================
+   TABLET
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .admin-actualites-page {
+    padding: 95px 18px 45px;
+  }
+
+  .admin-actualites-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-actualites-header h1 {
+    font-size: 34px;
+  }
+
+  .admin-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-form-full {
+    grid-column: auto;
+  }
+
+  .admin-form-actions {
+    justify-content: stretch;
+    flex-direction: column;
+  }
+
+  .admin-form-actions button {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+  .admin-actualites-page {
+    padding: 85px 12px 35px;
+  }
+
+  .admin-actualites-header h1 {
+    font-size: 30px;
+  }
+
+  .admin-actualites-header p {
+    font-size: 14px;
+  }
+
+  .admin-actualites-header
+    .admin-btn-primary {
+    width: 100%;
+  }
+
+  .admin-card-title,
+  .admin-list-header {
+    padding: 20px;
+  }
+
+  .admin-card-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-card-title h2,
+  .admin-list-header h2 {
+    font-size: 20px;
+  }
+
+  .admin-article-form {
+    padding: 20px;
+  }
+
+  .admin-form-group input,
+  .admin-form-group select {
+    height: 46px;
+  }
+
+  .admin-form-group textarea {
+    min-height: 220px;
+  }
+
+  .admin-list-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-articles-count {
+    align-self: flex-start;
+  }
+}

@@ -1,0 +1,523 @@
+/* ======================================================
+   ADMIN ÉQUIPE
+   ====================================================== */
+
+.admin-equipe-page {
+  min-height: 100vh;
+  padding: 40px;
+  background: #f5f7fa;
+  color: #111827;
+}
+
+/* ======================================================
+   HEADER
+   ====================================================== */
+
+.admin-equipe-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 30px;
+  margin-bottom: 35px;
+}
+
+.admin-equipe-kicker {
+  display: block;
+  margin-bottom: 8px;
+  color: #e31b23;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.admin-equipe-header h1 {
+  margin: 0;
+  font-size: 36px;
+  font-weight: 800;
+  color: #0b2a5b;
+}
+
+.admin-equipe-header p {
+  margin: 10px 0 0;
+  color: #6b7280;
+  font-size: 15px;
+}
+
+/* ======================================================
+   BOUTON AJOUTER
+   ====================================================== */
+
+.admin-equipe-add-btn {
+  border: none;
+  border-radius: 10px;
+  padding: 13px 20px;
+  background: #e31b23;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.admin-equipe-add-btn:hover {
+  background: #c9151c;
+  transform: translateY(-1px);
+}
+
+/* ======================================================
+   FORMULAIRE
+   ====================================================== */
+
+.admin-equipe-form-card {
+  margin-bottom: 30px;
+  padding: 28px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+}
+
+.admin-equipe-form-card h2 {
+  margin: 0 0 22px;
+  color: #0b2a5b;
+  font-size: 22px;
+}
+
+.admin-equipe-form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.admin-equipe-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.admin-equipe-form-group.full {
+  grid-column: 1 / -1;
+}
+
+.admin-equipe-form-group label {
+  color: #374151;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.admin-equipe-form-group input,
+.admin-equipe-form-group textarea,
+.admin-equipe-form-group select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 9px;
+  outline: none;
+  background: white;
+  color: #111827;
+  font-size: 14px;
+  transition: border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.admin-equipe-form-group textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.admin-equipe-form-group input:focus,
+.admin-equipe-form-group textarea:focus,
+.admin-equipe-form-group select:focus {
+  border-color: #0b2a5b;
+  box-shadow: 0 0 0 3px rgba(11, 42, 91, 0.1);
+}
+
+/* ======================================================
+   IMAGE
+   ====================================================== */
+
+.admin-equipe-image-preview {
+  width: 100px;
+  height: 100px;
+  margin-top: 10px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #f1f5f9;
+}
+
+/* ======================================================
+   ACTIONS FORMULAIRE
+   ====================================================== */
+
+.admin-equipe-form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 5px;
+}
+
+.admin-equipe-cancel-btn,
+.admin-equipe-submit-btn {
+  border: none;
+  border-radius: 9px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-equipe-cancel-btn {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.admin-equipe-cancel-btn:hover {
+  background: #d1d5db;
+}
+
+.admin-equipe-submit-btn {
+  background: #0b2a5b;
+  color: white;
+}
+
+.admin-equipe-submit-btn:hover {
+  background: #071d40;
+}
+
+/* ======================================================
+   LISTE DES MEMBRES
+   ====================================================== */
+
+.admin-equipe-list-card {
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+}
+
+.admin-equipe-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 28px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.admin-equipe-list-header h2 {
+  margin: 0;
+  color: #0b2a5b;
+  font-size: 21px;
+}
+
+.admin-equipe-count {
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: #eef3f9;
+  color: #0b2a5b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ======================================================
+   GRILLE MEMBRES
+   ====================================================== */
+
+.admin-equipe-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+  padding: 28px;
+}
+
+/* ======================================================
+   CARTE MEMBRE
+   ====================================================== */
+
+.admin-equipe-card {
+  position: relative;
+  padding: 24px;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  background: #ffffff;
+  text-align: center;
+  transition: 0.25s ease;
+}
+
+.admin-equipe-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  border-color: #cbd5e1;
+}
+
+.admin-equipe-avatar {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 15px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #0b2a5b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 34px;
+  font-weight: 800;
+}
+
+.admin-equipe-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.admin-equipe-card h3 {
+  margin: 0;
+  color: #111827;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.admin-equipe-card-role {
+  display: inline-block;
+  margin-top: 7px;
+  color: #e31b23;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin-equipe-card-description {
+  margin: 13px 0 0;
+  color: #6b7280;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ======================================================
+   RÉSEAUX SOCIAUX
+   ====================================================== */
+
+.admin-equipe-socials {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.admin-equipe-socials a {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #eef3f9;
+  color: #0b2a5b;
+  text-decoration: none;
+  font-size: 15px;
+  transition: 0.2s ease;
+}
+
+.admin-equipe-socials a:hover {
+  background: #0b2a5b;
+  color: white;
+}
+
+/* ======================================================
+   ACTIONS CARTE
+   ====================================================== */
+
+.admin-equipe-card-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 20px;
+  padding-top: 17px;
+  border-top: 1px solid #eef0f3;
+}
+
+.admin-equipe-edit-btn,
+.admin-equipe-delete-btn {
+  border: none;
+  border-radius: 8px;
+  padding: 9px 13px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.admin-equipe-edit-btn {
+  background: #eef3f9;
+  color: #0b2a5b;
+}
+
+.admin-equipe-edit-btn:hover {
+  background: #dce6f3;
+}
+
+.admin-equipe-delete-btn {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.admin-equipe-delete-btn:hover {
+  background: #fecaca;
+}
+
+/* ======================================================
+   MESSAGE VIDE
+   ====================================================== */
+
+.admin-equipe-empty {
+  padding: 60px 20px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.admin-equipe-empty-icon {
+  margin-bottom: 12px;
+  font-size: 45px;
+}
+
+.admin-equipe-empty h3 {
+  margin: 0 0 8px;
+  color: #374151;
+}
+
+/* ======================================================
+   LOADING
+   ====================================================== */
+
+.admin-equipe-loading {
+  padding: 60px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.admin-equipe-loader {
+  width: 38px;
+  height: 38px;
+  margin: 0 auto 15px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #e31b23;
+  border-radius: 50%;
+  animation: adminEquipeSpin 0.8s linear infinite;
+}
+
+@keyframes adminEquipeSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ======================================================
+   MESSAGE ERREUR / SUCCÈS
+   ====================================================== */
+
+.admin-equipe-message {
+  margin-bottom: 20px;
+  padding: 13px 16px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.admin-equipe-message.success {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.admin-equipe-message.error {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+/* ======================================================
+   RESPONSIVE TABLET
+   ====================================================== */
+
+@media (max-width: 1100px) {
+  .admin-equipe-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ======================================================
+   RESPONSIVE MOBILE
+   ====================================================== */
+
+@media (max-width: 768px) {
+  .admin-equipe-page {
+    padding: 25px 16px;
+  }
+
+  .admin-equipe-header {
+    flex-direction: column;
+  }
+
+  .admin-equipe-header h1 {
+    font-size: 29px;
+  }
+
+  .admin-equipe-add-btn {
+    width: 100%;
+  }
+
+  .admin-equipe-form {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-equipe-form-group.full {
+    grid-column: auto;
+  }
+
+  .admin-equipe-form-actions {
+    grid-column: auto;
+    flex-direction: column;
+  }
+
+  .admin-equipe-form-actions button {
+    width: 100%;
+  }
+
+  .admin-equipe-list-header {
+    padding: 20px;
+  }
+
+  .admin-equipe-grid {
+    grid-template-columns: 1fr;
+    padding: 18px;
+  }
+}
+
+/* ======================================================
+   PETIT MOBILE
+   ====================================================== */
+
+@media (max-width: 480px) {
+  .admin-equipe-page {
+    padding: 20px 12px;
+  }
+
+  .admin-equipe-form-card {
+    padding: 20px 16px;
+  }
+
+  .admin-equipe-header h1 {
+    font-size: 25px;
+  }
+
+  .admin-equipe-card {
+    padding: 20px 15px;
+  }
+
+  .admin-equipe-avatar {
+    width: 85px;
+    height: 85px;
+  }
+}

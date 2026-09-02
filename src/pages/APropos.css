@@ -1,0 +1,655 @@
+/* =========================================================
+   À PROPOS — MIKWO PÈP LA TV
+========================================================= */
+
+.apropos-page {
+  width: 100%;
+  background: #ffffff;
+  color: #111827;
+}
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
+.apropos-container {
+  width: min(1200px, 92%);
+  margin: 0 auto;
+}
+
+/* =========================================================
+   HERO
+========================================================= */
+
+.apropos-hero {
+  position: relative;
+  padding: 90px 0;
+  background: linear-gradient(
+    135deg,
+    #003b7a 0%,
+    #0056a6 55%,
+    #e31b23 100%
+  );
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.apropos-hero::before {
+  content: "";
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  right: -180px;
+  top: -180px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.apropos-hero::after {
+  content: "";
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  left: -150px;
+  bottom: -170px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.apropos-hero .apropos-container {
+  position: relative;
+  z-index: 2;
+}
+
+.apropos-kicker {
+  display: inline-block;
+  margin-bottom: 14px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.apropos-hero h1 {
+  margin: 0 0 18px;
+  font-size: clamp(38px, 6vw, 64px);
+  line-height: 1.05;
+  font-weight: 900;
+}
+
+.apropos-hero p {
+  max-width: 720px;
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* =========================================================
+   SECTION GÉNÉRALE
+========================================================= */
+
+.apropos-section {
+  padding: 85px 0;
+  background: #ffffff;
+}
+
+.apropos-content {
+  max-width: 900px;
+}
+
+.apropos-section-kicker {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: #e31b23;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+
+.apropos-content h2,
+.apropos-equipe-header h2,
+.apropos-values-content h2 {
+  margin: 0 0 24px;
+  color: #003b7a;
+  font-size: clamp(30px, 4vw, 46px);
+  line-height: 1.15;
+  font-weight: 900;
+}
+
+.apropos-content p {
+  margin: 0 0 20px;
+  color: #4b5563;
+  font-size: 17px;
+  line-height: 1.85;
+  text-align: justify;
+}
+
+.apropos-content p:last-child {
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   MISSION
+========================================================= */
+
+.apropos-mission {
+  padding: 80px 0;
+  background: #f5f7fa;
+}
+
+.apropos-mission-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 26px;
+}
+
+.apropos-mission-card {
+  padding: 34px 30px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.apropos-mission-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+.apropos-mission-icon {
+  width: 58px;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 22px;
+  border-radius: 14px;
+  background: #003b7a;
+  color: #ffffff;
+  font-size: 27px;
+}
+
+.apropos-mission-card:nth-child(2)
+  .apropos-mission-icon {
+  background: #e31b23;
+}
+
+.apropos-mission-card:nth-child(3)
+  .apropos-mission-icon {
+  background: #111827;
+}
+
+.apropos-mission-card h3 {
+  margin: 0 0 12px;
+  color: #111827;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.apropos-mission-card p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* =========================================================
+   ÉQUIPE
+========================================================= */
+
+.apropos-equipe {
+  padding: 90px 0;
+  background: #ffffff;
+}
+
+.apropos-equipe-header {
+  max-width: 760px;
+  margin-bottom: 50px;
+}
+
+.apropos-equipe-header p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 17px;
+  line-height: 1.75;
+}
+
+/* =========================================================
+   GRILLE ÉQUIPE
+========================================================= */
+
+.apropos-equipe-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+/* =========================================================
+   CARTE MEMBRE
+========================================================= */
+
+.apropos-member-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.apropos-member-card:hover {
+  transform: translateY(-7px);
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.12);
+}
+
+/* =========================================================
+   PHOTO MEMBRE
+========================================================= */
+
+.apropos-member-photo {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  overflow: hidden;
+  background: #eef2f7;
+}
+
+.apropos-member-photo img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.4s ease;
+}
+
+.apropos-member-card:hover
+  .apropos-member-photo img {
+  transform: scale(1.04);
+}
+
+.apropos-member-no-photo {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(
+    135deg,
+    #003b7a,
+    #0056a6
+  );
+  color: #ffffff;
+  font-size: 70px;
+}
+
+/* =========================================================
+   INFORMATIONS MEMBRE
+========================================================= */
+
+.apropos-member-info {
+  display: flex;
+  flex-direction: column;
+  padding: 27px 26px 25px;
+}
+
+.apropos-member-info h3 {
+  margin: 0 0 7px;
+  color: #111827;
+  font-size: 23px;
+  line-height: 1.25;
+  font-weight: 900;
+}
+
+.apropos-member-function {
+  display: inline-block;
+  margin-bottom: 18px;
+  color: #e31b23;
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 800;
+}
+
+/* =========================================================
+   BIOGRAPHIE
+   Justifiée + plusieurs paragraphes
+========================================================= */
+
+.apropos-member-biography {
+  margin-top: 0;
+}
+
+.apropos-member-biography p {
+  margin: 0 0 15px;
+  color: #5f6672;
+  font-size: 15px;
+  line-height: 1.8;
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+}
+
+.apropos-member-biography p:last-child {
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   ANCIEN FORMAT BIO — COMPATIBILITÉ
+========================================================= */
+
+.apropos-member-info > p {
+  margin: 0 0 15px;
+  color: #5f6672;
+  font-size: 15px;
+  line-height: 1.8;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.apropos-member-info > p:last-child {
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   RÉSEAUX SOCIAUX
+========================================================= */
+
+.apropos-member-socials {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.apropos-member-socials a {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #003b7a;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 900;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.apropos-member-socials a:hover {
+  transform: translateY(-3px);
+  background: #e31b23;
+}
+
+/* =========================================================
+   CHARGEMENT
+========================================================= */
+
+.apropos-equipe-loading {
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+}
+
+.apropos-loader {
+  width: 42px;
+  height: 42px;
+  margin-bottom: 18px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #003b7a;
+  border-radius: 50%;
+  animation: apropos-spin 0.8s linear infinite;
+}
+
+@keyframes apropos-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =========================================================
+   ERREUR
+========================================================= */
+
+.apropos-equipe-error {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 25px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.apropos-equipe-error span {
+  font-size: 25px;
+}
+
+.apropos-equipe-error p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* =========================================================
+   AUCUN MEMBRE
+========================================================= */
+
+.apropos-equipe-empty {
+  padding: 70px 25px;
+  text-align: center;
+  border: 1px dashed #d1d5db;
+  border-radius: 16px;
+  background: #f9fafb;
+}
+
+.apropos-equipe-empty > span {
+  display: block;
+  margin-bottom: 15px;
+  font-size: 50px;
+}
+
+.apropos-equipe-empty h3 {
+  margin: 0 0 10px;
+  color: #003b7a;
+  font-size: 23px;
+}
+
+.apropos-equipe-empty p {
+  max-width: 550px;
+  margin: 0 auto;
+  color: #6b7280;
+  line-height: 1.7;
+}
+
+/* =========================================================
+   VALEURS
+========================================================= */
+
+.apropos-values {
+  padding: 90px 0;
+  background: #f5f7fa;
+}
+
+.apropos-values-content {
+  max-width: 900px;
+}
+
+.apropos-values-list {
+  display: grid;
+  gap: 0;
+  margin-top: 35px;
+}
+
+.apropos-values-list > div {
+  padding: 24px 0;
+  border-top: 1px solid #dfe3e8;
+}
+
+.apropos-values-list > div:last-child {
+  border-bottom: 1px solid #dfe3e8;
+}
+
+.apropos-values-list strong {
+  display: block;
+  margin-bottom: 7px;
+  color: #003b7a;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.apropos-values-list p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 900px) {
+  .apropos-hero {
+    padding: 75px 0;
+  }
+
+  .apropos-section,
+  .apropos-equipe,
+  .apropos-values {
+    padding: 70px 0;
+  }
+
+  .apropos-mission {
+    padding: 65px 0;
+  }
+
+  .apropos-mission-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .apropos-equipe-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .apropos-member-photo {
+    height: 290px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 650px) {
+  .apropos-container {
+    width: min(94%, 1200px);
+  }
+
+  .apropos-hero {
+    padding: 60px 0;
+  }
+
+  .apropos-hero h1 {
+    font-size: 40px;
+  }
+
+  .apropos-hero p {
+    font-size: 16px;
+    line-height: 1.65;
+  }
+
+  .apropos-section,
+  .apropos-equipe,
+  .apropos-values {
+    padding: 55px 0;
+  }
+
+  .apropos-mission {
+    padding: 55px 0;
+  }
+
+  .apropos-content h2,
+  .apropos-equipe-header h2,
+  .apropos-values-content h2 {
+    font-size: 31px;
+  }
+
+  .apropos-content p {
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  .apropos-equipe-grid {
+    grid-template-columns: 1fr;
+    gap: 22px;
+  }
+
+  .apropos-member-photo {
+    height: 330px;
+  }
+
+  .apropos-member-info {
+    padding: 24px 21px;
+  }
+
+  .apropos-member-info h3 {
+    font-size: 21px;
+  }
+
+  .apropos-member-biography p {
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  .apropos-mission-card {
+    padding: 28px 24px;
+  }
+
+  .apropos-values-list {
+    margin-top: 25px;
+  }
+}
+
+/* =========================================================
+   TRÈS PETITS ÉCRANS
+========================================================= */
+
+@media (max-width: 400px) {
+  .apropos-hero h1 {
+    font-size: 34px;
+  }
+
+  .apropos-kicker,
+  .apropos-section-kicker {
+    font-size: 11px;
+  }
+
+  .apropos-member-photo {
+    height: 280px;
+  }
+
+  .apropos-member-info {
+    padding: 21px 18px;
+  }
+}

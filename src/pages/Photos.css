@@ -1,0 +1,1129 @@
+/* ==========================================================
+   MIKWO PÈP LA — PHOTOS
+   STYLE SOCIAL FEED / FACEBOOK
+========================================================== */
+
+.photos-page {
+  min-height: 100vh;
+  background: #f0f2f5;
+  padding: 40px 20px 80px;
+  color: #1c1e21;
+}
+
+/* ==========================================================
+   CONTAINER
+========================================================== */
+
+.photos-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* ==========================================================
+   HEADER
+========================================================== */
+
+.photos-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.photos-header-label {
+  display: block;
+  margin-bottom: 6px;
+
+  color: #d71920;
+
+  font-size: 13px;
+  font-weight: 900;
+
+  letter-spacing: 1.8px;
+}
+
+.photos-header h1 {
+  margin: 0;
+
+  color: #111;
+
+  font-size: 40px;
+  line-height: 1;
+
+  font-weight: 900;
+
+  letter-spacing: -1.2px;
+}
+
+.photos-header p {
+  margin: 10px 0 0;
+
+  color: #65676b;
+
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* ==========================================================
+   BOUTON ACCUEIL
+========================================================== */
+
+.photos-home-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 42px;
+
+  padding: 0 18px;
+
+  border-radius: 7px;
+
+  background: #0057a8;
+  color: #fff;
+
+  text-decoration: none;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.photos-home-button:hover {
+  background: #004786;
+  transform: translateY(-1px);
+}
+
+/* ==========================================================
+   FEED
+========================================================== */
+
+.facebook-feed {
+  display: flex;
+  flex-direction: column;
+
+  gap: 22px;
+}
+
+/* ==========================================================
+   PUBLICATION
+========================================================== */
+
+.facebook-photo-post {
+  width: 100%;
+
+  overflow: hidden;
+
+  background: #fff;
+
+  border-radius: 10px;
+
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* ==========================================================
+   HEADER PUBLICATION
+========================================================== */
+
+.facebook-post-header {
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+
+  padding: 15px 16px 10px;
+}
+
+.facebook-avatar {
+  width: 42px;
+  height: 42px;
+
+  min-width: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  background: #d71920;
+
+  color: #fff;
+
+  font-size: 19px;
+  font-weight: 900;
+}
+
+.facebook-author-info {
+  min-width: 0;
+  flex: 1;
+}
+
+.facebook-author-info strong {
+  display: block;
+
+  color: #050505;
+
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.facebook-post-meta {
+  display: flex;
+  align-items: center;
+
+  flex-wrap: wrap;
+
+  gap: 5px;
+
+  margin-top: 3px;
+
+  color: #65676b;
+
+  font-size: 12px;
+}
+
+.facebook-post-menu {
+  width: 38px;
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  color: #65676b;
+
+  font-size: 27px;
+
+  user-select: none;
+}
+
+/* ==========================================================
+   CONTENU PUBLICATION
+========================================================== */
+
+.facebook-post-content {
+  padding: 5px 16px 14px;
+}
+
+.facebook-post-content h2 {
+  margin: 0 0 7px;
+
+  color: #050505;
+
+  font-size: 20px;
+  line-height: 1.3;
+
+  font-weight: 800;
+}
+
+.facebook-post-content p {
+  margin: 0;
+
+  color: #050505;
+
+  font-size: 15px;
+  line-height: 1.5;
+
+  white-space: pre-wrap;
+}
+
+/* ==========================================================
+   GRILLE PHOTO
+========================================================== */
+
+.facebook-photo-grid {
+  width: 100%;
+
+  display: grid;
+
+  overflow: hidden;
+
+  background: #e4e6eb;
+}
+
+/* ==========================================================
+   ITEM PHOTO
+========================================================== */
+
+.facebook-photo-item {
+  position: relative;
+
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
+  margin: 0;
+  padding: 0;
+
+  border: none;
+
+  background: #e4e6eb;
+
+  cursor: pointer;
+
+  overflow: hidden;
+
+  appearance: none;
+}
+
+.facebook-photo-item img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  transition:
+    transform 0.25s ease,
+    filter 0.25s ease;
+}
+
+.facebook-photo-item:hover img {
+  transform: scale(1.025);
+
+  filter: brightness(0.94);
+}
+
+/* ==========================================================
+   IMAGE MANQUANTE
+========================================================== */
+
+.photo-missing {
+  width: 100%;
+  height: 100%;
+
+  min-height: 180px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    linear-gradient(
+      135deg,
+      #e4e6eb,
+      #d8dadf
+    );
+
+  color: #65676b;
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* ==========================================================
+   1 PHOTO
+========================================================== */
+
+.facebook-photo-grid.photos-1 {
+  grid-template-columns: 1fr;
+}
+
+.facebook-photo-grid.photos-1
+  .facebook-photo-item {
+  aspect-ratio: 16 / 10;
+}
+
+/* ==========================================================
+   2 PHOTOS
+========================================================== */
+
+.facebook-photo-grid.photos-2 {
+  grid-template-columns: 1fr 1fr;
+
+  gap: 2px;
+}
+
+.facebook-photo-grid.photos-2
+  .facebook-photo-item {
+  aspect-ratio: 1 / 1;
+}
+
+/* ==========================================================
+   3 PHOTOS
+========================================================== */
+
+.facebook-photo-grid.photos-3 {
+  grid-template-columns: 1fr 1fr;
+
+  grid-template-rows: 1fr 1fr;
+
+  gap: 2px;
+
+  aspect-ratio: 1.45 / 1;
+}
+
+.facebook-photo-grid.photos-3
+  .photo-item-1 {
+  grid-row: 1 / 3;
+}
+
+/* ==========================================================
+   4 PHOTOS
+========================================================== */
+
+.facebook-photo-grid.photos-4 {
+  grid-template-columns: 1fr 1fr;
+
+  grid-template-rows: 1fr 1fr;
+
+  gap: 2px;
+
+  aspect-ratio: 1.35 / 1;
+}
+
+/* ==========================================================
+   5+ PHOTOS
+========================================================== */
+
+.facebook-photo-grid.photos-5 {
+  grid-template-columns: 2fr 1fr;
+
+  grid-template-rows: 1fr 1fr;
+
+  gap: 2px;
+
+  aspect-ratio: 1.5 / 1;
+}
+
+.facebook-photo-grid.photos-5
+  .photo-item-1 {
+  grid-column: 1;
+  grid-row: 1 / 3;
+}
+
+.facebook-photo-grid.photos-5
+  .photo-item-2 {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.facebook-photo-grid.photos-5
+  .photo-item-3 {
+  grid-column: 2;
+  grid-row: 2;
+}
+
+.facebook-photo-grid.photos-5
+  .photo-item-4 {
+  display: none;
+}
+
+.facebook-photo-grid.photos-5
+  .photo-item-5 {
+  display: block;
+
+  grid-column: 2;
+  grid-row: 2;
+}
+
+/* ==========================================================
+   +N PHOTO
+========================================================== */
+
+.facebook-more-overlay {
+  position: absolute;
+
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.48);
+
+  color: #fff;
+
+  font-size: 34px;
+  font-weight: 900;
+
+  pointer-events: none;
+}
+
+/* ==========================================================
+   INFORMATIONS
+========================================================== */
+
+.facebook-photo-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding: 11px 16px;
+
+  border-bottom: 1px solid #e4e6eb;
+}
+
+.photo-count {
+  color: #65676b;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.view-all-button {
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+
+  color: #0057a8;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  cursor: pointer;
+}
+
+.view-all-button:hover {
+  text-decoration: underline;
+}
+
+/* ==========================================================
+   ACTIONS
+========================================================== */
+
+.facebook-post-actions {
+  display: grid;
+
+  grid-template-columns: 1fr 1fr;
+
+  gap: 4px;
+
+  margin: 0 8px;
+}
+
+.facebook-post-actions button {
+  min-height: 46px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 8px;
+
+  padding: 0 8px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: transparent;
+
+  color: #65676b;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.facebook-post-actions button:hover:not(:disabled) {
+  background: #f2f2f2;
+
+  color: #111;
+}
+
+.facebook-post-actions button:disabled {
+  opacity: 0.45;
+
+  cursor: not-allowed;
+}
+
+.action-icon {
+  font-size: 18px;
+}
+
+/* ==========================================================
+   LOADING
+========================================================== */
+
+.photos-loading {
+  min-height: 400px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  color: #65676b;
+}
+
+.photos-spinner {
+  width: 42px;
+  height: 42px;
+
+  margin-bottom: 15px;
+
+  border: 4px solid #d8dadf;
+
+  border-top-color: #d71920;
+
+  border-radius: 50%;
+
+  animation:
+    photos-spin 0.8s linear infinite;
+}
+
+@keyframes photos-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================================================
+   EMPTY
+========================================================== */
+
+.photos-empty {
+  min-height: 350px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px;
+
+  background: #fff;
+
+  border-radius: 10px;
+
+  text-align: center;
+
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.photos-empty-icon {
+  margin-bottom: 12px;
+
+  font-size: 52px;
+}
+
+.photos-empty h2 {
+  margin: 0 0 8px;
+
+  color: #111;
+
+  font-size: 22px;
+}
+
+.photos-empty p {
+  margin: 0;
+
+  color: #65676b;
+
+  font-size: 15px;
+}
+
+/* ==========================================================
+   ERROR
+========================================================== */
+
+.photos-error {
+  min-height: 350px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 40px;
+
+  background: #fff;
+
+  border-radius: 10px;
+
+  text-align: center;
+
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.12);
+}
+
+.photos-error-icon {
+  width: 52px;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 15px;
+
+  border-radius: 50%;
+
+  background: #d71920;
+
+  color: #fff;
+
+  font-size: 30px;
+  font-weight: 900;
+}
+
+.photos-error h2 {
+  margin: 0 0 8px;
+
+  color: #111;
+
+  font-size: 22px;
+}
+
+.photos-error p {
+  margin: 0 0 20px;
+
+  color: #65676b;
+
+  line-height: 1.5;
+}
+
+.photos-error button {
+  padding: 11px 20px;
+
+  border: none;
+
+  border-radius: 7px;
+
+  background: #0057a8;
+
+  color: #fff;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.photos-error button:hover {
+  background: #004786;
+
+  transform: translateY(-1px);
+}
+
+/* ==========================================================
+   FULLSCREEN VIEWER
+========================================================== */
+
+.facebook-photo-viewer {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 99999;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(0, 0, 0, 0.96);
+}
+
+/* ==========================================================
+   IMAGE VIEWER
+========================================================== */
+
+.facebook-viewer-image-container {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 70px 90px;
+
+  cursor: default;
+}
+
+.facebook-viewer-image {
+  display: block;
+
+  max-width: 100%;
+  max-height: 100%;
+
+  width: auto;
+  height: auto;
+
+  object-fit: contain;
+
+  user-select: none;
+
+  -webkit-user-drag: none;
+}
+
+/* ==========================================================
+   CLOSE
+========================================================== */
+
+.facebook-viewer-close {
+  position: absolute;
+
+  top: 18px;
+  right: 20px;
+
+  z-index: 10;
+
+  width: 48px;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.12);
+
+  color: #fff;
+
+  font-size: 34px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.facebook-viewer-close:hover {
+  background: rgba(255, 255, 255, 0.22);
+
+  transform: scale(1.05);
+}
+
+/* ==========================================================
+   COUNTER
+========================================================== */
+
+.facebook-viewer-counter {
+  position: absolute;
+
+  top: 29px;
+  left: 50%;
+
+  z-index: 10;
+
+  transform: translateX(-50%);
+
+  padding: 7px 13px;
+
+  border-radius: 20px;
+
+  background: rgba(0, 0, 0, 0.45);
+
+  color: #fff;
+
+  font-size: 14px;
+  font-weight: 800;
+}
+
+/* ==========================================================
+   ARROWS
+========================================================== */
+
+.facebook-viewer-arrow {
+  position: absolute;
+
+  top: 50%;
+
+  z-index: 10;
+
+  transform: translateY(-50%);
+
+  width: 52px;
+  height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: none;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.12);
+
+  color: #fff;
+
+  font-size: 48px;
+  line-height: 35px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.facebook-viewer-arrow:hover {
+  background: rgba(255, 255, 255, 0.22);
+
+  transform:
+    translateY(-50%)
+    scale(1.05);
+}
+
+.facebook-viewer-prev {
+  left: 20px;
+}
+
+.facebook-viewer-next {
+  right: 20px;
+}
+
+/* ==========================================================
+   TABLET
+========================================================== */
+
+@media (max-width: 700px) {
+
+  .photos-page {
+    padding: 20px 0 50px;
+  }
+
+  .photos-container {
+    max-width: 100%;
+  }
+
+  .photos-header {
+    align-items: flex-start;
+
+    padding: 10px 15px 15px;
+
+    margin-bottom: 20px;
+  }
+
+  .photos-header h1 {
+    font-size: 32px;
+  }
+
+  .photos-header p {
+    font-size: 14px;
+  }
+
+  .photos-home-button {
+    display: none;
+  }
+
+  .facebook-feed {
+    gap: 14px;
+  }
+
+  .facebook-photo-post {
+    border-radius: 0;
+  }
+
+  .facebook-post-header {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .facebook-post-content {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .facebook-photo-info {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .facebook-viewer-image-container {
+    padding: 70px 55px;
+  }
+
+  .facebook-viewer-arrow {
+    width: 44px;
+    height: 44px;
+
+    font-size: 40px;
+  }
+
+  .facebook-viewer-prev {
+    left: 8px;
+  }
+
+  .facebook-viewer-next {
+    right: 8px;
+  }
+}
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (max-width: 500px) {
+
+  .photos-header {
+    padding-top: 5px;
+  }
+
+  .photos-header h1 {
+    font-size: 28px;
+  }
+
+  .photos-header p {
+    font-size: 14px;
+  }
+
+  .facebook-post-content h2 {
+    font-size: 18px;
+  }
+
+  .facebook-post-content p {
+    font-size: 14px;
+  }
+
+  .facebook-post-actions button {
+    font-size: 13px;
+  }
+
+  .facebook-photo-grid.photos-1
+    .facebook-photo-item {
+    aspect-ratio: 4 / 3;
+  }
+
+  .facebook-photo-grid.photos-3 {
+    aspect-ratio: 1.25 / 1;
+  }
+
+  .facebook-photo-grid.photos-4 {
+    aspect-ratio: 1 / 1;
+  }
+
+  .facebook-photo-grid.photos-5 {
+    aspect-ratio: 1.15 / 1;
+  }
+
+  .facebook-viewer-image-container {
+    padding: 70px 10px;
+  }
+
+  .facebook-viewer-close {
+    top: 10px;
+    right: 10px;
+
+    width: 44px;
+    height: 44px;
+
+    font-size: 30px;
+  }
+
+  .facebook-viewer-counter {
+    top: 20px;
+
+    font-size: 13px;
+  }
+
+  .facebook-viewer-arrow {
+    width: 40px;
+    height: 40px;
+
+    font-size: 34px;
+  }
+
+  .facebook-viewer-prev {
+    left: 5px;
+  }
+
+  .facebook-viewer-next {
+    right: 5px;
+  }
+
+  .facebook-photo-info {
+    flex-wrap: wrap;
+  }
+
+  .photo-count {
+    font-size: 12px;
+  }
+
+  .view-all-button {
+    font-size: 12px;
+  }
+}
+
+/* ==========================================================
+   VERY SMALL MOBILE
+========================================================== */
+
+@media (max-width: 360px) {
+
+  .photos-header h1 {
+    font-size: 26px;
+  }
+
+  .facebook-post-header {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .facebook-post-content {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .facebook-photo-info {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .facebook-avatar {
+    width: 38px;
+    height: 38px;
+
+    min-width: 38px;
+
+    font-size: 17px;
+  }
+
+  .facebook-author-info strong {
+    font-size: 14px;
+  }
+
+  .facebook-post-meta {
+    font-size: 11px;
+  }
+
+  .facebook-post-actions {
+    margin: 0 5px;
+  }
+
+  .facebook-post-actions button {
+    font-size: 12px;
+  }
+}

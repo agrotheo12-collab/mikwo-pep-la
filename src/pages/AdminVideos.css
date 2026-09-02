@@ -1,0 +1,1204 @@
+/* =====================================================
+   PAGE
+===================================================== */
+
+.admin-photos-page {
+  min-height: 100vh;
+  background: #f0f2f5;
+  padding: 40px 20px 80px;
+  color: #1c1e21;
+}
+
+.admin-photos-container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+.admin-photos-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.admin-photos-label {
+  display: block;
+  color: #e21b2d;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  margin-bottom: 7px;
+}
+
+.admin-photos-header h1 {
+  margin: 0;
+  font-size: 34px;
+  line-height: 1.15;
+  font-weight: 800;
+}
+
+.admin-photos-header p {
+  margin: 8px 0 0;
+  color: #65676b;
+  font-size: 15px;
+}
+
+.admin-photo-total {
+  min-width: 120px;
+  padding: 18px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #dddfe2;
+  text-align: center;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.admin-photo-total strong {
+  display: block;
+  font-size: 28px;
+  line-height: 1;
+  font-weight: 800;
+}
+
+.admin-photo-total span {
+  display: block;
+  margin-top: 5px;
+  color: #65676b;
+  font-size: 13px;
+}
+
+/* =====================================================
+   MESSAGES
+===================================================== */
+
+.admin-message {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.admin-message span {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  font-weight: 800;
+}
+
+.admin-message p {
+  flex: 1;
+  margin: 0;
+}
+
+.admin-message button {
+  border: 0;
+  background: transparent;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.admin-message-error {
+  background: #fff1f2;
+  border: 1px solid #ffcdd2;
+  color: #b42318;
+}
+
+.admin-message-error span {
+  background: #e21b2d;
+  color: white;
+}
+
+.admin-message-success {
+  background: #edfdf3;
+  border: 1px solid #b7ebc6;
+  color: #176b3a;
+}
+
+.admin-message-success span {
+  background: #1b8a4b;
+  color: white;
+}
+
+/* =====================================================
+   UPLOAD CARD
+===================================================== */
+
+.admin-photo-upload-card {
+  background: white;
+  border: 1px solid #dddfe2;
+  border-radius: 14px;
+  padding: 26px;
+  margin-bottom: 35px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+}
+
+.admin-section-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 25px;
+}
+
+.admin-section-icon {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  background: #e21b2d;
+  color: white;
+  border-radius: 50%;
+  font-size: 28px;
+  font-weight: 400;
+}
+
+.admin-section-title h2 {
+  margin: 0;
+  font-size: 21px;
+}
+
+.admin-section-title p {
+  margin: 4px 0 0;
+  color: #65676b;
+  font-size: 14px;
+}
+
+/* =====================================================
+   FORM
+===================================================== */
+
+.admin-photo-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.admin-form-row {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 0.7fr;
+  gap: 15px;
+}
+
+.admin-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.admin-form-group label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #343638;
+}
+
+.admin-form-group input,
+.admin-form-group select,
+.admin-form-group textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #ccd0d5;
+  border-radius: 8px;
+  background: white;
+  color: #1c1e21;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: 0.2s;
+}
+
+.admin-form-group input,
+.admin-form-group select {
+  height: 44px;
+  padding: 0 12px;
+}
+
+.admin-form-group textarea {
+  padding: 12px;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.admin-form-group input:focus,
+.admin-form-group select:focus,
+.admin-form-group textarea:focus {
+  border-color: #1877f2;
+  box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.12);
+}
+
+/* =====================================================
+   DROPZONE
+===================================================== */
+
+.admin-photo-dropzone {
+  min-height: 170px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border: 2px dashed #ccd0d5;
+  border-radius: 12px;
+  background: #f7f8fa;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.admin-photo-dropzone:hover {
+  border-color: #1877f2;
+  background: #f0f7ff;
+}
+
+.admin-upload-icon {
+  font-size: 40px;
+}
+
+.admin-photo-dropzone strong {
+  font-size: 16px;
+}
+
+.admin-photo-dropzone span {
+  color: #65676b;
+  font-size: 13px;
+}
+
+.admin-photo-dropzone input {
+  display: none;
+}
+
+/* =====================================================
+   SELECTED FILES
+===================================================== */
+
+.admin-selected-files {
+  padding: 15px;
+  border-radius: 10px;
+  background: #f7f8fa;
+  border: 1px solid #dddfe2;
+}
+
+.admin-selected-header {
+  margin-bottom: 12px;
+}
+
+.admin-selected-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+}
+
+.admin-selected-item {
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 7px;
+  background: #ddd;
+}
+
+.admin-selected-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* =====================================================
+   BUTTON
+===================================================== */
+
+.admin-primary-button {
+  min-height: 46px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 8px;
+  background: #e21b2d;
+  color: white;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.admin-primary-button:hover {
+  background: #c91526;
+}
+
+.admin-primary-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =====================================================
+   PUBLICATIONS
+===================================================== */
+
+.admin-publications-section {
+  margin-top: 20px;
+}
+
+.admin-section-heading {
+  margin-bottom: 18px;
+}
+
+.admin-section-heading h2 {
+  margin: 0;
+  font-size: 23px;
+}
+
+.admin-section-heading p {
+  margin: 5px 0 0;
+  color: #65676b;
+  font-size: 14px;
+}
+
+.admin-publications-list {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+/* =====================================================
+   FACEBOOK POST
+===================================================== */
+
+.admin-facebook-post {
+  overflow: hidden;
+  background: white;
+  border: 1px solid #dddfe2;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.admin-post-header {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 16px 17px 10px;
+}
+
+.admin-avatar {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #e21b2d;
+  color: white;
+  font-size: 17px;
+  font-weight: 800;
+}
+
+.admin-author {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.admin-author strong {
+  font-size: 15px;
+}
+
+.admin-author span {
+  color: #65676b;
+  font-size: 12px;
+}
+
+.admin-post-content {
+  padding: 4px 17px 15px;
+}
+
+.admin-post-content h3 {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.admin-post-content p {
+  margin: 0;
+  color: #444;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+/* =====================================================
+   PHOTO GRID
+===================================================== */
+
+.admin-facebook-grid {
+  display: grid;
+  gap: 2px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.admin-photo-grid-item {
+  position: relative;
+  display: block;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 0;
+  background: #e4e6eb;
+  cursor: pointer;
+}
+
+.admin-photo-grid-item img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  transition: transform 0.25s ease;
+}
+
+.admin-photo-grid-item:hover img {
+  transform: scale(1.025);
+}
+
+/* 1 PHOTO */
+
+.admin-photos-1 {
+  grid-template-columns: 1fr;
+  aspect-ratio: 16 / 10;
+}
+
+/* 2 PHOTOS */
+
+.admin-photos-2 {
+  grid-template-columns: 1fr 1fr;
+  aspect-ratio: 16 / 9;
+}
+
+/* 3 PHOTOS */
+
+.admin-photos-3 {
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  aspect-ratio: 16 / 9;
+}
+
+.admin-photos-3
+  .admin-photo-item-1 {
+  grid-row: 1 / 3;
+}
+
+/* 4 PHOTOS */
+
+.admin-photos-4 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  aspect-ratio: 16 / 10;
+}
+
+/* 5+ PHOTOS */
+
+.admin-photos-5 {
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  aspect-ratio: 16 / 10;
+}
+
+.admin-photos-5
+  .admin-photo-item-1 {
+  grid-row: 1 / 3;
+}
+
+.admin-more-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.48);
+  color: white;
+  font-size: 30px;
+  font-weight: 800;
+}
+
+/* =====================================================
+   POST INFO
+===================================================== */
+
+.admin-post-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 12px 17px;
+  border-bottom: 1px solid #dddfe2;
+}
+
+.admin-post-info > span:first-child {
+  color: #65676b;
+  font-size: 13px;
+}
+
+.admin-status-badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.admin-status-badge.published {
+  background: #e8f7ee;
+  color: #167344;
+}
+
+.admin-status-badge.draft {
+  background: #fff4e5;
+  color: #a45b00;
+}
+
+/* =====================================================
+   ACTIONS
+===================================================== */
+
+.admin-post-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.admin-post-actions button {
+  min-height: 48px;
+  border: 0;
+  background: white;
+  color: #65676b;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.admin-post-actions button:hover {
+  background: #f0f2f5;
+}
+
+.admin-post-actions .danger-action {
+  color: #d11a2a;
+  border-left: 1px solid #dddfe2;
+}
+
+/* =====================================================
+   EMPTY
+===================================================== */
+
+.admin-photo-empty {
+  padding: 70px 20px;
+  background: white;
+  border: 1px solid #dddfe2;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.admin-photo-empty > div {
+  font-size: 50px;
+}
+
+.admin-photo-empty h3 {
+  margin: 15px 0 5px;
+}
+
+.admin-photo-empty p {
+  margin: 0;
+  color: #65676b;
+}
+
+/* =====================================================
+   EDIT OVERLAY
+===================================================== */
+
+.admin-edit-overlay {
+  position: fixed;
+  z-index: 5000;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.admin-edit-modal {
+  width: 100%;
+  max-width: 850px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: white;
+  border-radius: 14px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+}
+
+/* =====================================================
+   EDIT HEADER
+===================================================== */
+
+.admin-edit-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 22px;
+  border-bottom: 1px solid #dddfe2;
+}
+
+.admin-edit-header span {
+  display: block;
+  margin-bottom: 3px;
+  color: #e21b2d;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+}
+
+.admin-edit-header h2 {
+  margin: 0;
+  font-size: 21px;
+}
+
+.admin-edit-header > button {
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: #e4e6eb;
+  color: #1c1e21;
+  font-size: 25px;
+  cursor: pointer;
+}
+
+/* =====================================================
+   EDIT BODY
+===================================================== */
+
+.admin-edit-body {
+  overflow-y: auto;
+  padding: 22px;
+}
+
+.admin-edit-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+}
+
+.admin-edit-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+}
+
+/* =====================================================
+   EDIT PHOTOS
+===================================================== */
+
+.admin-edit-photos-section {
+  margin-top: 28px;
+}
+
+.admin-edit-section-title {
+  margin-bottom: 13px;
+}
+
+.admin-edit-section-title h3 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.admin-edit-section-title p {
+  margin: 4px 0 0;
+  color: #65676b;
+  font-size: 13px;
+}
+
+.admin-edit-photo-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 9px;
+}
+
+.admin-edit-photo-item {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  background: #ddd;
+}
+
+.admin-edit-photo-item img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.admin-delete-photo {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.admin-delete-photo:hover {
+  background: #e21b2d;
+}
+
+.admin-delete-photo:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-no-photos {
+  padding: 25px;
+  border: 1px dashed #ccd0d5;
+  border-radius: 10px;
+  background: #f7f8fa;
+  color: #65676b;
+  text-align: center;
+}
+
+/* =====================================================
+   ADD PHOTOS
+===================================================== */
+
+.admin-add-photos-section {
+  margin-top: 28px;
+}
+
+.admin-add-photos-box {
+  min-height: 130px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 2px dashed #ccd0d5;
+  border-radius: 10px;
+  background: #f7f8fa;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.admin-add-photos-box:hover {
+  border-color: #1877f2;
+  background: #f0f7ff;
+}
+
+.admin-add-photos-box input {
+  display: none;
+}
+
+.admin-add-icon {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #e4e6eb;
+  color: #1c1e21;
+  font-size: 25px;
+}
+
+.admin-add-photos-box strong {
+  font-size: 15px;
+}
+
+.admin-add-photos-box span {
+  color: #65676b;
+  font-size: 12px;
+}
+
+/* =====================================================
+   NEW PHOTOS PREVIEW
+===================================================== */
+
+.admin-new-files-preview {
+  margin-top: 15px;
+  padding: 14px;
+  border: 1px solid #dddfe2;
+  border-radius: 10px;
+  background: #f7f8fa;
+}
+
+.admin-new-files-preview > strong {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.admin-new-files-preview > div {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 7px;
+}
+
+.admin-new-files-preview img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 7px;
+}
+
+.admin-add-files-button {
+  width: 100%;
+  min-height: 42px;
+  margin-top: 13px;
+  border: 0;
+  border-radius: 8px;
+  background: #1877f2;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-add-files-button:hover {
+  background: #166fe5;
+}
+
+.admin-add-files-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =====================================================
+   EDIT FOOTER
+===================================================== */
+
+.admin-edit-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 16px 22px;
+  border-top: 1px solid #dddfe2;
+}
+
+.admin-cancel-button,
+.admin-save-button {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-cancel-button {
+  background: #e4e6eb;
+  color: #1c1e21;
+}
+
+.admin-save-button {
+  background: #e21b2d;
+  color: white;
+}
+
+.admin-save-button:hover {
+  background: #c91526;
+}
+
+.admin-cancel-button:disabled,
+.admin-save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* =====================================================
+   VIEWER
+===================================================== */
+
+.admin-photo-viewer {
+  position: fixed;
+  z-index: 10000;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.96);
+}
+
+.admin-viewer-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 70px;
+  box-sizing: border-box;
+}
+
+.admin-viewer-content img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.admin-viewer-close {
+  position: absolute;
+  z-index: 2;
+  top: 18px;
+  right: 22px;
+  width: 45px;
+  height: 45px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  color: white;
+  font-size: 31px;
+  cursor: pointer;
+}
+
+.admin-viewer-counter {
+  position: absolute;
+  z-index: 2;
+  top: 27px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.admin-viewer-arrow {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: white;
+  font-size: 42px;
+  line-height: 35px;
+  cursor: pointer;
+}
+
+.admin-viewer-arrow:hover,
+.admin-viewer-close:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.admin-viewer-prev {
+  left: 22px;
+}
+
+.admin-viewer-next {
+  right: 22px;
+}
+
+/* =====================================================
+   LOADING
+===================================================== */
+
+.admin-photos-loading {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  color: #65676b;
+}
+
+.admin-spinner {
+  width: 38px;
+  height: 38px;
+  border: 4px solid #dddfe2;
+  border-top-color: #e21b2d;
+  border-radius: 50%;
+  animation: adminSpin 0.8s linear infinite;
+}
+
+@keyframes adminSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* =====================================================
+   RESPONSIVE
+===================================================== */
+
+@media (max-width: 800px) {
+  .admin-photos-page {
+    padding: 25px 12px 60px;
+  }
+
+  .admin-photos-header {
+    align-items: flex-start;
+  }
+
+  .admin-photos-header h1 {
+    font-size: 28px;
+  }
+
+  .admin-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-selected-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .admin-edit-photo-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .admin-new-files-preview > div {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-photos-page {
+    padding: 15px 0 50px;
+  }
+
+  .admin-photos-container {
+    width: 100%;
+  }
+
+  .admin-photos-header {
+    padding: 0 15px;
+  }
+
+  .admin-photo-upload-card {
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+    padding: 20px 15px;
+  }
+
+  .admin-photos-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .admin-photo-total {
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .admin-facebook-post {
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+
+  .admin-section-heading {
+    padding: 0 15px;
+  }
+
+  .admin-post-header {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .admin-post-content {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+
+  .admin-edit-overlay {
+    padding: 0;
+  }
+
+  .admin-edit-modal {
+    width: 100%;
+    height: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .admin-edit-header {
+    padding: 15px;
+  }
+
+  .admin-edit-body {
+    padding: 15px;
+  }
+
+  .admin-edit-row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-edit-photo-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .admin-edit-footer {
+    padding: 12px 15px;
+  }
+
+  .admin-edit-footer button {
+    flex: 1;
+  }
+
+  .admin-viewer-content {
+    padding: 65px 10px;
+  }
+
+  .admin-viewer-prev {
+    left: 8px;
+  }
+
+  .admin-viewer-next {
+    right: 8px;
+  }
+
+  .admin-viewer-arrow {
+    width: 40px;
+    height: 40px;
+  }
+
+  .admin-selected-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .admin-new-files-preview > div {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 420px) {
+  .admin-photos-header h1 {
+    font-size: 25px;
+  }
+
+  .admin-post-actions button {
+    font-size: 13px;
+  }
+
+  .admin-edit-photo-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-selected-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-new-files-preview > div {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

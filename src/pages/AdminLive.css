@@ -1,0 +1,760 @@
+/* =========================================================
+   MIKWO PÈP LA TV — ADMIN LIVE
+   Design professionnel / Responsive
+========================================================= */
+
+.admin-live-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(0, 63, 135, 0.08), transparent 32%),
+    #f4f6f9;
+  color: #151515;
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+/* =========================================================
+   CONTAINER PRINCIPAL
+========================================================= */
+
+.admin-live-page > * {
+  width: 100%;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+.admin-live-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+
+  background: linear-gradient(
+    135deg,
+    #003b7a 0%,
+    #0056a6 55%,
+    #0070c9 100%
+  );
+
+  color: #ffffff;
+  padding: 34px 40px;
+  border-radius: 22px;
+
+  box-shadow:
+    0 18px 45px rgba(0, 55, 110, 0.18);
+
+  margin-bottom: 24px;
+
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-live-header::after {
+  content: "";
+  position: absolute;
+  width: 260px;
+  height: 260px;
+  right: -90px;
+  top: -120px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.admin-live-eyebrow {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  opacity: 0.8;
+  margin-bottom: 8px;
+}
+
+.admin-live-header h1 {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 46px);
+  line-height: 1.05;
+  font-weight: 900;
+}
+
+.admin-live-header p {
+  margin: 12px 0 0;
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 15px;
+}
+
+.admin-live-back {
+  position: relative;
+  z-index: 2;
+
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+
+  padding: 13px 19px;
+  border-radius: 12px;
+
+  font-weight: 800;
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.admin-live-back:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* =========================================================
+   MESSAGES
+========================================================= */
+
+.admin-live-success,
+.admin-live-error {
+  padding: 15px 18px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.admin-live-success {
+  background: #e8f8ee;
+  border: 1px solid #a9dfbd;
+  color: #13733a;
+}
+
+.admin-live-error {
+  background: #fff0f0;
+  border: 1px solid #f0b5b5;
+  color: #b42323;
+}
+
+/* =========================================================
+   FORM SECTION
+========================================================= */
+
+.admin-live-form-section {
+  margin-bottom: 35px;
+}
+
+.admin-live-card {
+  background: #ffffff;
+  border: 1px solid #e5e9ef;
+  border-radius: 20px;
+
+  box-shadow:
+    0 10px 35px rgba(15, 35, 55, 0.07);
+
+  overflow: hidden;
+}
+
+.admin-live-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  padding: 25px 30px;
+
+  border-bottom: 1px solid #edf0f4;
+}
+
+.admin-live-card-header > div > span {
+  color: #e32929;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.8px;
+}
+
+.admin-live-card-header h2 {
+  margin: 5px 0 0;
+  font-size: 24px;
+  color: #10243b;
+}
+
+.admin-live-cancel {
+  border: 1px solid #d9dee5;
+  background: #ffffff;
+  color: #4b5563;
+
+  padding: 10px 16px;
+  border-radius: 10px;
+
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-live-cancel:hover {
+  background: #f5f7fa;
+}
+
+/* =========================================================
+   FORM
+========================================================= */
+
+.admin-live-form {
+  padding: 30px;
+  display: grid;
+  gap: 22px;
+}
+
+.admin-live-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-live-field label {
+  color: #182b3f;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.admin-live-field input,
+.admin-live-field textarea,
+.admin-live-field select {
+  width: 100%;
+  box-sizing: border-box;
+
+  border: 1px solid #d9e0e8;
+  background: #fbfcfd;
+  color: #172333;
+
+  border-radius: 11px;
+  padding: 13px 14px;
+
+  font-family: inherit;
+  font-size: 14px;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.admin-live-field input:focus,
+.admin-live-field textarea:focus,
+.admin-live-field select:focus {
+  background: #ffffff;
+  border-color: #0067b9;
+  box-shadow: 0 0 0 4px rgba(0, 103, 185, 0.1);
+}
+
+.admin-live-field textarea {
+  min-height: 115px;
+  resize: vertical;
+}
+
+.admin-live-field small {
+  color: #718096;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.admin-live-submit {
+  border: none;
+  border-radius: 12px;
+
+  padding: 15px 22px;
+
+  background: linear-gradient(
+    135deg,
+    #e32929,
+    #c91515
+  );
+
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 900;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 8px 20px rgba(227, 41, 41, 0.2);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.admin-live-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 25px rgba(227, 41, 41, 0.28);
+}
+
+.admin-live-submit:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   LIST HEADER
+========================================================= */
+
+.admin-live-list-section {
+  margin-bottom: 50px;
+}
+
+.admin-live-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+
+  margin-bottom: 20px;
+}
+
+.admin-live-list-header > div > span {
+  color: #e32929;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.8px;
+}
+
+.admin-live-list-header h2 {
+  margin: 5px 0 0;
+  font-size: 28px;
+  color: #10243b;
+}
+
+.admin-live-new-button {
+  border: none;
+  background: #003b7a;
+  color: #ffffff;
+
+  padding: 13px 18px;
+  border-radius: 11px;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.admin-live-new-button:hover {
+  transform: translateY(-2px);
+  background: #0056a6;
+}
+
+/* =========================================================
+   LOADING / EMPTY
+========================================================= */
+
+.admin-live-loading,
+.admin-live-empty {
+  background: #ffffff;
+  border: 1px solid #e4e8ed;
+  border-radius: 18px;
+  text-align: center;
+  padding: 55px 25px;
+  box-shadow: 0 8px 28px rgba(15, 35, 55, 0.05);
+}
+
+.admin-live-loading {
+  color: #64748b;
+  font-weight: 700;
+}
+
+.admin-live-empty > div {
+  font-size: 42px;
+  margin-bottom: 10px;
+}
+
+.admin-live-empty h3 {
+  margin: 0;
+  color: #10243b;
+  font-size: 21px;
+}
+
+.admin-live-empty p {
+  color: #718096;
+  margin: 8px 0 0;
+}
+
+/* =========================================================
+   GRID
+========================================================= */
+
+.admin-live-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+/* =========================================================
+   LIVE CARD
+========================================================= */
+
+.admin-live-item {
+  background: #ffffff;
+  border: 1px solid #e2e7ed;
+  border-radius: 18px;
+
+  padding: 24px;
+
+  box-shadow:
+    0 8px 28px rgba(15, 35, 55, 0.06);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease;
+
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-live-item:hover {
+  transform: translateY(-4px);
+  box-shadow:
+    0 15px 38px rgba(15, 35, 55, 0.1);
+}
+
+.admin-live-item:has(.status-live) {
+  border-top: 4px solid #e32929;
+}
+
+/* =========================================================
+   CARD TOP
+========================================================= */
+
+.admin-live-item-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin-bottom: 18px;
+}
+
+.status-live,
+.status-offline {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 7px 10px;
+  border-radius: 30px;
+
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.7px;
+}
+
+.status-live {
+  background: #fff0f0;
+  color: #d51e1e;
+}
+
+.status-live > span {
+  width: 8px;
+  height: 8px;
+  background: #e32929;
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 0 4px rgba(227, 41, 41, 0.12);
+
+  animation: adminLivePulse 1.5s infinite;
+}
+
+.status-offline {
+  background: #f1f3f5;
+  color: #667085;
+}
+
+.status-offline > span {
+  width: 8px;
+  height: 8px;
+  background: #98a2b3;
+  border-radius: 50%;
+}
+
+@keyframes adminLivePulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(227, 41, 41, 0.35);
+  }
+
+  70% {
+    box-shadow: 0 0 0 7px rgba(227, 41, 41, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(227, 41, 41, 0);
+  }
+}
+
+.admin-live-id {
+  color: #98a2b3;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* =========================================================
+   CARD CONTENT
+========================================================= */
+
+.admin-live-item h3 {
+  margin: 0 0 9px;
+
+  color: #10243b;
+
+  font-size: 21px;
+  line-height: 1.25;
+  font-weight: 900;
+}
+
+.admin-live-item > p {
+  margin: 0 0 18px;
+
+  color: #667085;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* =========================================================
+   STREAM URL
+========================================================= */
+
+.admin-live-url {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  padding: 13px;
+
+  background: #f7f9fb;
+  border: 1px solid #e7ebef;
+  border-radius: 11px;
+
+  margin-bottom: 14px;
+}
+
+.admin-live-url strong {
+  color: #344054;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.admin-live-url span {
+  color: #0067b9;
+  font-size: 12px;
+  line-height: 1.45;
+
+  word-break: break-all;
+}
+
+/* =========================================================
+   VIEWERS
+========================================================= */
+
+.admin-live-viewers {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 8px 11px;
+
+  background: #eef6ff;
+  color: #245b86;
+
+  border-radius: 9px;
+
+  font-size: 12px;
+
+  margin-bottom: 20px;
+}
+
+.admin-live-viewers strong {
+  font-size: 14px;
+  color: #003b7a;
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.admin-live-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 9px;
+
+  padding-top: 18px;
+  border-top: 1px solid #edf0f3;
+}
+
+.admin-live-actions button {
+  border: none;
+  border-radius: 10px;
+
+  padding: 11px 12px;
+
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.18s ease,
+    opacity 0.18s ease,
+    background 0.18s ease;
+}
+
+.admin-live-actions button:hover {
+  transform: translateY(-2px);
+}
+
+.button-live {
+  background: #e32929;
+  color: #ffffff;
+}
+
+.button-live:hover {
+  background: #c91515;
+}
+
+.button-offline {
+  background: #263445;
+  color: #ffffff;
+}
+
+.button-edit {
+  background: #eaf3fb;
+  color: #005a9f;
+}
+
+.button-edit:hover {
+  background: #dcecf9;
+}
+
+.button-delete {
+  width: 44px;
+  background: #fff0f0;
+  color: #c51c1c;
+}
+
+.button-delete:hover {
+  background: #ffe0e0;
+}
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 900px) {
+  .admin-live-page {
+    padding: 22px;
+  }
+
+  .admin-live-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-live-header {
+    padding: 28px;
+  }
+}
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 640px) {
+  .admin-live-page {
+    padding: 14px;
+  }
+
+  .admin-live-header {
+    flex-direction: column;
+    align-items: flex-start;
+
+    padding: 24px 20px;
+    border-radius: 17px;
+  }
+
+  .admin-live-header h1 {
+    font-size: 30px;
+  }
+
+  .admin-live-back {
+    width: 100%;
+  }
+
+  .admin-live-card-header {
+    padding: 20px;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-live-form {
+    padding: 20px;
+  }
+
+  .admin-live-list-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-live-new-button {
+    width: 100%;
+  }
+
+  .admin-live-item {
+    padding: 19px;
+  }
+
+  .admin-live-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .button-delete {
+    width: 100%;
+    grid-column: span 2;
+  }
+}
+
+/* =========================================================
+   PETIT MOBILE
+========================================================= */
+
+@media (max-width: 420px) {
+  .admin-live-page {
+    padding: 10px;
+  }
+
+  .admin-live-header {
+    padding: 20px 16px;
+  }
+
+  .admin-live-form {
+    padding: 16px;
+  }
+
+  .admin-live-item {
+    padding: 16px;
+  }
+
+  .admin-live-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .button-delete {
+    grid-column: auto;
+  }
+}

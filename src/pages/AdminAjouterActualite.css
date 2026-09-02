@@ -1,0 +1,151 @@
+.admin-ajouter-page {
+  min-height: 100vh;
+  background: #f3ead8;
+  color: #111111;
+}
+
+.admin-ajouter-container {
+  width: min(900px, 92%);
+  margin: 0 auto;
+}
+
+.admin-ajouter-header {
+  padding: 50px 0;
+  background: #111111;
+  color: #ffffff;
+  border-bottom: 5px solid #d71920;
+}
+
+.admin-ajouter-header h1 {
+  margin: 0 0 10px;
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.admin-ajouter-header p {
+  margin: 0;
+  color: #cccccc;
+}
+
+.admin-ajouter-content {
+  padding: 50px 0;
+}
+
+.admin-form-card {
+  background: #ffffff;
+  padding: 35px;
+  border-top: 5px solid #0057a8;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+}
+
+.admin-form-group {
+  margin-bottom: 22px;
+}
+
+.admin-form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.admin-form-group input,
+.admin-form-group textarea,
+.admin-form-group select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 14px;
+  border: 1px solid #dddddd;
+  background: #ffffff;
+  color: #111111;
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+}
+
+.admin-form-group input:focus,
+.admin-form-group textarea:focus,
+.admin-form-group select:focus {
+  border-color: #0057a8;
+}
+
+.admin-form-group textarea {
+  resize: vertical;
+}
+
+.admin-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.admin-form-message {
+  margin-bottom: 20px;
+  padding: 13px 15px;
+  background: #f3ead8;
+  border-left: 5px solid #0057a8;
+  font-weight: 700;
+}
+
+.admin-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.admin-cancel-button,
+.admin-submit-button {
+  border: none;
+  padding: 13px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-cancel-button {
+  background: #eeeeee;
+  color: #111111;
+}
+
+.admin-submit-button {
+  background: #d71920;
+  color: #ffffff;
+}
+
+.admin-cancel-button:hover {
+  background: #dddddd;
+}
+
+.admin-submit-button:hover {
+  background: #0057a8;
+}
+
+.admin-submit-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 650px) {
+  .admin-ajouter-header h1 {
+    font-size: 26px;
+  }
+
+  .admin-form-card {
+    padding: 22px;
+  }
+
+  .admin-form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .admin-form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .admin-cancel-button,
+  .admin-submit-button {
+    width: 100%;
+  }
+}
