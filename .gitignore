@@ -35,3 +35,4 @@ backend/uploads/
 backend/node_modules/
 # Backend data
 backend/messages.json
+mikwo_pep_la.sql
