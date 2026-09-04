@@ -1,523 +1,997 @@
-/* ======================================================
-   ADMIN ÉQUIPE
-   ====================================================== */
+/* =========================================================
+   MIKWO PÈP LA TV — ADMIN VIDEOS
+   Design premium / moderne / responsive
+   ========================================================= */
 
-.admin-equipe-page {
-  min-height: 100vh;
-  padding: 40px;
-  background: #f5f7fa;
-  color: #111827;
+:root {
+  --admin-blue: #0756a3;
+  --admin-blue-dark: #043b73;
+  --admin-blue-light: #eaf3ff;
+
+  --admin-red: #e21b23;
+  --admin-red-dark: #b51219;
+  --admin-red-light: #fff0f1;
+
+  --admin-dark: #111827;
+  --admin-dark-soft: #374151;
+
+  --admin-gray: #6b7280;
+  --admin-gray-light: #9ca3af;
+
+  --admin-light: #f5f7fb;
+  --admin-white: #ffffff;
+
+  --admin-border: #e5e7eb;
+  --admin-success: #16803c;
+
+  --admin-shadow-sm: 0 4px 14px rgba(15, 23, 42, 0.06);
+  --admin-shadow: 0 12px 30px rgba(15, 23, 42, 0.09);
+  --admin-shadow-lg: 0 24px 60px rgba(15, 23, 42, 0.18);
+
+  --admin-radius: 18px;
 }
 
-/* ======================================================
-   HEADER
-   ====================================================== */
+/* =========================================================
+   PAGE
+   ========================================================= */
 
-.admin-equipe-header {
+.admin-videos-page {
+  min-height: 100vh;
+  background:
+    radial-gradient(
+      circle at top right,
+      rgba(7, 86, 163, 0.07),
+      transparent 30%
+    ),
+    var(--admin-light);
+  color: var(--admin-dark);
+}
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.admin-videos-header {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    var(--admin-blue-dark),
+    var(--admin-blue)
+  );
+  color: var(--admin-white);
+  padding: 48px 0 54px;
+}
+
+.admin-videos-header::before {
+  content: "";
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.07);
+  top: -150px;
+  right: 8%;
+}
+
+.admin-videos-header::after {
+  content: "";
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: rgba(226, 27, 35, 0.25);
+  bottom: -100px;
+  right: 20%;
+}
+
+.admin-videos-container {
+  width: min(1400px, calc(100% - 40px));
+  margin: 0 auto;
+}
+
+.admin-videos-header .admin-videos-container {
+  position: relative;
+  z-index: 2;
+}
+
+.admin-videos-header h1 {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 900;
+  letter-spacing: -0.8px;
+}
+
+.admin-videos-header p {
+  margin: 10px 0 0;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* =========================================================
+   CONTENT
+   ========================================================= */
+
+.admin-videos-content {
+  padding: 34px 0 70px;
+}
+
+.admin-videos-top {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 30px;
-  margin-bottom: 35px;
-}
-
-.admin-equipe-kicker {
-  display: block;
-  margin-bottom: 8px;
-  color: #e31b23;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
-}
-
-.admin-equipe-header h1 {
-  margin: 0;
-  font-size: 36px;
-  font-weight: 800;
-  color: #0b2a5b;
-}
-
-.admin-equipe-header p {
-  margin: 10px 0 0;
-  color: #6b7280;
-  font-size: 15px;
-}
-
-/* ======================================================
-   BOUTON AJOUTER
-   ====================================================== */
-
-.admin-equipe-add-btn {
-  border: none;
-  border-radius: 10px;
-  padding: 13px 20px;
-  background: #e31b23;
-  color: white;
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.admin-equipe-add-btn:hover {
-  background: #c9151c;
-  transform: translateY(-1px);
-}
-
-/* ======================================================
-   FORMULAIRE
-   ====================================================== */
-
-.admin-equipe-form-card {
-  margin-bottom: 30px;
-  padding: 28px;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
-}
-
-.admin-equipe-form-card h2 {
-  margin: 0 0 22px;
-  color: #0b2a5b;
-  font-size: 22px;
-}
-
-.admin-equipe-form {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  align-items: center;
   gap: 20px;
+  margin-bottom: 28px;
 }
 
-.admin-equipe-form-group {
+.admin-videos-top h2 {
+  margin: 0;
+  font-size: 25px;
+  font-weight: 850;
+  letter-spacing: -0.4px;
+}
+
+.admin-videos-top p {
+  margin: 6px 0 0;
+  color: var(--admin-gray);
+  font-size: 14px;
+}
+
+/* =========================================================
+   ADD BUTTON
+   ========================================================= */
+
+.admin-add-video-button {
+  border: 0;
+  outline: none;
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  padding: 13px 20px;
+  border-radius: 12px;
+
+  background: linear-gradient(
+    135deg,
+    var(--admin-red),
+    var(--admin-red-dark)
+  );
+
+  color: white;
+  font-size: 14px;
+  font-weight: 800;
+
+  box-shadow: 0 8px 18px rgba(226, 27, 35, 0.22);
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    filter 0.2s ease;
+}
+
+.admin-add-video-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px rgba(226, 27, 35, 0.3);
+  filter: brightness(1.04);
+}
+
+.admin-add-video-button:active {
+  transform: translateY(0);
+}
+
+/* =========================================================
+   MESSAGES
+   ========================================================= */
+
+.admin-video-success,
+.admin-video-error,
+.admin-video-message {
+  border-radius: 13px;
+  padding: 14px 17px;
+  margin-bottom: 22px;
+  font-size: 14px;
+}
+
+.admin-video-success {
+  background: #ecfdf3;
+  border: 1px solid #b7ebc9;
+  color: var(--admin-success);
+}
+
+.admin-video-error {
+  background: var(--admin-red-light);
+  border: 1px solid #f5c2c5;
+  color: var(--admin-red-dark);
+}
+
+.admin-video-message {
+  background: white;
+  border: 1px solid var(--admin-border);
+  color: var(--admin-gray);
+  text-align: center;
+  padding: 45px 20px;
+  box-shadow: var(--admin-shadow-sm);
+}
+
+/* =========================================================
+   VIDEO LIST
+   ========================================================= */
+
+.admin-videos-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+/* =========================================================
+   VIDEO CARD
+   ========================================================= */
+
+.admin-video-card {
+  position: relative;
+
   display: flex;
   flex-direction: column;
-  gap: 7px;
+
+  background: var(--admin-white);
+  border: 1px solid var(--admin-border);
+  border-radius: var(--admin-radius);
+
+  overflow: hidden;
+
+  box-shadow: var(--admin-shadow-sm);
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    border-color 0.25s ease;
 }
 
-.admin-equipe-form-group.full {
-  grid-column: 1 / -1;
+.admin-video-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(7, 86, 163, 0.18);
+  box-shadow: var(--admin-shadow);
 }
 
-.admin-equipe-form-group label {
-  color: #374151;
-  font-size: 14px;
-  font-weight: 700;
-}
+/* =========================================================
+   THUMBNAIL
+   ========================================================= */
 
-.admin-equipe-form-group input,
-.admin-equipe-form-group textarea,
-.admin-equipe-form-group select {
+.admin-video-thumbnail {
+  position: relative;
   width: 100%;
-  box-sizing: border-box;
-  padding: 12px 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 9px;
-  outline: none;
-  background: white;
-  color: #111827;
+  height: 245px;
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--admin-blue-dark),
+      #111827
+    );
+
+  overflow: hidden;
+}
+
+.admin-video-thumbnail::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.48),
+    transparent 45%
+  );
+
+  pointer-events: none;
+}
+
+.admin-video-thumbnail img {
+  width: 100%;
+  height: 100%;
+  display: block;
+
+  object-fit: cover;
+
+  transition:
+    transform 0.45s ease,
+    filter 0.35s ease;
+}
+
+.admin-video-card:hover .admin-video-thumbnail img {
+  transform: scale(1.05);
+  filter: brightness(0.9);
+}
+
+/* =========================================================
+   NO THUMBNAIL
+   ========================================================= */
+
+.admin-video-no-thumbnail {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 58px;
+
+  background:
+    radial-gradient(
+      circle at center,
+      rgba(255, 255, 255, 0.12),
+      transparent 45%
+    ),
+    linear-gradient(
+      135deg,
+      var(--admin-blue-dark),
+      #111827
+    );
+}
+
+/* =========================================================
+   PLAY BUTTON
+   ========================================================= */
+
+.admin-video-play {
+  position: absolute;
+  z-index: 3;
+
+  left: 50%;
+  top: 50%;
+
+  transform: translate(-50%, -50%);
+
+  width: 68px;
+  height: 68px;
+
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.9);
+
+  background: rgba(7, 86, 163, 0.9);
+  color: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  font-size: 22px;
+
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.28),
+    0 0 0 8px rgba(255, 255, 255, 0.12);
+
+  transition:
+    transform 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.admin-video-play:hover {
+  transform: translate(-50%, -50%) scale(1.1);
+  background: var(--admin-red);
+  box-shadow:
+    0 14px 35px rgba(226, 27, 35, 0.35),
+    0 0 0 10px rgba(255, 255, 255, 0.13);
+}
+
+/* =========================================================
+   VIDEO INFO
+   ========================================================= */
+
+.admin-video-info {
+  padding: 21px 21px 10px;
+  flex: 1;
+}
+
+.admin-video-category {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 6px 10px;
+
+  border-radius: 999px;
+
+  background: var(--admin-blue-light);
+  color: var(--admin-blue);
+
+  font-size: 11px;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+
+  margin-bottom: 10px;
+}
+
+.admin-video-info h3 {
+  margin: 0;
+
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 850;
+
+  color: var(--admin-dark);
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+
+  overflow: hidden;
+}
+
+.admin-video-info p {
+  margin: 9px 0 12px;
+
+  color: var(--admin-gray);
   font-size: 14px;
-  transition: border-color 0.2s ease,
+  line-height: 1.6;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+
+  overflow: hidden;
+}
+
+.admin-video-info small {
+  display: block;
+
+  color: var(--admin-gray-light);
+  font-size: 12px;
+}
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+
+.admin-video-actions {
+  display: flex;
+  gap: 10px;
+
+  padding: 16px 21px 21px;
+  margin-top: auto;
+}
+
+.admin-video-edit-button,
+.admin-video-delete-button {
+  flex: 1;
+
+  border: 0;
+  border-radius: 10px;
+
+  padding: 11px 14px;
+
+  cursor: pointer;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
     box-shadow 0.2s ease;
 }
 
-.admin-equipe-form-group textarea {
-  min-height: 120px;
-  resize: vertical;
+.admin-video-edit-button {
+  background: var(--admin-blue-light);
+  color: var(--admin-blue);
 }
 
-.admin-equipe-form-group input:focus,
-.admin-equipe-form-group textarea:focus,
-.admin-equipe-form-group select:focus {
-  border-color: #0b2a5b;
-  box-shadow: 0 0 0 3px rgba(11, 42, 91, 0.1);
-}
-
-/* ======================================================
-   IMAGE
-   ====================================================== */
-
-.admin-equipe-image-preview {
-  width: 100px;
-  height: 100px;
-  margin-top: 10px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 4px solid #f1f5f9;
-}
-
-/* ======================================================
-   ACTIONS FORMULAIRE
-   ====================================================== */
-
-.admin-equipe-form-actions {
-  grid-column: 1 / -1;
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 5px;
-}
-
-.admin-equipe-cancel-btn,
-.admin-equipe-submit-btn {
-  border: none;
-  border-radius: 9px;
-  padding: 12px 20px;
-  font-size: 14px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.admin-equipe-cancel-btn {
-  background: #e5e7eb;
-  color: #374151;
-}
-
-.admin-equipe-cancel-btn:hover {
-  background: #d1d5db;
-}
-
-.admin-equipe-submit-btn {
-  background: #0b2a5b;
+.admin-video-edit-button:hover {
+  background: var(--admin-blue);
   color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 7px 16px rgba(7, 86, 163, 0.2);
 }
 
-.admin-equipe-submit-btn:hover {
-  background: #071d40;
+.admin-video-delete-button {
+  background: var(--admin-red-light);
+  color: var(--admin-red-dark);
 }
 
-/* ======================================================
-   LISTE DES MEMBRES
-   ====================================================== */
-
-.admin-equipe-list-card {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.06);
+.admin-video-delete-button:hover {
+  background: var(--admin-red);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 7px 16px rgba(226, 27, 35, 0.2);
 }
 
-.admin-equipe-list-header {
+/* =========================================================
+   EDIT OVERLAY
+   ========================================================= */
+
+.admin-video-edit-overlay {
+  position: fixed;
+  z-index: 1000;
+
+  inset: 0;
+
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 24px 28px;
-  border-bottom: 1px solid #e5e7eb;
-}
+  justify-content: center;
 
-.admin-equipe-list-header h2 {
-  margin: 0;
-  color: #0b2a5b;
-  font-size: 21px;
-}
-
-.admin-equipe-count {
-  padding: 6px 12px;
-  border-radius: 20px;
-  background: #eef3f9;
-  color: #0b2a5b;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-/* ======================================================
-   GRILLE MEMBRES
-   ====================================================== */
-
-.admin-equipe-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 22px;
-  padding: 28px;
-}
-
-/* ======================================================
-   CARTE MEMBRE
-   ====================================================== */
-
-.admin-equipe-card {
-  position: relative;
   padding: 24px;
-  border: 1px solid #e5e7eb;
-  border-radius: 14px;
-  background: #ffffff;
-  text-align: center;
-  transition: 0.25s ease;
+
+  background: rgba(15, 23, 42, 0.72);
+
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+
+  animation: adminVideoFadeIn 0.2s ease;
 }
 
-.admin-equipe-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-  border-color: #cbd5e1;
+/* =========================================================
+   EDIT MODAL
+   ========================================================= */
+
+.admin-video-edit-modal {
+  width: min(700px, 100%);
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+  background: white;
+
+  border-radius: 20px;
+
+  box-shadow: var(--admin-shadow-lg);
+
+  animation: adminVideoModalIn 0.25s ease;
 }
 
-.admin-equipe-avatar {
-  width: 100px;
-  height: 100px;
-  margin: 0 auto 15px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: #0b2a5b;
+.admin-video-edit-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 34px;
-  font-weight: 800;
+  justify-content: space-between;
+
+  padding: 20px 23px;
+
+  background: white;
+
+  border-bottom: 1px solid var(--admin-border);
 }
 
-.admin-equipe-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.admin-equipe-card h3 {
+.admin-video-edit-header h2 {
   margin: 0;
-  color: #111827;
-  font-size: 19px;
-  font-weight: 800;
+
+  font-size: 21px;
+  font-weight: 850;
 }
 
-.admin-equipe-card-role {
-  display: inline-block;
-  margin-top: 7px;
-  color: #e31b23;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.admin-equipe-card-description {
-  margin: 13px 0 0;
-  color: #6b7280;
-  font-size: 14px;
-  line-height: 1.6;
-}
-
-/* ======================================================
-   RÉSEAUX SOCIAUX
-   ====================================================== */
-
-.admin-equipe-socials {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 16px;
-}
-
-.admin-equipe-socials a {
-  width: 34px;
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  background: #eef3f9;
-  color: #0b2a5b;
-  text-decoration: none;
-  font-size: 15px;
-  transition: 0.2s ease;
-}
-
-.admin-equipe-socials a:hover {
-  background: #0b2a5b;
-  color: white;
-}
-
-/* ======================================================
-   ACTIONS CARTE
-   ====================================================== */
-
-.admin-equipe-card-actions {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-  margin-top: 20px;
-  padding-top: 17px;
-  border-top: 1px solid #eef0f3;
-}
-
-.admin-equipe-edit-btn,
-.admin-equipe-delete-btn {
-  border: none;
-  border-radius: 8px;
-  padding: 9px 13px;
-  font-size: 13px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: 0.2s ease;
-}
-
-.admin-equipe-edit-btn {
-  background: #eef3f9;
-  color: #0b2a5b;
-}
-
-.admin-equipe-edit-btn:hover {
-  background: #dce6f3;
-}
-
-.admin-equipe-delete-btn {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.admin-equipe-delete-btn:hover {
-  background: #fecaca;
-}
-
-/* ======================================================
-   MESSAGE VIDE
-   ====================================================== */
-
-.admin-equipe-empty {
-  padding: 60px 20px;
-  text-align: center;
-  color: #6b7280;
-}
-
-.admin-equipe-empty-icon {
-  margin-bottom: 12px;
-  font-size: 45px;
-}
-
-.admin-equipe-empty h3 {
-  margin: 0 0 8px;
-  color: #374151;
-}
-
-/* ======================================================
-   LOADING
-   ====================================================== */
-
-.admin-equipe-loading {
-  padding: 60px;
-  text-align: center;
-  color: #6b7280;
-}
-
-.admin-equipe-loader {
+.admin-video-close-button,
+.admin-video-player-close {
   width: 38px;
   height: 38px;
-  margin: 0 auto 15px;
-  border: 4px solid #e5e7eb;
-  border-top-color: #e31b23;
+
+  border: 0;
   border-radius: 50%;
-  animation: adminEquipeSpin 0.8s linear infinite;
+
+  background: #f3f4f6;
+  color: var(--admin-dark);
+
+  font-size: 24px;
+  line-height: 1;
+
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
-@keyframes adminEquipeSpin {
-  to {
-    transform: rotate(360deg);
-  }
+.admin-video-close-button:hover,
+.admin-video-player-close:hover {
+  background: var(--admin-red);
+  color: white;
+  transform: rotate(5deg);
 }
 
-/* ======================================================
-   MESSAGE ERREUR / SUCCÈS
-   ====================================================== */
+/* =========================================================
+   FORM
+   ========================================================= */
 
-.admin-equipe-message {
-  margin-bottom: 20px;
-  padding: 13px 16px;
-  border-radius: 9px;
+.admin-video-edit-modal form {
+  padding: 23px;
+}
+
+.admin-video-form-group {
+  margin-bottom: 18px;
+}
+
+.admin-video-form-group label {
+  display: block;
+
+  margin-bottom: 7px;
+
+  color: var(--admin-dark);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.admin-video-form-group input,
+.admin-video-form-group textarea,
+.admin-video-form-group select {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  border: 1px solid var(--admin-border);
+  border-radius: 11px;
+
+  background: #fbfcfe;
+  color: var(--admin-dark);
+
+  padding: 12px 13px;
+
+  font-family: inherit;
   font-size: 14px;
-  font-weight: 600;
+
+  outline: none;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
 }
 
-.admin-equipe-message.success {
-  background: #dcfce7;
-  color: #166534;
-  border: 1px solid #bbf7d0;
+.admin-video-form-group textarea {
+  resize: vertical;
+  min-height: 120px;
 }
 
-.admin-equipe-message.error {
-  background: #fee2e2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
+.admin-video-form-group input:focus,
+.admin-video-form-group textarea:focus,
+.admin-video-form-group select:focus {
+  background: white;
+  border-color: var(--admin-blue);
+
+  box-shadow:
+    0 0 0 3px rgba(7, 86, 163, 0.11);
 }
 
-/* ======================================================
-   RESPONSIVE TABLET
-   ====================================================== */
+.admin-video-form-group input::placeholder,
+.admin-video-form-group textarea::placeholder {
+  color: #a1a8b3;
+}
 
-@media (max-width: 1100px) {
-  .admin-equipe-grid {
-    grid-template-columns: repeat(2, 1fr);
+/* =========================================================
+   FORM ACTIONS
+   ========================================================= */
+
+.admin-video-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+
+  padding-top: 7px;
+}
+
+.admin-video-cancel-button,
+.admin-video-submit-button {
+  border: 0;
+  border-radius: 10px;
+
+  padding: 12px 19px;
+
+  cursor: pointer;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.admin-video-cancel-button {
+  background: #eef0f3;
+  color: var(--admin-dark-soft);
+}
+
+.admin-video-cancel-button:hover {
+  background: #e1e4e8;
+  transform: translateY(-1px);
+}
+
+.admin-video-submit-button {
+  background: linear-gradient(
+    135deg,
+    var(--admin-blue),
+    var(--admin-blue-dark)
+  );
+
+  color: white;
+
+  box-shadow: 0 7px 16px rgba(7, 86, 163, 0.2);
+}
+
+.admin-video-submit-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(7, 86, 163, 0.28);
+}
+
+/* =========================================================
+   PLAYER OVERLAY
+   ========================================================= */
+
+.admin-video-player-overlay {
+  position: fixed;
+  z-index: 1100;
+
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 24px;
+
+  background: rgba(3, 7, 18, 0.88);
+
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+
+  animation: adminVideoFadeIn 0.2s ease;
+}
+
+/* =========================================================
+   PLAYER MODAL
+   ========================================================= */
+
+.admin-video-player-modal {
+  width: min(1100px, 100%);
+
+  background: #0b1220;
+
+  border-radius: 18px;
+
+  overflow: hidden;
+
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+
+  animation: adminVideoModalIn 0.25s ease;
+}
+
+.admin-video-player-header {
+  min-height: 64px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+
+  padding: 12px 18px;
+
+  background: #111827;
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.admin-video-player-header h2 {
+  margin: 0;
+
+  color: white;
+
+  font-size: 17px;
+  font-weight: 750;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-video-player-close {
+  flex: 0 0 auto;
+
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.admin-video-player {
+  display: block;
+
+  width: 100%;
+
+  max-height: 72vh;
+
+  background: black;
+
+  object-fit: contain;
+}
+
+/* =========================================================
+   ANIMATIONS
+   ========================================================= */
+
+@keyframes adminVideoFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
 
-/* ======================================================
-   RESPONSIVE MOBILE
-   ====================================================== */
-
-@media (max-width: 768px) {
-  .admin-equipe-page {
-    padding: 25px 16px;
+@keyframes adminVideoModalIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px) scale(0.98);
   }
 
-  .admin-equipe-header {
-    flex-direction: column;
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
+}
 
-  .admin-equipe-header h1 {
-    font-size: 29px;
-  }
+/* =========================================================
+   TABLET
+   ========================================================= */
 
-  .admin-equipe-add-btn {
-    width: 100%;
-  }
-
-  .admin-equipe-form {
+@media (max-width: 1000px) {
+  .admin-videos-list {
     grid-template-columns: 1fr;
   }
 
-  .admin-equipe-form-group.full {
-    grid-column: auto;
-  }
-
-  .admin-equipe-form-actions {
-    grid-column: auto;
-    flex-direction: column;
-  }
-
-  .admin-equipe-form-actions button {
-    width: 100%;
-  }
-
-  .admin-equipe-list-header {
-    padding: 20px;
-  }
-
-  .admin-equipe-grid {
-    grid-template-columns: 1fr;
-    padding: 18px;
+  .admin-video-thumbnail {
+    height: 300px;
   }
 }
 
-/* ======================================================
-   PETIT MOBILE
-   ====================================================== */
+/* =========================================================
+   MOBILE
+   ========================================================= */
 
-@media (max-width: 480px) {
-  .admin-equipe-page {
-    padding: 20px 12px;
+@media (max-width: 700px) {
+  .admin-videos-container {
+    width: min(100% - 24px, 1400px);
   }
 
-  .admin-equipe-form-card {
-    padding: 20px 16px;
+  .admin-videos-header {
+    padding: 34px 0 40px;
   }
 
-  .admin-equipe-header h1 {
-    font-size: 25px;
+  .admin-videos-header h1 {
+    font-size: 27px;
   }
 
-  .admin-equipe-card {
-    padding: 20px 15px;
+  .admin-videos-content {
+    padding: 25px 0 50px;
   }
 
-  .admin-equipe-avatar {
-    width: 85px;
-    height: 85px;
+  .admin-videos-top {
+    align-items: stretch;
+    flex-direction: column;
   }
+
+  .admin-add-video-button {
+    width: 100%;
+  }
+
+  .admin-video-thumbnail {
+    height: 220px;
+  }
+
+  .admin-video-info {
+    padding: 18px 17px 8px;
+  }
+
+  .admin-video-actions {
+    padding: 14px 17px 17px;
+  }
+
+  .admin-video-edit-overlay,
+  .admin-video-player-overlay {
+    padding: 12px;
+  }
+
+  .admin-video-edit-modal {
+    max-height: 94vh;
+    border-radius: 16px;
+  }
+
+  .admin-video-edit-header {
+    padding: 17px;
+  }
+
+  .admin-video-edit-modal form {
+    padding: 17px;
+  }
+
+  .admin-video-form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .admin-video-cancel-button,
+  .admin-video-submit-button {
+    width: 100%;
+  }
+
+  .admin-video-player-modal {
+    border-radius: 12px;
+  }
+
+  .admin-video-player-header {
+    min-height: 58px;
+    padding: 10px 12px;
+  }
+
+  .admin-video-player-header h2 {
+    font-size: 14px;
+  }
+
+  .admin-video-player {
+    max-height: 65vh;
+  }
+}
+
+/* =========================================================
+   SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 430px) {
+  .admin-videos-header h1 {
+    font-size: 24px;
+  }
+
+  .admin-videos-header p {
+    font-size: 14px;
+  }
+
+  .admin-video-thumbnail {
+    height: 195px;
+  }
+
+  .admin-video-play {
+    width: 58px;
+    height: 58px;
+    font-size: 19px;
+  }
+
+  .admin-video-info h3 {
+    font-size: 18px;
+  }
+
+  .admin-video-actions {
+    flex-direction: column;
+  }
+
+  .admin-video-edit-button,
+  .admin-video-delete-button {
+    width: 100%;
+  }
+}
+
+/* =========================================================
+   ACCESSIBILITY
+   ========================================================= */
+
+.admin-add-video-button:focus-visible,
+.admin-video-play:focus-visible,
+.admin-video-edit-button:focus-visible,
+.admin-video-delete-button:focus-visible,
+.admin-video-close-button:focus-visible,
+.admin-video-player-close:focus-visible,
+.admin-video-cancel-button:focus-visible,
+.admin-video-submit-button:focus-visible {
+  outline: 3px solid rgba(7, 86, 163, 0.28);
+  outline-offset: 3px;
 }

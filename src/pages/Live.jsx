@@ -6,30 +6,41 @@ import cover from "../assets/logo.JPG";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// =====================================================
+// YOUTUBE
+// =====================================================
+
 function getYouTubeEmbedUrl(url) {
   if (!url) return "";
 
   try {
     const parsed = new URL(url);
+    const hostname = parsed.hostname.toLowerCase();
 
     if (
-      parsed.hostname.includes("youtube.com") ||
-      parsed.hostname.includes("youtu.be")
+      hostname.includes("youtube.com") ||
+      hostname.includes("youtu.be")
     ) {
       let videoId = "";
 
-      if (parsed.hostname.includes("youtu.be")) {
-        videoId = parsed.pathname.replace("/", "");
+      if (hostname.includes("youtu.be")) {
+        videoId = parsed.pathname.replace("/", "").split("/")[0];
+      }
+
+      if (parsed.pathname.includes("/live/")) {
+        videoId =
+          parsed.pathname.split("/live/")[1]?.split("/")[0] || "";
+      }
+
+      if (parsed.pathname.includes("/watch")) {
+        videoId = parsed.searchParams.get("v") || "";
       }
 
       if (
-        parsed.pathname.includes("/live/") ||
-        parsed.pathname.includes("/watch")
+        parsed.pathname.includes("/embed/")
       ) {
         videoId =
-          parsed.pathname.split("/live/")[1]?.split("/")[0] ||
-          parsed.searchParams.get("v") ||
-          "";
+          parsed.pathname.split("/embed/")[1]?.split("/")[0] || "";
       }
 
       if (videoId) {
@@ -43,6 +54,90 @@ function getYouTubeEmbedUrl(url) {
   return "";
 }
 
+// =====================================================
+// FACEBOOK
+// =====================================================
+
+function isFacebookUrl(url) {
+  if (!url) return false;
+
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.toLowerCase();
+
+    return (
+      hostname.includes("facebook.com") ||
+      hostname.includes("fb.watch")
+    );
+  } catch {
+    return false;
+  }
+}
+
+function getFacebookEmbedUrl(url) {
+  if (!url || !isFacebookUrl(url)) return "";
+
+  return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(
+    url
+  )}&show_text=false&autoplay=true`;
+}
+
+// =====================================================
+// TIKTOK
+// =====================================================
+
+function isTikTokUrl(url) {
+  if (!url) return false;
+
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.toLowerCase();
+
+    return (
+      hostname.includes("tiktok.com") ||
+      hostname.includes("vm.tiktok.com")
+    );
+  } catch {
+    return false;
+  }
+}
+
+function getTikTokEmbedUrl(url) {
+  if (!url || !isTikTokUrl(url)) return "";
+
+  return url;
+}
+
+// =====================================================
+// ZOOM
+// =====================================================
+
+function isZoomUrl(url) {
+  if (!url) return false;
+
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.toLowerCase();
+
+    return (
+      hostname.includes("zoom.us") ||
+      hostname.includes("zoom.com")
+    );
+  } catch {
+    return false;
+  }
+}
+
+function getZoomEmbedUrl(url) {
+  if (!url || !isZoomUrl(url)) return "";
+
+  return url;
+}
+
+// =====================================================
+// HLS
+// =====================================================
+
 function isHlsUrl(url) {
   if (!url) return false;
 
@@ -50,10 +145,15 @@ function isHlsUrl(url) {
 
   return (
     value.includes(".m3u8") ||
+    value.includes("m3u8") ||
     value.includes("application/vnd.apple.mpegurl") ||
     value.includes("application/x-mpegurl")
   );
 }
+
+// =====================================================
+// LIVE
+// =====================================================
 
 function Live() {
   const [live, setLive] = useState(null);
@@ -175,8 +275,6 @@ function Live() {
 
     envoyerPresence();
 
-    // Pas de rafraîchissement du LIVE.
-    // La présence est seulement actualisée périodiquement.
     const interval = setInterval(
       envoyerPresence,
       30000
@@ -237,11 +335,8 @@ function Live() {
       const hls = new Hls({
         enableWorker: true,
 
-        // Le lecteur choisit automatiquement
-        // la meilleure qualité adaptée à Internet.
         startLevel: -1,
 
-        // Tolérance pour connexions faibles.
         maxBufferLength: 20,
         maxMaxBufferLength: 40,
 
@@ -268,12 +363,8 @@ function Live() {
           const qualities = levels
             .map((level, index) => ({
               index,
-              height:
-                level.height ||
-                0,
-              bitrate:
-                level.bitrate ||
-                0,
+              height: level.height || 0,
+              bitrate: level.bitrate || 0,
             }))
             .filter(
               (item) =>
@@ -307,12 +398,8 @@ function Live() {
             data
           );
 
-          if (
-            data.fatal
-          ) {
-            switch (
-              data.type
-            ) {
+          if (data.fatal) {
+            switch (data.type) {
               case Hls.ErrorTypes.NETWORK_ERROR:
                 hls.startLoad();
                 break;
@@ -382,18 +469,37 @@ function Live() {
       live &&
       live.stream_url
     ) {
-      const sourceType =
-        String(
-          live.source_type ||
-            ""
-        ).toLowerCase();
+      const sourceType = String(
+        live.source_type || ""
+      ).toLowerCase();
+
+      const streamUrl =
+        live.stream_url;
 
       const youtubeUrl =
         getYouTubeEmbedUrl(
-          live.stream_url
+          streamUrl
         );
 
-      // YouTube
+      const facebookUrl =
+        getFacebookEmbedUrl(
+          streamUrl
+        );
+
+      const tiktokUrl =
+        getTikTokEmbedUrl(
+          streamUrl
+        );
+
+      const zoomUrl =
+        getZoomEmbedUrl(
+          streamUrl
+        );
+
+      // =================================================
+      // YOUTUBE
+      // =================================================
+
       if (
         sourceType === "youtube" ||
         youtubeUrl
@@ -401,16 +507,55 @@ function Live() {
         return;
       }
 
+      // =================================================
+      // FACEBOOK
+      // =================================================
+
+      if (
+        sourceType === "facebook" ||
+        facebookUrl
+      ) {
+        return;
+      }
+
+      // =================================================
+      // TIKTOK
+      // =================================================
+
+      if (
+        sourceType === "tiktok" ||
+        tiktokUrl
+      ) {
+        return;
+      }
+
+      // =================================================
+      // ZOOM
+      // =================================================
+
+      if (
+        sourceType === "zoom" ||
+        zoomUrl
+      ) {
+        return;
+      }
+
+      // =================================================
       // HLS
+      // =================================================
+
       if (
         sourceType === "hls" ||
-        isHlsUrl(
-          live.stream_url
-        )
+        isHlsUrl(streamUrl)
       ) {
-        setTimeout(() => {
+        const timer = setTimeout(() => {
           setupHls();
         }, 50);
+
+        return () => {
+          clearTimeout(timer);
+          destroyHls();
+        };
       }
     }
 
@@ -443,9 +588,7 @@ function Live() {
     const selected = Number(value);
 
     if (
-      Number.isInteger(
-        selected
-      )
+      Number.isInteger(selected)
     ) {
       hls.currentLevel =
         selected;
@@ -477,9 +620,42 @@ function Live() {
         )
       : "";
 
+  const facebookEmbedUrl =
+    live?.stream_url
+      ? getFacebookEmbedUrl(
+          live.stream_url
+        )
+      : "";
+
+  const tiktokEmbedUrl =
+    live?.stream_url
+      ? getTikTokEmbedUrl(
+          live.stream_url
+        )
+      : "";
+
+  const zoomEmbedUrl =
+    live?.stream_url
+      ? getZoomEmbedUrl(
+          live.stream_url
+        )
+      : "";
+
   const isYoutube =
     sourceType === "youtube" ||
     Boolean(youtubeEmbedUrl);
+
+  const isFacebook =
+    sourceType === "facebook" ||
+    Boolean(facebookEmbedUrl);
+
+  const isTikTok =
+    sourceType === "tiktok" ||
+    Boolean(tiktokEmbedUrl);
+
+  const isZoom =
+    sourceType === "zoom" ||
+    Boolean(zoomEmbedUrl);
 
   const isHls =
     sourceType === "hls" ||
@@ -618,6 +794,10 @@ function Live() {
 
                     <div className="live-video-wrapper">
 
+                      {/* =================================================
+                          YOUTUBE
+                      ================================================= */}
+
                       {isYoutube &&
                       youtubeEmbedUrl ? (
 
@@ -634,7 +814,71 @@ function Live() {
                           allowFullScreen
                         ></iframe>
 
+                      ) : isFacebook &&
+                        facebookEmbedUrl ? (
+
+                        /* =================================================
+                           FACEBOOK
+                        ================================================= */
+
+                        <iframe
+                          className="live-youtube"
+                          src={
+                            facebookEmbedUrl
+                          }
+                          title={
+                            live?.titre ||
+                            "Mikwo Pèp La en direct sur Facebook"
+                          }
+                          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                          allowFullScreen
+                        ></iframe>
+
+                      ) : isTikTok &&
+                        tiktokEmbedUrl ? (
+
+                        /* =================================================
+                           TIKTOK
+                        ================================================= */
+
+                        <iframe
+                          className="live-youtube"
+                          src={
+                            tiktokEmbedUrl
+                          }
+                          title={
+                            live?.titre ||
+                            "Mikwo Pèp La en direct sur TikTok"
+                          }
+                          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                          allowFullScreen
+                        ></iframe>
+
+                      ) : isZoom &&
+                        zoomEmbedUrl ? (
+
+                        /* =================================================
+                           ZOOM
+                        ================================================= */
+
+                        <iframe
+                          className="live-youtube"
+                          src={
+                            zoomEmbedUrl
+                          }
+                          title={
+                            live?.titre ||
+                            "Mikwo Pèp La en direct sur Zoom"
+                          }
+                          allow="autoplay; encrypted-media; microphone; camera; fullscreen"
+                          allowFullScreen
+                        ></iframe>
+
                       ) : isHls ? (
+
+                        /* =================================================
+                           HLS
+                        ================================================= */
 
                         <>
                           <video
@@ -692,6 +936,10 @@ function Live() {
                         </>
 
                       ) : (
+
+                        /* =================================================
+                           VIDEO DIRECT
+                        ================================================= */
 
                         <video
                           ref={videoRef}

@@ -18,10 +18,12 @@ const app = express();
 
 const PORT = Number(process.env.PORT) || 3000;
 
-// Sur Render, mettre FFMPEG_PATH dans Environment Variables
-// Exemple local Mac : /opt/homebrew/bin/ffmpeg
 const ffmpegPath =
   process.env.FFMPEG_PATH || "/opt/homebrew/bin/ffmpeg";
+
+// ======================================================
+// CORS
+// ======================================================
 
 app.use(
   cors({
@@ -30,33 +32,15 @@ app.use(
   })
 );
 
+// ======================================================
+// BODY PARSER
+// ======================================================
+
 app.use(express.json({ limit: "2mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // ======================================================
-// DOSSIERS UPLOADS
-// ======================================================
-
-const uploadsPath = path.join(__dirname, "uploads");
-const videosPath = path.join(uploadsPath, "videos");
-
-if (!fs.existsSync(uploadsPath)) {
-  fs.mkdirSync(uploadsPath, { recursive: true });
-}
-
-if (!fs.existsSync(videosPath)) {
-  fs.mkdirSync(videosPath, { recursive: true });
-}
-
-app.use(
-  "/uploads",
-  express.static(uploadsPath, {
-    maxAge: "1d",
-  })
-);
-
-// ======================================================
-// POSTGRESQL
+// CONFIGURATION POSTGRESQL
 // ======================================================
 
 console.log(
@@ -85,170 +69,58 @@ const pool = process.env.DATABASE_URL
       connectionTimeoutMillis: 10000,
     });
 
-pool.on("error", (err) => {
-  console.error("❌ Erreur PostgreSQL inattendue:", err);
+// ======================================================
+// DOSSIERS UPLOADS
+// ======================================================
+
+const uploadsPath = path.join(__dirname, "uploads");
+const videosPath = path.join(uploadsPath, "videos");
+
+if (!fs.existsSync(uploadsPath)) {
+  fs.mkdirSync(uploadsPath, {
+    recursive: true,
+  });
+}
+
+if (!fs.existsSync(videosPath)) {
+  fs.mkdirSync(videosPath, {
+    recursive: true,
+  });
+}
+
+// ======================================================
+// FICHIERS STATIQUES
+// ======================================================
+
+app.use(
+  "/uploads",
+  express.static(uploadsPath, {
+    maxAge: "1d",
+  })
+);
+
+// ======================================================
+// MULTER — IMAGES
+// ======================================================
+
+const imageStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadsPath);
+  },
+
+  filename: function (req, file, cb) {
+    const extension =
+      path.extname(file.originalname) || ".jpg";
+
+    const filename =
+      Date.now() +
+      "-" +
+      Math.round(Math.random() * 1e9) +
+      extension.toLowerCase();
+
+    cb(null, filename);
+  },
 });
-
-// ======================================================
-// CONSTANTES RÔLES
-// ======================================================
-
-const ROLES = {
-  ADMIN: "admin",
-
-  // IMPORTANT :
-  // PostgreSQL utilise "editor", pas "editeur"
-  EDITEUR: "editor",
-
-  JOURNALISTE: "journaliste",
-};
-
-// ======================================================
-// JWT
-// ======================================================
-
-function verifierToken(req, res, next) {
-  try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader) {
-      return res.status(401).json({
-        message: "Token manquant",
-      });
-    }
-
-    const parts = authHeader.split(" ");
-
-    if (parts.length !== 2 || parts[0] !== "Bearer") {
-      return res.status(401).json({
-        message: "Format du token invalide",
-      });
-    }
-
-    const token = parts[1];
-
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET
-    );
-
-    req.user = decoded;
-
-    next();
-  } catch (error) {
-    console.error("❌ Erreur token:", error.message);
-
-    return res.status(401).json({
-      message: "Token invalide ou expiré",
-    });
-  }
-}
-
-// ======================================================
-// VÉRIFICATION DES RÔLES
-// ======================================================
-
-function verifierRole(...rolesAutorises) {
-  return (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({
-        message: "Authentification requise",
-      });
-    }
-
-    if (!rolesAutorises.includes(req.user.role)) {
-      return res.status(403).json({
-        message: "Accès refusé",
-      });
-    }
-
-    next();
-  };
-}
-
-const verifierAdmin = verifierRole(
-  ROLES.ADMIN
-);
-
-const verifierEditeur = verifierRole(
-  ROLES.ADMIN,
-  ROLES.EDITEUR
-);
-
-const verifierAdminEditeur = verifierEditeur;
-
-const verifierRedacteur = verifierRole(
-  ROLES.ADMIN,
-  ROLES.EDITEUR,
-  ROLES.JOURNALISTE
-);
-
-const verifierEquipeEditoriale = verifierRedacteur;
-
-// ======================================================
-// VÉRIFICATION PROPRIÉTAIRE
-// ======================================================
-
-async function verifierProprietaire(
-  table,
-  idColumn,
-  id,
-  user,
-  res
-) {
-  try {
-    // Admin et editor peuvent modifier les contenus
-    if (
-      user.role === ROLES.ADMIN ||
-      user.role === ROLES.EDITEUR
-    ) {
-      return true;
-    }
-
-    const result = await pool.query(
-      `SELECT id_utilisateur
-       FROM ${table}
-       WHERE ${idColumn} = $1`,
-      [id]
-    );
-
-    if (result.rows.length === 0) {
-      res.status(404).json({
-        message: "Élément introuvable",
-      });
-
-      return false;
-    }
-
-    if (
-      Number(result.rows[0].id_utilisateur) !==
-      Number(user.id_utilisateur)
-    ) {
-      res.status(403).json({
-        message: "Vous ne pouvez pas modifier cet élément",
-      });
-
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    console.error(
-      "❌ Erreur vérification propriétaire:",
-      error
-    );
-
-    res.status(500).json({
-      message: "Erreur serveur",
-    });
-
-    return false;
-  }
-}
-
-// ======================================================
-// MULTER - IMAGES
-// ======================================================
 
 const allowedImageTypes = [
   "image/jpeg",
@@ -258,53 +130,49 @@ const allowedImageTypes = [
   "image/gif",
 ];
 
-const imageStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsPath);
-  },
-
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-
-    const baseName = path
-      .basename(file.originalname, ext)
-      .replace(/[^a-zA-Z0-9_-]/g, "_");
-
-    cb(
-      null,
-      `${Date.now()}-${baseName}${ext}`
-    );
-  },
-});
-
 const upload = multer({
   storage: imageStorage,
+
+  fileFilter: function (req, file, cb) {
+    if (allowedImageTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(
+        new Error(
+          "Format d'image non autorisé. Utilisez JPG, JPEG, PNG, WEBP ou GIF."
+        )
+      );
+    }
+  },
 
   limits: {
     fileSize: 5 * 1024 * 1024,
     files: 20,
   },
-
-  fileFilter: (req, file, cb) => {
-    if (
-      allowedImageTypes.includes(
-        file.mimetype
-      )
-    ) {
-      cb(null, true);
-    } else {
-      cb(
-        new Error(
-          "Format image non autorisé. Utilisez JPG, JPEG, PNG, WEBP ou GIF."
-        )
-      );
-    }
-  },
 });
 
 // ======================================================
-// MULTER - VIDÉOS
+// MULTER — VIDÉOS
 // ======================================================
+
+const videoStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, videosPath);
+  },
+
+  filename: function (req, file, cb) {
+    const extension =
+      path.extname(file.originalname) || ".mp4";
+
+    const filename =
+      Date.now() +
+      "-" +
+      Math.round(Math.random() * 1e9) +
+      extension.toLowerCase();
+
+    cb(null, filename);
+  },
+});
 
 const allowedVideoTypes = [
   "video/mp4",
@@ -314,274 +182,100 @@ const allowedVideoTypes = [
   "video/mpeg",
 ];
 
-const videoStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, videosPath);
-  },
-
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-
-    const baseName = path
-      .basename(file.originalname, ext)
-      .replace(/[^a-zA-Z0-9_-]/g, "_");
-
-    cb(
-      null,
-      `${Date.now()}-${baseName}${ext}`
-    );
-  },
-});
-
 const uploadVideo = multer({
   storage: videoStorage,
 
-  limits: {
-    fileSize: 500 * 1024 * 1024,
-  },
-
-  fileFilter: (req, file, cb) => {
-    if (
-      allowedVideoTypes.includes(
-        file.mimetype
-      )
-    ) {
+  fileFilter: function (req, file, cb) {
+    if (allowedVideoTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
       cb(
         new Error(
-          "Format vidéo non autorisé."
+          "Format vidéo non autorisé. Utilisez MP4, WEBM, MOV, AVI ou MPEG."
         )
       );
     }
   },
+
+  limits: {
+    fileSize: 500 * 1024 * 1024,
+  },
 });
 
 // ======================================================
-// UTILITAIRES FICHIERS
+// FONCTION SUPPRESSION FICHIER
+// ======================================================
+
+function supprimerFichier(filePath) {
+  try {
+    if (!filePath) return;
+
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  } catch (error) {
+    console.error(
+      "Erreur suppression fichier :",
+      error
+    );
+  }
+}
+
+// ======================================================
+// SUPPRESSION IMAGE
 // ======================================================
 
 function supprimerImage(imageUrl) {
-  if (!imageUrl) return;
-
   try {
-    let filePath = imageUrl;
+    if (!imageUrl) return;
 
-    if (filePath.startsWith("/uploads/")) {
-      filePath = filePath.replace(
-        "/uploads/",
-        ""
-      );
-    }
+    const filename = path.basename(imageUrl);
 
-    if (filePath.startsWith("uploads/")) {
-      filePath = filePath.replace(
-        "uploads/",
-        ""
-      );
-    }
+    if (!filename) return;
 
-    const absolutePath = path.join(
+    const imagePath = path.join(
       uploadsPath,
-      filePath
+      filename
     );
 
-    if (fs.existsSync(absolutePath)) {
-      fs.unlinkSync(absolutePath);
-
-      console.log(
-        "🗑️ Fichier supprimé:",
-        absolutePath
-      );
-    }
+    supprimerFichier(imagePath);
   } catch (error) {
     console.error(
-      "❌ Erreur suppression fichier:",
-      error.message
+      "Erreur suppression image :",
+      error
     );
   }
 }
+
+// ======================================================
+// SUPPRESSION VIDÉO
+// ======================================================
 
 function supprimerVideo(videoUrl) {
-  if (!videoUrl) return;
-
   try {
-    let fileName = videoUrl;
+    if (!videoUrl) return;
 
-    if (fileName.startsWith("/uploads/videos/")) {
-      fileName = fileName.replace(
-        "/uploads/videos/",
-        ""
-      );
-    }
+    const filename = path.basename(videoUrl);
 
-    if (fileName.startsWith("uploads/videos/")) {
-      fileName = fileName.replace(
-        "uploads/videos/",
-        ""
-      );
-    }
+    if (!filename) return;
 
-    const absolutePath = path.join(
+    const videoPath = path.join(
       videosPath,
-      fileName
+      filename
     );
 
-    if (fs.existsSync(absolutePath)) {
-      fs.unlinkSync(absolutePath);
-
-      console.log(
-        "🗑️ Vidéo supprimée:",
-        absolutePath
-      );
-    }
+    supprimerFichier(videoPath);
   } catch (error) {
     console.error(
-      "❌ Erreur suppression vidéo:",
-      error.message
+      "Erreur suppression vidéo :",
+      error
     );
   }
 }
 
 // ======================================================
-// FFmpeg - TEST
+// TEST BASE DE DONNÉES
 // ======================================================
-
-function testFFmpeg() {
-  return new Promise((resolve) => {
-    const processFFmpeg = spawn(
-      ffmpegPath,
-      ["-version"]
-    );
-
-    let output = "";
-
-    processFFmpeg.stdout.on(
-      "data",
-      (data) => {
-        output += data.toString();
-      }
-    );
-
-    processFFmpeg.stderr.on(
-      "data",
-      (data) => {
-        output += data.toString();
-      }
-    );
-
-    processFFmpeg.on(
-      "error",
-      (error) => {
-        console.error(
-          "⚠️ FFmpeg non disponible:",
-          error.message
-        );
-
-        resolve(false);
-      }
-    );
-
-    processFFmpeg.on(
-      "close",
-      (code) => {
-        if (code === 0) {
-          console.log("✅ FFmpeg disponible");
-          resolve(true);
-        } else {
-          console.error(
-            "⚠️ FFmpeg retourne le code:",
-            code
-          );
-
-          resolve(false);
-        }
-      }
-    );
-  });
-}
-
-// ======================================================
-// GÉNÉRATION THUMBNAIL VIDÉO
-// ======================================================
-
-function generateVideoThumbnail(
-  videoPath,
-  thumbnailPath,
-  time = 1
-) {
-  return new Promise((resolve, reject) => {
-    const args = [
-      "-ss",
-      String(time),
-      "-i",
-      videoPath,
-      "-frames:v",
-      "1",
-      "-vf",
-      "scale=1280:-2",
-      "-y",
-      thumbnailPath,
-    ];
-
-    console.log(
-      "🎬 Génération thumbnail:",
-      args
-    );
-
-    const ffmpeg = spawn(
-      ffmpegPath,
-      args
-    );
-
-    let stderr = "";
-
-    ffmpeg.stderr.on(
-      "data",
-      (data) => {
-        stderr += data.toString();
-      }
-    );
-
-    ffmpeg.on(
-      "error",
-      (error) => {
-        reject(error);
-      }
-    );
-
-    ffmpeg.on(
-      "close",
-      (code) => {
-        if (code === 0) {
-          resolve(thumbnailPath);
-        } else {
-          reject(
-            new Error(
-              `FFmpeg thumbnail échoué (${code}): ${stderr}`
-            )
-          );
-        }
-      }
-    );
-  });
-}
-
-// ======================================================
-// API TEST
-// ======================================================
-
-app.get("/", (req, res) => {
-  res.json({
-    message: "Mikwo Pèp La TV API fonctionne",
-  });
-});
-
-app.get("/api", (req, res) => {
-  res.json({
-    message: "API Mikwo Pèp La TV fonctionne",
-  });
-});
 
 app.get("/api/test-db", async (req, res) => {
   try {
@@ -591,89 +285,109 @@ app.get("/api/test-db", async (req, res) => {
 
     res.json({
       success: true,
-      database: "connected",
+      message: "Connexion PostgreSQL réussie.",
       time: result.rows[0].now,
     });
   } catch (error) {
     console.error(
-      "❌ Test DB:",
+      "Erreur PostgreSQL :",
       error
     );
 
     res.status(500).json({
       success: false,
-      message: "Erreur connexion base de données",
-      error: error.message,
+      message:
+        "Erreur de connexion PostgreSQL.",
     });
   }
 });
 
 // ======================================================
-// LOGIN
+// API PRINCIPALE
+// ======================================================
+
+app.get("/api", (req, res) => {
+  res.json({
+    success: true,
+    message:
+      "API Mikwo Pèp La TV fonctionne.",
+  });
+});
+
+// ======================================================
+// AUTHENTIFICATION
 // ======================================================
 
 app.post("/api/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const {
+      email,
+      password,
+    } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({
         message:
-          "Email et mot de passe obligatoires",
+          "Email et mot de passe obligatoires.",
       });
     }
 
     const result = await pool.query(
-      `SELECT
+      `
+      SELECT
         id_utilisateur,
         nom,
         email,
         password,
         role
-       FROM utilisateur
-       WHERE LOWER(email) = LOWER($1)`,
+      FROM utilisateur
+      WHERE LOWER(email) = LOWER($1)
+      LIMIT 1
+      `,
       [email.trim()]
     );
 
     if (result.rows.length === 0) {
       return res.status(401).json({
         message:
-          "Email ou mot de passe incorrect",
+          "Email ou mot de passe incorrect.",
       });
     }
 
-    const user = result.rows[0];
+    const utilisateur = result.rows[0];
 
     const passwordCorrect =
       await bcrypt.compare(
         password,
-        user.password
+        utilisateur.password
       );
 
     if (!passwordCorrect) {
       return res.status(401).json({
         message:
-          "Email ou mot de passe incorrect",
+          "Email ou mot de passe incorrect.",
       });
     }
 
     if (!process.env.JWT_SECRET) {
       console.error(
-        "❌ JWT_SECRET manquant"
+        "JWT_SECRET manquant."
       );
 
       return res.status(500).json({
         message:
-          "Configuration serveur incomplète",
+          "Configuration serveur incomplète.",
       });
     }
 
     const token = jwt.sign(
       {
         id_utilisateur:
-          user.id_utilisateur,
-        email: user.email,
-        role: user.role,
+          utilisateur.id_utilisateur,
+        email:
+          utilisateur.email,
+        role:
+          utilisateur.role,
       },
       process.env.JWT_SECRET,
       {
@@ -687,26 +401,213 @@ app.post("/api/login", async (req, res) => {
 
       user: {
         id_utilisateur:
-          user.id_utilisateur,
-        nom: user.nom,
-        email: user.email,
-        role: user.role,
+          utilisateur.id_utilisateur,
+        nom:
+          utilisateur.nom,
+        email:
+          utilisateur.email,
+        role:
+          utilisateur.role,
       },
     });
   } catch (error) {
     console.error(
-      "❌ Login:",
+      "Erreur login :",
       error
     );
 
     res.status(500).json({
-      message: "Erreur serveur",
+      message:
+        "Erreur serveur.",
     });
   }
 });
 
 // ======================================================
-// ARTICLES - PUBLIC
+// MIDDLEWARE TOKEN
+// ======================================================
+
+function verifierToken(req, res, next) {
+  try {
+    const authorization =
+      req.headers.authorization;
+
+    if (!authorization) {
+      return res.status(401).json({
+        message:
+          "Token manquant.",
+      });
+    }
+
+    const parts =
+      authorization.split(" ");
+
+    if (
+      parts.length !== 2 ||
+      parts[0] !== "Bearer"
+    ) {
+      return res.status(401).json({
+        message:
+          "Format du token invalide.",
+      });
+    }
+
+    const token = parts[1];
+
+    if (!process.env.JWT_SECRET) {
+      return res.status(500).json({
+        message:
+          "JWT_SECRET non configuré.",
+      });
+    }
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    req.user = decoded;
+
+    next();
+  } catch (error) {
+    console.error(
+      "Erreur token :",
+      error
+    );
+
+    return res.status(401).json({
+      message:
+        "Token invalide ou expiré.",
+    });
+  }
+}
+
+// ======================================================
+// RÔLES
+// ======================================================
+
+const ROLES = {
+  ADMIN: "admin",
+  EDITEUR: "editeur",
+  JOURNALISTE: "journaliste",
+};
+
+function verifierRole(...rolesAutorises) {
+  return (req, res, next) => {
+    if (!req.user) {
+      return res.status(401).json({
+        message:
+          "Authentification requise.",
+      });
+    }
+
+    if (
+      !rolesAutorises.includes(
+        req.user.role
+      )
+    ) {
+      return res.status(403).json({
+        message:
+          "Accès refusé.",
+      });
+    }
+
+    next();
+  };
+}
+
+const verifierAdmin =
+  verifierRole(ROLES.ADMIN);
+
+const verifierEditeur =
+  verifierRole(
+    ROLES.ADMIN,
+    ROLES.EDITEUR
+  );
+
+const verifierAdminEditeur =
+  verifierEditeur;
+
+const verifierRedacteur =
+  verifierRole(
+    ROLES.ADMIN,
+    ROLES.EDITEUR,
+    ROLES.JOURNALISTE
+  );
+
+const verifierEquipeEditoriale =
+  verifierRedacteur;
+
+// ======================================================
+// VÉRIFICATION PROPRIÉTAIRE
+// ======================================================
+
+async function verifierProprietaire(
+  table,
+  idColumn,
+  id,
+  user,
+  res
+) {
+  if (
+    user.role === ROLES.ADMIN ||
+    user.role === ROLES.EDITEUR
+  ) {
+    return true;
+  }
+
+  const tablesAutorisees = [
+    "article",
+    "photo",
+    "video",
+  ];
+
+  if (!tablesAutorisees.includes(table)) {
+    res.status(400).json({
+      message:
+        "Table non autorisée.",
+    });
+
+    return false;
+  }
+
+  const result = await pool.query(
+    `
+    SELECT id_utilisateur
+    FROM ${table}
+    WHERE ${idColumn} = $1
+    `,
+    [id]
+  );
+
+  if (result.rows.length === 0) {
+    res.status(404).json({
+      message:
+        "Élément introuvable.",
+    });
+
+    return false;
+  }
+
+  if (
+    Number(
+      result.rows[0].id_utilisateur
+    ) !==
+    Number(user.id_utilisateur)
+  ) {
+    res.status(403).json({
+      message:
+        "Vous n'êtes pas autorisé à modifier cet élément.",
+    });
+
+    return false;
+  }
+
+  return true;
+}
+
+// ======================================================
+// ARTICLES — PUBLIC
 // ======================================================
 
 app.get("/api/articles", async (req, res) => {
@@ -717,50 +618,85 @@ app.get("/api/articles", async (req, res) => {
         a.titre,
         a.slug,
         a.contenu,
-
-        -- Le frontend peut continuer à utiliser image_url
         a.image AS image_url,
-
         a.statut,
         a.created_at,
-        a.updated_at,
         a.id_utilisateur,
-
         u.nom AS auteur
-
       FROM article a
-
       LEFT JOIN utilisateur u
-        ON u.id_utilisateur = a.id_utilisateur
-
+        ON a.id_utilisateur =
+           u.id_utilisateur
       WHERE a.statut = 'publie'
-
       ORDER BY a.created_at DESC
     `);
 
     res.json(result.rows);
   } catch (error) {
     console.error(
-      "❌ GET articles:",
+      "Erreur récupération articles :",
       error
     );
 
     res.status(500).json({
       message:
-        "Erreur récupération des articles",
+        "Erreur serveur.",
     });
   }
 });
 
 // ======================================================
-// ARTICLE - CRÉER
+// ARTICLES — ADMIN
+// ======================================================
+
+app.get(
+  "/api/articles/admin",
+  verifierToken,
+  verifierRedacteur,
+  async (req, res) => {
+    try {
+      const result = await pool.query(`
+        SELECT
+          a.id_article,
+          a.titre,
+          a.slug,
+          a.contenu,
+          a.image AS image_url,
+          a.statut,
+          a.created_at,
+          a.updated_at,
+          a.id_utilisateur,
+          u.nom AS auteur
+        FROM article a
+        LEFT JOIN utilisateur u
+          ON a.id_utilisateur = u.id_utilisateur
+        ORDER BY a.created_at DESC
+      `);
+
+      res.json(result.rows);
+    } catch (error) {
+      console.error(
+        "Erreur articles admin :",
+        error
+      );
+
+      res.status(500).json({
+        message: "Erreur serveur.",
+      });
+    }
+  }
+);
+
+// ======================================================
+// AJOUT ARTICLE
 // ======================================================
 
 app.post(
   "/api/articles",
   verifierToken,
-  verifierRedacteur,
+  verifierEquipeEditoriale,
   upload.single("image"),
+
   async (req, res) => {
     try {
       const {
@@ -770,11 +706,7 @@ app.post(
         statut,
       } = req.body;
 
-      if (
-        !titre ||
-        !slug ||
-        !contenu
-      ) {
+      if (!titre || !slug || !contenu) {
         if (req.file) {
           supprimerImage(
             `/uploads/${req.file.filename}`
@@ -783,107 +715,85 @@ app.post(
 
         return res.status(400).json({
           message:
-            "Titre, slug et contenu sont obligatoires",
+            "Titre, slug et contenu obligatoires.",
         });
       }
 
       if (!req.file) {
         return res.status(400).json({
           message:
-            "Une image est obligatoire",
+            "Une image est obligatoire.",
         });
       }
 
       const imageUrl =
         `/uploads/${req.file.filename}`;
 
-      const statutFinal =
-        statut || "brouillon";
-
       const result = await pool.query(
-        `INSERT INTO article
-          (
-            titre,
-            slug,
-            contenu,
-            image,
-            statut,
-            id_utilisateur
-          )
-         VALUES
-          ($1, $2, $3, $4, $5, $6)
-         RETURNING
-          id_article,
+        `
+        INSERT INTO article
+        (
           titre,
           slug,
           contenu,
-          image AS image_url,
+          image,
           statut,
           created_at,
-          updated_at,
-          id_utilisateur`,
+          id_utilisateur
+        )
+        VALUES
+        ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $6)
+        RETURNING *
+        `,
         [
-          titre.trim(),
-          slug.trim(),
+          titre,
+          slug,
           contenu,
           imageUrl,
-          statutFinal,
+          statut || "publie",
           req.user.id_utilisateur,
         ]
       );
 
       res.status(201).json({
         success: true,
+        message: "Article ajouté.",
         article: result.rows[0],
       });
     } catch (error) {
+      console.error(
+        "Erreur ajout article :",
+        error
+      );
+
       if (req.file) {
         supprimerImage(
           `/uploads/${req.file.filename}`
         );
       }
 
-      console.error(
-        "❌ POST article:",
-        error
-      );
-
-      if (
-        error.code === "23505"
-      ) {
-        return res.status(409).json({
-          message:
-            "Ce slug existe déjà",
-        });
-      }
-
       res.status(500).json({
         message:
-          "Erreur création article",
-        error: error.message,
+          error.message ||
+          "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// ARTICLE - MODIFIER
+// MODIFICATION ARTICLE
 // ======================================================
 
 app.put(
   "/api/articles/:id",
   verifierToken,
-  verifierRedacteur,
+  verifierEquipeEditoriale,
   upload.single("image"),
-  async (req, res) => {
-    const id = Number(req.params.id);
 
+  async (req, res) => {
     try {
-      if (isNaN(id)) {
-        return res.status(400).json({
-          message: "ID article invalide",
-        });
-      }
+      const id = req.params.id;
 
       const autorise =
         await verifierProprietaire(
@@ -894,7 +804,15 @@ app.put(
           res
         );
 
-      if (!autorise) return;
+      if (!autorise) {
+        if (req.file) {
+          supprimerImage(
+            `/uploads/${req.file.filename}`
+          );
+        }
+
+        return;
+      }
 
       const {
         titre,
@@ -903,19 +821,16 @@ app.put(
         statut,
       } = req.body;
 
-      const oldResult =
-        await pool.query(
-          `SELECT
-            id_article,
-            image
-           FROM article
-           WHERE id_article = $1`,
-          [id]
-        );
+      const oldResult = await pool.query(
+        `
+        SELECT image
+        FROM article
+        WHERE id_article = $1
+        `,
+        [id]
+      );
 
-      if (
-        oldResult.rows.length === 0
-      ) {
+      if (oldResult.rows.length === 0) {
         if (req.file) {
           supprimerImage(
             `/uploads/${req.file.filename}`
@@ -924,105 +839,85 @@ app.put(
 
         return res.status(404).json({
           message:
-            "Article introuvable",
+            "Article introuvable.",
         });
       }
 
       const oldImage =
         oldResult.rows[0].image;
 
-      const newImage = req.file
-        ? `/uploads/${req.file.filename}`
-        : oldImage;
+      let imageUrl = oldImage;
+
+      if (req.file) {
+        imageUrl =
+          `/uploads/${req.file.filename}`;
+      }
 
       const result = await pool.query(
-        `UPDATE article
-         SET
-           titre = COALESCE($1, titre),
-           slug = COALESCE($2, slug),
-           contenu = COALESCE($3, contenu),
-           image = $4,
-           statut = COALESCE($5, statut),
-           updated_at = CURRENT_TIMESTAMP
-         WHERE id_article = $6
-         RETURNING
-           id_article,
-           titre,
-           slug,
-           contenu,
-           image AS image_url,
-           statut,
-           created_at,
-           updated_at,
-           id_utilisateur`,
+        `
+        UPDATE article
+        SET
+          titre = COALESCE($1, titre),
+          slug = COALESCE($2, slug),
+          contenu = COALESCE($3, contenu),
+          image = $4,
+          statut = COALESCE($5, statut),
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id_article = $6
+        RETURNING *
+        `,
         [
-          titre || null,
-          slug || null,
-          contenu || null,
-          newImage,
-          statut || null,
+          titre,
+          slug,
+          contenu,
+          imageUrl,
+          statut,
           id,
         ]
       );
 
-      if (
-        req.file &&
-        oldImage &&
-        oldImage !== newImage
-      ) {
+      if (req.file && oldImage) {
         supprimerImage(oldImage);
       }
 
       res.json({
         success: true,
+        message: "Article modifié.",
         article: result.rows[0],
       });
     } catch (error) {
+      console.error(
+        "Erreur modification article :",
+        error
+      );
+
       if (req.file) {
         supprimerImage(
           `/uploads/${req.file.filename}`
         );
       }
 
-      console.error(
-        "❌ PUT article:",
-        error
-      );
-
-      if (
-        error.code === "23505"
-      ) {
-        return res.status(409).json({
-          message:
-            "Ce slug existe déjà",
-        });
-      }
-
       res.status(500).json({
         message:
-          "Erreur modification article",
+          error.message ||
+          "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// ARTICLE - SUPPRIMER
+// SUPPRESSION ARTICLE
 // ======================================================
 
 app.delete(
   "/api/articles/:id",
   verifierToken,
-  verifierRedacteur,
-  async (req, res) => {
-    const id = Number(req.params.id);
+  verifierEquipeEditoriale,
 
+  async (req, res) => {
     try {
-      if (isNaN(id)) {
-        return res.status(400).json({
-          message: "ID invalide",
-        });
-      }
+      const id = req.params.id;
 
       const autorise =
         await verifierProprietaire(
@@ -1036,47 +931,46 @@ app.delete(
       if (!autorise) return;
 
       const result = await pool.query(
-        `DELETE FROM article
-         WHERE id_article = $1
-         RETURNING
-           image AS image_url`,
+        `
+        DELETE FROM article
+        WHERE id_article = $1
+        RETURNING image
+        `,
         [id]
       );
 
-      if (
-        result.rows.length === 0
-      ) {
+      if (result.rows.length === 0) {
         return res.status(404).json({
           message:
-            "Article introuvable",
+            "Article introuvable.",
         });
       }
 
       supprimerImage(
-        result.rows[0].image_url
+        result.rows[0].image
       );
 
       res.json({
         success: true,
         message:
-          "Article supprimé avec succès",
+          "Article supprimé.",
       });
     } catch (error) {
       console.error(
-        "❌ DELETE article:",
+        "Erreur suppression article :",
         error
       );
 
       res.status(500).json({
         message:
-          "Erreur suppression article",
+          "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// PHOTOS - PUBLIC
+// PHOTOS — PUBLIC
 // ======================================================
 
 app.get("/api/photos", async (req, res) => {
@@ -1091,139 +985,151 @@ app.get("/api/photos", async (req, res) => {
         p.created_at,
         p.id_utilisateur,
         u.nom AS auteur
-
       FROM photo p
-
       LEFT JOIN utilisateur u
-        ON u.id_utilisateur = p.id_utilisateur
-
+        ON p.id_utilisateur =
+           u.id_utilisateur
       WHERE p.statut = 'publie'
-
-      ORDER BY p.created_at DESC
+      ORDER BY
+        p.created_at DESC,
+        p.id_photo DESC
     `);
 
     res.json(result.rows);
   } catch (error) {
     console.error(
-      "❌ GET photos:",
+      "Erreur récupération photos :",
       error
     );
 
     res.status(500).json({
       message:
-        "Erreur récupération photos",
+        "Erreur serveur.",
     });
   }
 });
 
 // ======================================================
-// PUBLICATIONS PHOTOS GROUPÉES
-// ======================================================
-
-app.get(
-  "/api/photo-publications",
-  async (req, res) => {
-    try {
-      const result = await pool.query(`
-        SELECT
-          MIN(p.id_photo) AS id_publication,
-          p.titre,
-          p.description,
-          p.statut,
-          p.created_at,
-          p.id_utilisateur,
-          u.nom AS auteur,
-
-          JSON_AGG(
-            JSON_BUILD_OBJECT(
-              'id_photo', p.id_photo,
-              'image_url', p.image_url
-            )
-            ORDER BY p.id_photo ASC
-          ) AS photos,
-
-          COUNT(p.id_photo)::int AS nombre_photos
-
-        FROM photo p
-
-        LEFT JOIN utilisateur u
-          ON u.id_utilisateur = p.id_utilisateur
-
-        WHERE p.statut = 'publie'
-
-        GROUP BY
-          p.titre,
-          p.description,
-          p.statut,
-          p.created_at,
-          p.id_utilisateur,
-          u.nom
-
-        ORDER BY p.created_at DESC
-      `);
-
-      res.json(result.rows);
-    } catch (error) {
-      console.error(
-        "❌ GET photo publications:",
-        error
-      );
-
-      res.status(500).json({
-        message:
-          "Erreur récupération publications photos",
-      });
-    }
-  }
-);
-
-// ======================================================
-// PHOTOS - ADMIN / ÉQUIPE
+// PHOTOS — ADMIN
 // ======================================================
 
 app.get(
   "/api/photos/admin",
   verifierToken,
-  verifierEquipeEditoriale,
+  verifierRedacteur,
+
   async (req, res) => {
     try {
-      const result = await pool.query(`
-        SELECT
-          p.*,
-          u.nom AS auteur
-
-        FROM photo p
-
-        LEFT JOIN utilisateur u
-          ON u.id_utilisateur = p.id_utilisateur
-
-        ORDER BY p.created_at DESC
-      `);
+      const result =
+        await pool.query(`
+          SELECT
+            p.id_photo,
+            p.titre,
+            p.description,
+            p.image_url,
+            p.statut,
+            p.created_at,
+            p.id_utilisateur,
+            u.nom AS auteur
+          FROM photo p
+          LEFT JOIN utilisateur u
+            ON p.id_utilisateur =
+               u.id_utilisateur
+          ORDER BY
+            p.created_at DESC,
+            p.id_photo DESC
+        `);
 
       res.json(result.rows);
     } catch (error) {
       console.error(
-        "❌ GET admin photos:",
+        "Erreur photos admin :",
         error
       );
 
       res.status(500).json({
         message:
-          "Erreur récupération photos",
+          "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// PHOTOS - AJOUTER PLUSIEURS PHOTOS
+// PHOTO PUBLICATIONS — GROUPÉES
+// ======================================================
+
+app.get(
+  "/api/photo-publications",
+
+  async (req, res) => {
+    try {
+      const result =
+        await pool.query(`
+          SELECT
+            MIN(p.id_photo) AS id_publication,
+            p.titre,
+            p.description,
+            p.statut,
+            p.created_at,
+            p.id_utilisateur,
+            u.nom AS auteur,
+
+            JSON_AGG(
+              JSON_BUILD_OBJECT(
+                'id_photo', p.id_photo,
+                'image_url', p.image_url
+              )
+              ORDER BY p.id_photo
+            ) AS photos,
+
+            COUNT(p.id_photo)::int
+              AS nombre_photos
+
+          FROM photo p
+
+          LEFT JOIN utilisateur u
+            ON p.id_utilisateur =
+               u.id_utilisateur
+
+          WHERE p.statut = 'publie'
+
+          GROUP BY
+            p.titre,
+            p.description,
+            p.statut,
+            p.created_at,
+            p.id_utilisateur,
+            u.nom
+
+          ORDER BY p.created_at DESC
+        `);
+
+      res.json(result.rows);
+    } catch (error) {
+      console.error(
+        "Erreur photo publications :",
+        error
+      );
+
+      res.status(500).json({
+        message:
+          "Erreur serveur.",
+      });
+    }
+  }
+);
+
+// ======================================================
+// AJOUT PHOTOS
 // ======================================================
 
 app.post(
   "/api/photos",
   verifierToken,
-  verifierRedacteur,
+  verifierEquipeEditoriale,
   upload.array("photos", 20),
+
   async (req, res) => {
     try {
       const {
@@ -1243,7 +1149,7 @@ app.post(
 
         return res.status(400).json({
           message:
-            "Le titre est obligatoire",
+            "Titre obligatoire.",
         });
       }
 
@@ -1253,80 +1159,63 @@ app.post(
       ) {
         return res.status(400).json({
           message:
-            "Au moins une photo est obligatoire",
+            "Au moins une photo est obligatoire.",
         });
       }
 
-      const statutFinal =
-        statut || "brouillon";
-
-      // Toutes les photos de la même publication
-      // reçoivent exactement le même created_at.
       const publicationDate =
         new Date();
 
-      const client =
-        await pool.connect();
+      const insertedPhotos = [];
 
-      try {
-        await client.query(
-          "BEGIN"
-        );
+      for (const file of req.files) {
+        const imageUrl =
+          `/uploads/${file.filename}`;
 
-        const insertedPhotos = [];
-
-        for (const file of req.files) {
-          const imageUrl =
-            `/uploads/${file.filename}`;
-
-          const result =
-            await client.query(
-              `INSERT INTO photo
-                (
-                  titre,
-                  description,
-                  image_url,
-                  statut,
-                  created_at,
-                  id_utilisateur
-                )
-               VALUES
-                ($1, $2, $3, $4, $5, $6)
-               RETURNING *`,
-              [
-                titre.trim(),
-                description || null,
-                imageUrl,
-                statutFinal,
-                publicationDate,
-                req.user.id_utilisateur,
-              ]
-            );
-
-          insertedPhotos.push(
-            result.rows[0]
+        const result =
+          await pool.query(
+            `
+            INSERT INTO photo
+            (
+              titre,
+              description,
+              image_url,
+              statut,
+              created_at,
+              id_utilisateur
+            )
+            VALUES
+            ($1, $2, $3, $4, $5, $6)
+            RETURNING *
+            `,
+            [
+              titre,
+              description || null,
+              imageUrl,
+              statut || "publie",
+              publicationDate,
+              req.user.id_utilisateur,
+            ]
           );
-        }
 
-        await client.query(
-          "COMMIT"
+        insertedPhotos.push(
+          result.rows[0]
         );
-
-        res.status(201).json({
-          success: true,
-          message: `${insertedPhotos.length} photo(s) ajoutée(s)`,
-          photos: insertedPhotos,
-        });
-      } catch (error) {
-        await client.query(
-          "ROLLBACK"
-        );
-
-        throw error;
-      } finally {
-        client.release();
       }
+
+      res.status(201).json({
+        success: true,
+        message:
+          "Publication photo ajoutée.",
+        photos:
+          insertedPhotos,
+      });
     } catch (error) {
+      console.error(
+        "Erreur ajout photos :",
+        error
+      );
+
       if (req.files) {
         req.files.forEach((file) => {
           supprimerImage(
@@ -1335,37 +1224,27 @@ app.post(
         });
       }
 
-      console.error(
-        "❌ POST photos:",
-        error
-      );
-
       res.status(500).json({
         message:
-          "Erreur ajout photos",
-        error: error.message,
+          error.message ||
+          "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// PHOTO - MODIFIER
+// MODIFICATION PHOTO
 // ======================================================
 
 app.put(
   "/api/photos/:id",
   verifierToken,
-  verifierRedacteur,
-  async (req, res) => {
-    const id = Number(req.params.id);
+  verifierAdminEditeur,
 
+  async (req, res) => {
     try {
-      if (isNaN(id)) {
-        return res.status(400).json({
-          message: "ID photo invalide",
-        });
-      }
+      const id = req.params.id;
 
       const autorise =
         await verifierProprietaire(
@@ -1384,68 +1263,65 @@ app.put(
         statut,
       } = req.body;
 
-      const result = await pool.query(
-        `UPDATE photo
-         SET
-           titre = COALESCE($1, titre),
-           description = COALESCE($2, description),
-           statut = COALESCE($3, statut)
-         WHERE id_photo = $4
-         RETURNING *`,
-        [
-          titre || null,
-          description !== undefined
-            ? description
-            : null,
-          statut || null,
-          id,
-        ]
-      );
+      const result =
+        await pool.query(
+          `
+          UPDATE photo
+          SET
+            titre = COALESCE($1, titre),
+            description = COALESCE($2, description),
+            statut = COALESCE($3, statut)
+          WHERE id_photo = $4
+          RETURNING *
+          `,
+          [
+            titre,
+            description,
+            statut,
+            id,
+          ]
+        );
 
-      if (
-        result.rows.length === 0
-      ) {
+      if (result.rows.length === 0) {
         return res.status(404).json({
           message:
-            "Photo introuvable",
+            "Photo introuvable.",
         });
       }
 
       res.json({
         success: true,
-        photo: result.rows[0],
+        message:
+          "Photo modifiée.",
+        photo:
+          result.rows[0],
       });
     } catch (error) {
       console.error(
-        "❌ PUT photo:",
+        "Erreur modification photo :",
         error
       );
 
       res.status(500).json({
         message:
-          "Erreur modification photo",
+          "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// PHOTO - SUPPRIMER
+// SUPPRESSION PHOTO
 // ======================================================
 
 app.delete(
   "/api/photos/:id",
   verifierToken,
-  verifierRedacteur,
-  async (req, res) => {
-    const id = Number(req.params.id);
+  verifierAdminEditeur,
 
+  async (req, res) => {
     try {
-      if (isNaN(id)) {
-        return res.status(400).json({
-          message: "ID photo invalide",
-        });
-      }
+      const id = req.params.id;
 
       const autorise =
         await verifierProprietaire(
@@ -1458,19 +1334,20 @@ app.delete(
 
       if (!autorise) return;
 
-      const result = await pool.query(
-        `DELETE FROM photo
-         WHERE id_photo = $1
-         RETURNING image_url`,
-        [id]
-      );
+      const result =
+        await pool.query(
+          `
+          DELETE FROM photo
+          WHERE id_photo = $1
+          RETURNING image_url
+          `,
+          [id]
+        );
 
-      if (
-        result.rows.length === 0
-      ) {
+      if (result.rows.length === 0) {
         return res.status(404).json({
           message:
-            "Photo introuvable",
+            "Photo introuvable.",
         });
       }
 
@@ -1481,24 +1358,24 @@ app.delete(
       res.json({
         success: true,
         message:
-          "Photo supprimée avec succès",
+          "Photo supprimée.",
       });
     } catch (error) {
       console.error(
-        "❌ DELETE photo:",
+        "Erreur suppression photo :",
         error
       );
 
       res.status(500).json({
         message:
-          "Erreur suppression photo",
+          "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// VIDÉOS - PUBLIC
+// VIDÉOS — PUBLIC
 // ======================================================
 
 app.get("/api/videos", async (req, res) => {
@@ -1514,71 +1391,164 @@ app.get("/api/videos", async (req, res) => {
         v.created_at,
         v.id_utilisateur,
         u.nom AS auteur
-
       FROM video v
-
       LEFT JOIN utilisateur u
-        ON u.id_utilisateur = v.id_utilisateur
-
+        ON v.id_utilisateur =
+           u.id_utilisateur
       WHERE v.statut = 'publie'
-
       ORDER BY v.created_at DESC
     `);
 
     res.json(result.rows);
   } catch (error) {
     console.error(
-      "❌ GET videos:",
+      "Erreur récupération vidéos :",
       error
     );
 
     res.status(500).json({
       message:
-        "Erreur récupération vidéos",
+        "Erreur serveur.",
     });
   }
 });
 
 // ======================================================
-// VIDÉOS - ADMIN
+// VIDÉOS — ADMIN
 // ======================================================
 
 app.get(
   "/api/videos/admin",
   verifierToken,
-  verifierEquipeEditoriale,
+  verifierEditeur,
+
   async (req, res) => {
     try {
-      const result = await pool.query(`
-        SELECT
-          v.*,
-          u.nom AS auteur
-
-        FROM video v
-
-        LEFT JOIN utilisateur u
-          ON u.id_utilisateur = v.id_utilisateur
-
-        ORDER BY v.created_at DESC
-      `);
+      const result =
+        await pool.query(`
+          SELECT
+            v.id_video,
+            v.titre,
+            v.description,
+            v.thumbnail,
+            v.video_url,
+            v.statut,
+            v.created_at,
+            v.id_utilisateur,
+            u.nom AS auteur
+          FROM video v
+          LEFT JOIN utilisateur u
+            ON v.id_utilisateur =
+               u.id_utilisateur
+          ORDER BY v.created_at DESC
+        `);
 
       res.json(result.rows);
     } catch (error) {
       console.error(
-        "❌ GET admin videos:",
+        "Erreur récupération vidéos admin :",
         error
       );
 
       res.status(500).json({
         message:
-          "Erreur récupération vidéos",
+          "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// VIDÉOS - AJOUTER
+// FFmpeg — THUMBNAIL VIDÉO
+// ======================================================
+
+function generateVideoThumbnail(
+  videoPath,
+  thumbnailPath,
+  time = "00:00:01"
+) {
+  return new Promise(
+    (resolve, reject) => {
+      try {
+        if (!fs.existsSync(videoPath)) {
+          return reject(
+            new Error(
+              "Fichier vidéo introuvable."
+            )
+          );
+        }
+
+        if (!fs.existsSync(ffmpegPath)) {
+          return reject(
+            new Error(
+              `FFmpeg introuvable : ${ffmpegPath}`
+            )
+          );
+        }
+
+        const args = [
+          "-ss",
+          time,
+          "-i",
+          videoPath,
+          "-frames:v",
+          "1",
+          "-vf",
+          "scale=1280:-2",
+          "-y",
+          thumbnailPath,
+        ];
+
+        const ffmpeg = spawn(
+          ffmpegPath,
+          args
+        );
+
+        let stderr = "";
+
+        ffmpeg.stderr.on(
+          "data",
+          (data) => {
+            stderr +=
+              data.toString();
+          }
+        );
+
+        ffmpeg.on(
+          "error",
+          (error) => {
+            reject(error);
+          }
+        );
+
+        ffmpeg.on(
+          "close",
+          (code) => {
+            if (
+              code === 0 &&
+              fs.existsSync(
+                thumbnailPath
+              )
+            ) {
+              resolve(thumbnailPath);
+            } else {
+              reject(
+                new Error(
+                  `FFmpeg a échoué (${code}) : ${stderr}`
+                )
+              );
+            }
+          }
+        );
+      } catch (error) {
+        reject(error);
+      }
+    }
+  );
+}
+
+// ======================================================
+// AJOUT VIDÉO
 // ======================================================
 
 app.post(
@@ -1586,7 +1556,10 @@ app.post(
   verifierToken,
   verifierRedacteur,
   uploadVideo.single("video"),
+
   async (req, res) => {
+    let thumbnailPath = null;
+
     try {
       const {
         titre,
@@ -1596,135 +1569,119 @@ app.post(
 
       if (!titre) {
         if (req.file) {
-          supprimerVideo(
-            `/uploads/videos/${req.file.filename}`
+          supprimerFichier(
+            req.file.path
           );
         }
 
         return res.status(400).json({
           message:
-            "Le titre est obligatoire",
+            "Titre obligatoire.",
         });
       }
 
       if (!req.file) {
         return res.status(400).json({
           message:
-            "Une vidéo est obligatoire",
+            "Une vidéo est obligatoire.",
         });
       }
 
       const videoUrl =
         `/uploads/videos/${req.file.filename}`;
 
-      const thumbnailFileName =
-        `${Date.now()}-thumbnail-${path.basename(
-          req.file.filename,
-          path.extname(req.file.filename)
-        )}.jpg`;
+      const thumbnailFilename =
+        `${path.parse(req.file.filename).name}-thumbnail.jpg`;
 
-      const thumbnailPath =
-        path.join(
-          videosPath,
-          thumbnailFileName
-        );
-
-      let thumbnailUrl = null;
+      thumbnailPath = path.join(
+        videosPath,
+        thumbnailFilename
+      );
 
       try {
         await generateVideoThumbnail(
           req.file.path,
           thumbnailPath,
-          1
+          "00:00:01"
         );
-
-        thumbnailUrl =
-          `/uploads/videos/${thumbnailFileName}`;
-
-        console.log(
-          "✅ Thumbnail générée:",
-          thumbnailUrl
-        );
-      } catch (thumbnailError) {
+      } catch (firstError) {
         console.warn(
-          "⚠️ Thumbnail à 1 seconde échouée. Tentative à 0 seconde..."
+          "Thumbnail à 1 seconde échoué, tentative à 0 seconde..."
         );
 
-        try {
-          await generateVideoThumbnail(
-            req.file.path,
-            thumbnailPath,
-            0
-          );
-
-          thumbnailUrl =
-            `/uploads/videos/${thumbnailFileName}`;
-
-          console.log(
-            "✅ Thumbnail générée à 0 seconde"
-          );
-        } catch (secondError) {
-          console.error(
-            "❌ Impossible de générer thumbnail:",
-            secondError.message
-          );
-
-          thumbnailUrl = null;
-        }
+        await generateVideoThumbnail(
+          req.file.path,
+          thumbnailPath,
+          "00:00:00"
+        );
       }
 
-      const result = await pool.query(
-        `INSERT INTO video
+      const thumbnailUrl =
+        `/uploads/videos/${thumbnailFilename}`;
+
+      const result =
+        await pool.query(
+          `
+          INSERT INTO video
           (
             titre,
             description,
             thumbnail,
             video_url,
             statut,
+            created_at,
             id_utilisateur
           )
-         VALUES
-          ($1, $2, $3, $4, $5, $6)
-         RETURNING *`,
-        [
-          titre.trim(),
-          description || null,
-          thumbnailUrl,
-          videoUrl,
-          statut || "brouillon",
-          req.user.id_utilisateur,
-        ]
-      );
+          VALUES
+          ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, $6)
+          RETURNING *
+          `,
+          [
+            titre,
+            description || null,
+            thumbnailUrl,
+            videoUrl,
+            statut || "publie",
+            req.user.id_utilisateur,
+          ]
+        );
 
       res.status(201).json({
         success: true,
         message:
-          "Vidéo ajoutée avec succès",
-        video: result.rows[0],
+          "Vidéo ajoutée.",
+        video:
+          result.rows[0],
       });
     } catch (error) {
-      if (req.file) {
-        supprimerVideo(
-          `/uploads/videos/${req.file.filename}`
-        );
-      }
-
       console.error(
-        "❌ POST video:",
+        "Erreur ajout vidéo :",
         error
       );
 
+      if (req.file) {
+        supprimerFichier(
+          req.file.path
+        );
+      }
+
+      if (thumbnailPath) {
+        supprimerFichier(
+          thumbnailPath
+        );
+      }
+
       res.status(500).json({
         message:
-          "Erreur ajout vidéo",
-        error: error.message,
+          error.message ||
+          "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// VIDÉO - MODIFIER
+// MODIFICATION VIDÉO
 // ======================================================
 
 app.put(
@@ -1732,17 +1689,12 @@ app.put(
   verifierToken,
   verifierRedacteur,
   uploadVideo.single("video"),
-  async (req, res) => {
-    const id = Number(req.params.id);
 
+  async (req, res) => {
     let newThumbnailPath = null;
 
     try {
-      if (isNaN(id)) {
-        return res.status(400).json({
-          message: "ID vidéo invalide",
-        });
-      }
+      const id = req.params.id;
 
       const autorise =
         await verifierProprietaire(
@@ -1753,30 +1705,44 @@ app.put(
           res
         );
 
-      if (!autorise) return;
+      if (!autorise) {
+        if (req.file) {
+          supprimerFichier(
+            req.file.path
+          );
+        }
+
+        return;
+      }
+
+      const {
+        titre,
+        description,
+        statut,
+      } = req.body;
 
       const oldResult =
         await pool.query(
-          `SELECT
+          `
+          SELECT
             video_url,
             thumbnail
-           FROM video
-           WHERE id_video = $1`,
+          FROM video
+          WHERE id_video = $1
+          `,
           [id]
         );
 
-      if (
-        oldResult.rows.length === 0
-      ) {
+      if (oldResult.rows.length === 0) {
         if (req.file) {
-          supprimerVideo(
-            `/uploads/videos/${req.file.filename}`
+          supprimerFichier(
+            req.file.path
           );
         }
 
         return res.status(404).json({
           message:
-            "Vidéo introuvable",
+            "Vidéo introuvable.",
         });
       }
 
@@ -1786,156 +1752,116 @@ app.put(
       const oldThumbnail =
         oldResult.rows[0].thumbnail;
 
-      let newVideo = oldVideo;
-      let newThumbnail = oldThumbnail;
+      let videoUrl =
+        oldVideo;
+
+      let thumbnailUrl =
+        oldThumbnail;
 
       if (req.file) {
-        newVideo =
+        videoUrl =
           `/uploads/videos/${req.file.filename}`;
 
-        const thumbnailFileName =
-          `${Date.now()}-thumbnail-${path.basename(
-            req.file.filename,
-            path.extname(req.file.filename)
-          )}.jpg`;
+        const thumbnailFilename =
+          `${path.parse(req.file.filename).name}-thumbnail.jpg`;
 
-        newThumbnailPath =
-          path.join(
-            videosPath,
-            thumbnailFileName
-          );
+        newThumbnailPath = path.join(
+          videosPath,
+          thumbnailFilename
+        );
 
         try {
           await generateVideoThumbnail(
             req.file.path,
             newThumbnailPath,
-            1
+            "00:00:01"
           );
-        } catch (error) {
-          try {
-            await generateVideoThumbnail(
-              req.file.path,
-              newThumbnailPath,
-              0
-            );
-          } catch (secondError) {
-            console.warn(
-              "⚠️ Thumbnail non générée:",
-              secondError.message
-            );
-
-            newThumbnailPath = null;
-          }
+        } catch (firstError) {
+          await generateVideoThumbnail(
+            req.file.path,
+            newThumbnailPath,
+            "00:00:00"
+          );
         }
 
-        if (newThumbnailPath) {
-          newThumbnail =
-            `/uploads/videos/${path.basename(
-              newThumbnailPath
-            )}`;
-        } else {
-          newThumbnail = null;
-        }
+        thumbnailUrl =
+          `/uploads/videos/${thumbnailFilename}`;
       }
 
-      const {
-        titre,
-        description,
-        statut,
-      } = req.body;
+      const result =
+        await pool.query(
+          `
+          UPDATE video
+          SET
+            titre = COALESCE($1, titre),
+            description = COALESCE($2, description),
+            thumbnail = $3,
+            video_url = $4,
+            statut = COALESCE($5, statut)
+          WHERE id_video = $6
+          RETURNING *
+          `,
+          [
+            titre,
+            description,
+            thumbnailUrl,
+            videoUrl,
+            statut,
+            id,
+          ]
+        );
 
-      const result = await pool.query(
-        `UPDATE video
-         SET
-           titre = COALESCE($1, titre),
-           description = COALESCE($2, description),
-           thumbnail = $3,
-           video_url = $4,
-           statut = COALESCE($5, statut)
-         WHERE id_video = $6
-         RETURNING *`,
-        [
-          titre || null,
-          description !== undefined
-            ? description
-            : null,
-          newThumbnail,
-          newVideo,
-          statut || null,
-          id,
-        ]
-      );
-
-      if (
-        req.file &&
-        oldVideo &&
-        oldVideo !== newVideo
-      ) {
+      if (req.file) {
         supprimerVideo(oldVideo);
-      }
-
-      if (
-        req.file &&
-        oldThumbnail &&
-        oldThumbnail !== newThumbnail
-      ) {
         supprimerVideo(oldThumbnail);
       }
 
       res.json({
         success: true,
         message:
-          "Vidéo modifiée avec succès",
-        video: result.rows[0],
+          "Vidéo modifiée.",
+        video:
+          result.rows[0],
       });
     } catch (error) {
-      if (req.file) {
-        supprimerVideo(
-          `/uploads/videos/${req.file.filename}`
-        );
-      }
-
-      if (
-        newThumbnailPath &&
-        fs.existsSync(newThumbnailPath)
-      ) {
-        try {
-          fs.unlinkSync(
-            newThumbnailPath
-          );
-        } catch {}
-      }
-
       console.error(
-        "❌ PUT video:",
+        "Erreur modification vidéo :",
         error
       );
 
+      if (req.file) {
+        supprimerFichier(
+          req.file.path
+        );
+      }
+
+      if (newThumbnailPath) {
+        supprimerFichier(
+          newThumbnailPath
+        );
+      }
+
       res.status(500).json({
         message:
-          "Erreur modification vidéo",
+          error.message ||
+          "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// VIDÉO - SUPPRIMER
+// SUPPRESSION VIDÉO
 // ======================================================
 
 app.delete(
   "/api/videos/:id",
   verifierToken,
   verifierRedacteur,
-  async (req, res) => {
-    const id = Number(req.params.id);
 
+  async (req, res) => {
     try {
-      if (isNaN(id)) {
-        return res.status(400).json({
-          message: "ID vidéo invalide",
-        });
-      }
+      const id = req.params.id;
 
       const autorise =
         await verifierProprietaire(
@@ -1948,21 +1874,20 @@ app.delete(
 
       if (!autorise) return;
 
-      const result = await pool.query(
-        `DELETE FROM video
-         WHERE id_video = $1
-         RETURNING
-           video_url,
-           thumbnail`,
-        [id]
-      );
+      const result =
+        await pool.query(
+          `
+          DELETE FROM video
+          WHERE id_video = $1
+          RETURNING video_url, thumbnail
+          `,
+          [id]
+        );
 
-      if (
-        result.rows.length === 0
-      ) {
+      if (result.rows.length === 0) {
         return res.status(404).json({
           message:
-            "Vidéo introuvable",
+            "Vidéo introuvable.",
         });
       }
 
@@ -1977,55 +1902,82 @@ app.delete(
       res.json({
         success: true,
         message:
-          "Vidéo supprimée avec succès",
+          "Vidéo supprimée.",
       });
     } catch (error) {
       console.error(
-        "❌ DELETE video:",
+        "Erreur suppression vidéo :",
         error
       );
 
       res.status(500).json({
         message:
-          "Erreur suppression vidéo",
+          "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// LIVE - TYPES DE STREAM
+// LIVE
 // ======================================================
 
 function detectStreamType(url) {
-  if (!url) {
-    return "youtube";
-  }
+  if (!url) return "unknown";
 
-  const value =
-    url.toLowerCase();
+  const lower = url.toLowerCase();
 
   if (
-    value.includes("youtube.com") ||
-    value.includes("youtu.be")
-  ) {
-    return "youtube";
-  }
-
-  if (
-    value.includes(".m3u8")
+    lower.includes(".m3u8") ||
+    lower.includes("m3u8")
   ) {
     return "hls";
   }
 
-  if (
-    value.includes(".mp4") ||
-    value.includes(".webm")
-  ) {
-    return "video";
+  if (lower.includes(".mp4")) {
+    return "mp4";
   }
 
-  return "youtube";
+  if (lower.includes(".webm")) {
+    return "webm";
+  }
+
+  if (
+    lower.includes(".mov") ||
+    lower.includes("quicktime")
+  ) {
+    return "mov";
+  }
+
+  if (
+    lower.includes("youtube.com") ||
+    lower.includes("youtu.be")
+  ) {
+    return "youtube";
+  }
+
+  if (
+    lower.includes("facebook.com") ||
+    lower.includes("fb.watch")
+  ) {
+    return "facebook";
+  }
+
+  if (
+    lower.includes("tiktok.com") ||
+    lower.includes("vm.tiktok.com")
+  ) {
+    return "tiktok";
+  }
+
+  if (
+    lower.includes("zoom.us") ||
+    lower.includes("zoom.com")
+  ) {
+    return "zoom";
+  }
+
+  return "unknown";
 }
 
 function isValidStreamUrl(url) {
@@ -2043,115 +1995,116 @@ function isValidStreamUrl(url) {
 }
 
 // ======================================================
-// LIVE - PUBLIC
+// LIVE — PUBLIC
 // ======================================================
 
 app.get("/api/live", async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT
-        l.id_live,
-        l.titre,
-        l.description,
-        l.stream_url,
-        l.statut,
-        l.created_at,
-        l.updated_at,
-        l.id_utilisateur,
-        l.source_type
+    const result =
+      await pool.query(`
+        SELECT *
+        FROM live
+        WHERE statut = 'live'
+        ORDER BY id_live DESC
+        LIMIT 1
+      `);
 
-      FROM live l
-
-      ORDER BY
-        CASE
-          WHEN l.statut = 'live'
-          THEN 0
-          ELSE 1
-        END,
-        l.created_at DESC
-
-      LIMIT 1
-    `);
-
-    if (
-      result.rows.length === 0
-    ) {
-      return res.json(null);
+    if (result.rows.length === 0) {
+      return res.json({
+        is_live: false,
+        live: null,
+      });
     }
 
-    res.json(result.rows[0]);
+    const live =
+      result.rows[0];
+
+    res.json({
+      is_live: true,
+
+      live: {
+        ...live,
+
+        stream_type:
+          detectStreamType(
+            live.stream_url
+          ),
+      },
+    });
   } catch (error) {
     console.error(
-      "❌ GET live:",
+      "Erreur live public :",
       error
     );
 
     res.status(500).json({
       message:
-        "Erreur récupération live",
+        "Erreur serveur.",
     });
   }
 });
 
 // ======================================================
-// LIVE - ADMIN
+// LIVE — ADMIN
 // ======================================================
 
 app.get(
   "/api/live/all",
   verifierToken,
-  verifierAdminEditeur,
+  verifierEditeur,
+
   async (req, res) => {
     try {
-      const result = await pool.query(`
-        SELECT
-          l.id_live,
-          l.titre,
-          l.description,
-          l.stream_url,
-          l.statut,
-          l.created_at,
-          l.updated_at,
-          l.id_utilisateur,
-          l.source_type,
+      const result =
+        await pool.query(`
+          SELECT
+            l.*,
 
-          (
-            SELECT COUNT(*)
-            FROM live_viewers lv
-            WHERE lv.id_live = l.id_live
-              AND lv.last_seen >
-                  CURRENT_TIMESTAMP - INTERVAL '2 minutes'
-          )::int AS viewers
+            COALESCE(
+              (
+                SELECT COUNT(*)
+                FROM live_viewers lv
+                WHERE
+                  lv.id_live =
+                    l.id_live
+                  AND
+                  lv.last_seen >
+                    CURRENT_TIMESTAMP -
+                    INTERVAL '90 seconds'
+              ),
+              0
+            )::int AS viewer_count
 
-        FROM live l
+          FROM live l
 
-        ORDER BY
-          l.created_at DESC
-      `);
+          ORDER BY
+            l.id_live DESC
+        `);
 
       res.json(result.rows);
     } catch (error) {
       console.error(
-        "❌ GET all live:",
+        "Erreur live admin :",
         error
       );
 
       res.status(500).json({
         message:
-          "Erreur récupération des lives",
+          "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// LIVE - CRÉER
+// AJOUT LIVE
 // ======================================================
 
 app.post(
   "/api/live",
   verifierToken,
-  verifierAdminEditeur,
+  verifierEditeur,
+
   async (req, res) => {
     const client =
       await pool.connect();
@@ -2159,18 +2112,15 @@ app.post(
     try {
       const {
         titre,
-        description,
         stream_url,
         statut,
+        description,
       } = req.body;
 
-      if (
-        !titre ||
-        !stream_url
-      ) {
+      if (!titre || !stream_url) {
         return res.status(400).json({
           message:
-            "Titre et URL du stream obligatoires",
+            "Titre et URL du live obligatoires.",
         });
       }
 
@@ -2181,57 +2131,64 @@ app.post(
       ) {
         return res.status(400).json({
           message:
-            "URL du stream invalide",
+            "URL du stream invalide.",
         });
       }
 
-      const statutFinal =
+      const finalStatus =
         statut === "live"
           ? "live"
           : "offline";
-
-      const sourceType =
-        detectStreamType(
-          stream_url
-        );
 
       await client.query(
         "BEGIN"
       );
 
-      // Un seul live actif à la fois
       if (
-        statutFinal === "live"
+        finalStatus === "live"
       ) {
         await client.query(`
           UPDATE live
-          SET
-            statut = 'offline',
-            updated_at = CURRENT_TIMESTAMP
+          SET statut = 'offline'
           WHERE statut = 'live'
         `);
       }
 
       const result =
         await client.query(
-          `INSERT INTO live
-            (
-              titre,
-              description,
-              stream_url,
-              source_type,
-              statut,
-              id_utilisateur
-            )
-           VALUES
-            ($1, $2, $3, $4, $5, $6)
-           RETURNING *`,
+          `
+          INSERT INTO live
+          (
+            titre,
+            description,
+            stream_url,
+            source_type,
+            statut,
+            created_at,
+            updated_at,
+            id_utilisateur
+          )
+          VALUES
+          (
+            $1,
+            $2,
+            $3,
+            $4,
+            $5,
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP,
+            $6
+          )
+          RETURNING *
+          `,
           [
-            titre.trim(),
+            titre,
             description || null,
-            stream_url.trim(),
-            sourceType,
-            statutFinal,
+            stream_url,
+            detectStreamType(
+              stream_url
+            ),
+            finalStatus,
             req.user.id_utilisateur,
           ]
         );
@@ -2243,8 +2200,9 @@ app.post(
       res.status(201).json({
         success: true,
         message:
-          "Live créé avec succès",
-        live: result.rows[0],
+          "Live ajouté.",
+        live:
+          result.rows[0],
       });
     } catch (error) {
       await client.query(
@@ -2252,13 +2210,14 @@ app.post(
       );
 
       console.error(
-        "❌ POST live:",
+        "Erreur ajout live :",
         error
       );
 
       res.status(500).json({
         message:
-          "Erreur création live",
+          error.message ||
+          "Erreur serveur.",
       });
     } finally {
       client.release();
@@ -2267,221 +2226,230 @@ app.post(
 );
 
 // ======================================================
-// LIVE - MODIFIER
+// MODIFICATION LIVE
 // ======================================================
 
 app.put(
   "/api/live/:id",
   verifierToken,
-  verifierAdminEditeur,
+  verifierEditeur,
+
   async (req, res) => {
-    const id = Number(req.params.id);
+    const client =
+      await pool.connect();
 
     try {
-      if (isNaN(id)) {
-        return res.status(400).json({
-          message:
-            "ID live invalide",
-        });
-      }
+      const id =
+        req.params.id;
 
       const {
         titre,
-        description,
         stream_url,
         statut,
+        description,
       } = req.body;
 
+      if (!titre || !stream_url) {
+        return res.status(400).json({
+          message:
+            "Titre et URL du live obligatoires.",
+        });
+      }
+
       if (
-        stream_url &&
         !isValidStreamUrl(
           stream_url
         )
       ) {
         return res.status(400).json({
           message:
-            "URL du stream invalide",
+            "URL du stream invalide.",
         });
       }
-
-      const current =
-        await pool.query(
-          `SELECT *
-           FROM live
-           WHERE id_live = $1`,
-          [id]
-        );
-
-      if (
-        current.rows.length === 0
-      ) {
-        return res.status(404).json({
-          message:
-            "Live introuvable",
-        });
-      }
-
-      const currentLive =
-        current.rows[0];
-
-      const finalStreamUrl =
-        stream_url ||
-        currentLive.stream_url;
-
-      const finalSourceType =
-        detectStreamType(
-          finalStreamUrl
-        );
 
       const finalStatus =
         statut === "live"
           ? "live"
-          : statut === "offline"
-          ? "offline"
-          : currentLive.statut;
+          : "offline";
 
-      const client =
-        await pool.connect();
+      await client.query(
+        "BEGIN"
+      );
 
-      try {
+      if (
+        finalStatus === "live"
+      ) {
         await client.query(
-          "BEGIN"
+          `
+          UPDATE live
+          SET statut = 'offline'
+          WHERE
+            id_live <> $1
+            AND statut = 'live'
+          `,
+          [id]
+        );
+      }
+
+      const result =
+        await client.query(
+          `
+          UPDATE live
+          SET
+            titre = $1,
+            description = $2,
+            stream_url = $3,
+            source_type = $4,
+            statut = $5,
+            updated_at = CURRENT_TIMESTAMP
+          WHERE id_live = $6
+          RETURNING *
+          `,
+          [
+            titre,
+            description || null,
+            stream_url,
+            detectStreamType(
+              stream_url
+            ),
+            finalStatus,
+            id,
+          ]
         );
 
-        if (
-          finalStatus === "live"
-        ) {
-          await client.query(
-            `UPDATE live
-             SET
-               statut = 'offline',
-               updated_at = CURRENT_TIMESTAMP
-             WHERE
-               id_live <> $1
-               AND statut = 'live'`,
-            [id]
-          );
-        }
-
-        const result =
-          await client.query(
-            `UPDATE live
-             SET
-               titre = COALESCE($1, titre),
-               description = COALESCE($2, description),
-               stream_url = COALESCE($3, stream_url),
-               source_type = $4,
-               statut = $5,
-               updated_at = CURRENT_TIMESTAMP
-             WHERE id_live = $6
-             RETURNING *`,
-            [
-              titre || null,
-              description !== undefined
-                ? description
-                : null,
-              stream_url || null,
-              finalSourceType,
-              finalStatus,
-              id,
-            ]
-          );
-
-        await client.query(
-          "COMMIT"
-        );
-
-        res.json({
-          success: true,
-          message:
-            "Live modifié avec succès",
-          live: result.rows[0],
-        });
-      } catch (error) {
+      if (
+        result.rows.length === 0
+      ) {
         await client.query(
           "ROLLBACK"
         );
 
-        throw error;
-      } finally {
-        client.release();
+        return res.status(404).json({
+          message:
+            "Live introuvable.",
+        });
       }
+
+      await client.query(
+        "COMMIT"
+      );
+
+      res.json({
+        success: true,
+        message:
+          "Live modifié.",
+        live:
+          result.rows[0],
+      });
     } catch (error) {
+      await client.query(
+        "ROLLBACK"
+      );
+
       console.error(
-        "❌ PUT live:",
+        "Erreur modification live :",
         error
       );
 
       res.status(500).json({
         message:
-          "Erreur modification live",
+          error.message ||
+          "Erreur serveur.",
       });
+    } finally {
+      client.release();
     }
   }
 );
 
 // ======================================================
-// LIVE - SUPPRIMER
+// SUPPRESSION LIVE
 // ======================================================
 
 app.delete(
   "/api/live/:id",
   verifierToken,
-  verifierAdminEditeur,
+  verifierEditeur,
+
   async (req, res) => {
-    const id = Number(req.params.id);
+    const client =
+      await pool.connect();
 
     try {
-      if (isNaN(id)) {
-        return res.status(400).json({
-          message:
-            "ID live invalide",
-        });
-      }
+      const id =
+        req.params.id;
 
-      // live_viewers sera supprimé automatiquement
-      // grâce à ON DELETE CASCADE.
-      const result = await pool.query(
-        `DELETE FROM live
-         WHERE id_live = $1
-         RETURNING id_live`,
+      await client.query(
+        "BEGIN"
+      );
+
+      await client.query(
+        `
+        DELETE FROM live_viewers
+        WHERE id_live = $1
+        `,
         [id]
       );
+
+      const result =
+        await client.query(
+          `
+          DELETE FROM live
+          WHERE id_live = $1
+          RETURNING *
+          `,
+          [id]
+        );
 
       if (
         result.rows.length === 0
       ) {
+        await client.query(
+          "ROLLBACK"
+        );
+
         return res.status(404).json({
           message:
-            "Live introuvable",
+            "Live introuvable.",
         });
       }
+
+      await client.query(
+        "COMMIT"
+      );
 
       res.json({
         success: true,
         message:
-          "Live supprimé avec succès",
+          "Live supprimé.",
       });
     } catch (error) {
+      await client.query(
+        "ROLLBACK"
+      );
+
       console.error(
-        "❌ DELETE live:",
+        "Erreur suppression live :",
         error
       );
 
       res.status(500).json({
         message:
-          "Erreur suppression live",
+          "Erreur serveur.",
       });
+    } finally {
+      client.release();
     }
   }
 );
 
 // ======================================================
-// LIVE - VIEWER
+// LIVE — VIEWER
 // ======================================================
 
 app.post(
   "/api/live/viewer",
+
   async (req, res) => {
     try {
       const {
@@ -2495,25 +2463,29 @@ app.post(
       ) {
         return res.status(400).json({
           message:
-            "session_id et id_live sont obligatoires",
+            "session_id et id_live obligatoires.",
         });
       }
 
-      const result = await pool.query(
-        `INSERT INTO live_viewers
-          (
-            session_id,
-            id_live,
-            last_seen
-          )
-         VALUES
-          ($1, $2, CURRENT_TIMESTAMP)
-         ON CONFLICT (session_id)
-         DO UPDATE SET
-           id_live = EXCLUDED.id_live,
-           last_seen = CURRENT_TIMESTAMP
+      await pool.query(
+        `
+        INSERT INTO live_viewers
+        (
+          session_id,
+          last_seen,
+          id_live
+        )
+        VALUES
+        ($1, CURRENT_TIMESTAMP, $2)
 
-         RETURNING *`,
+        ON CONFLICT (session_id)
+
+        DO UPDATE SET
+          last_seen =
+            CURRENT_TIMESTAMP,
+          id_live =
+            EXCLUDED.id_live
+        `,
         [
           session_id,
           id_live,
@@ -2522,69 +2494,67 @@ app.post(
 
       res.json({
         success: true,
-        viewer: result.rows[0],
       });
     } catch (error) {
       console.error(
-        "❌ POST live viewer:",
+        "Erreur viewer live :",
         error
       );
 
       res.status(500).json({
         message:
-          "Erreur enregistrement viewer",
+          "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// UTILISATEURS - LISTE
+// UTILISATEURS — ADMIN
 // ======================================================
 
 app.get(
   "/api/utilisateurs",
   verifierToken,
   verifierAdmin,
+
   async (req, res) => {
     try {
-      const result = await pool.query(`
-        SELECT
-          id_utilisateur,
-          nom,
-          email,
-          role,
-          created_at
-
-        FROM utilisateur
-
-        ORDER BY
-          created_at DESC
-      `);
+      const result =
+        await pool.query(`
+          SELECT
+            id_utilisateur,
+            nom,
+            email,
+            role
+          FROM utilisateur
+          ORDER BY id_utilisateur ASC
+        `);
 
       res.json(result.rows);
     } catch (error) {
       console.error(
-        "❌ GET utilisateurs:",
+        "Erreur utilisateurs :",
         error
       );
 
       res.status(500).json({
         message:
-          "Erreur récupération utilisateurs",
+          "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// UTILISATEUR - CRÉER
+// AJOUT UTILISATEUR
 // ======================================================
 
 app.post(
   "/api/utilisateurs",
   verifierToken,
   verifierAdmin,
+
   async (req, res) => {
     try {
       const {
@@ -2601,179 +2571,209 @@ app.post(
       ) {
         return res.status(400).json({
           message:
-            "Nom, email et mot de passe obligatoires",
+            "Nom, email et mot de passe obligatoires.",
         });
       }
 
-      let finalRole =
-        role || ROLES.JOURNALISTE;
-
-      const rolesValides = [
-        ROLES.ADMIN,
-        ROLES.EDITEUR,
-        ROLES.JOURNALISTE,
-      ];
+      const finalRole =
+        role ||
+        ROLES.JOURNALISTE;
 
       if (
-        !rolesValides.includes(
-          finalRole
-        )
+        !Object.values(
+          ROLES
+        ).includes(finalRole)
       ) {
         return res.status(400).json({
           message:
-            "Rôle invalide",
+            "Rôle invalide.",
         });
       }
 
-      const passwordHash =
+      const existing =
+        await pool.query(
+          `
+          SELECT id_utilisateur
+          FROM utilisateur
+          WHERE LOWER(email) = LOWER($1)
+          `,
+          [
+            email.trim(),
+          ]
+        );
+
+      if (
+        existing.rows.length > 0
+      ) {
+        return res.status(409).json({
+          message:
+            "Cet email existe déjà.",
+        });
+      }
+
+      const hashedPassword =
         await bcrypt.hash(
           password,
           10
         );
 
-      const result = await pool.query(
-        `INSERT INTO utilisateur
+      const result =
+        await pool.query(
+          `
+          INSERT INTO utilisateur
           (
             nom,
             email,
             password,
             role
           )
-         VALUES
+          VALUES
           ($1, $2, $3, $4)
-         RETURNING
-          id_utilisateur,
-          nom,
-          email,
-          role,
-          created_at`,
-        [
-          nom.trim(),
-          email.trim().toLowerCase(),
-          passwordHash,
-          finalRole,
-        ]
-      );
+          RETURNING
+            id_utilisateur,
+            nom,
+            email,
+            role
+          `,
+          [
+            nom,
+            email.trim(),
+            hashedPassword,
+            finalRole,
+          ]
+        );
 
       res.status(201).json({
         success: true,
+        message:
+          "Utilisateur ajouté.",
         utilisateur:
           result.rows[0],
       });
     } catch (error) {
       console.error(
-        "❌ POST utilisateur:",
+        "Erreur ajout utilisateur :",
         error
       );
 
-      if (
-        error.code === "23505"
-      ) {
-        return res.status(409).json({
-          message:
-            "Cet email existe déjà",
-        });
-      }
-
       res.status(500).json({
         message:
-          "Erreur création utilisateur",
+          "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// UTILISATEUR - SUPPRIMER
+// SUPPRESSION UTILISATEUR
 // ======================================================
 
 app.delete(
   "/api/utilisateurs/:id",
   verifierToken,
   verifierAdmin,
-  async (req, res) => {
-    const id = Number(req.params.id);
 
+  async (req, res) => {
     try {
-      if (isNaN(id)) {
-        return res.status(400).json({
-          message:
-            "ID utilisateur invalide",
-        });
-      }
+      const id =
+        Number(req.params.id);
 
       if (
-        Number(req.user.id_utilisateur) ===
-        id
+        id ===
+        Number(
+          req.user.id_utilisateur
+        )
       ) {
         return res.status(400).json({
           message:
-            "Vous ne pouvez pas supprimer votre propre compte",
+            "Vous ne pouvez pas supprimer votre propre compte.",
         });
       }
 
-      const result = await pool.query(
-        `DELETE FROM utilisateur
-         WHERE id_utilisateur = $1
-         RETURNING
-           id_utilisateur,
-           nom,
-           email`,
-        [id]
-      );
+      const result =
+        await pool.query(
+          `
+          DELETE FROM utilisateur
+          WHERE id_utilisateur = $1
+          RETURNING id_utilisateur
+          `,
+          [id]
+        );
 
       if (
         result.rows.length === 0
       ) {
         return res.status(404).json({
           message:
-            "Utilisateur introuvable",
+            "Utilisateur introuvable.",
         });
       }
 
       res.json({
         success: true,
         message:
-          "Utilisateur supprimé avec succès",
+          "Utilisateur supprimé.",
       });
     } catch (error) {
       console.error(
-        "❌ DELETE utilisateur:",
+        "Erreur suppression utilisateur :",
         error
       );
 
-      // FK article/photo/video peuvent empêcher
-      // la suppression d'un utilisateur qui possède
-      // encore du contenu.
-      if (
-        error.code === "23503"
-      ) {
-        return res.status(409).json({
-          message:
-            "Impossible de supprimer cet utilisateur car il possède encore du contenu.",
-        });
-      }
-
       res.status(500).json({
         message:
-          "Erreur suppression utilisateur",
+          error.message ||
+          "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// CONTACT - PUBLIC
+// CONTACTS — ADMIN
+// ======================================================
+
+app.get(
+  "/api/contacts",
+  verifierToken,
+  verifierAdmin,
+
+  async (req, res) => {
+    try {
+      const result =
+        await pool.query(`
+          SELECT *
+          FROM contact
+          ORDER BY id_contact DESC
+        `);
+
+      res.json(result.rows);
+    } catch (error) {
+      console.error(
+        "Erreur contacts :",
+        error
+      );
+
+      res.status(500).json({
+        message:
+          "Erreur serveur.",
+      });
+    }
+  }
+);
+
+// ======================================================
+// CONTACT — PUBLIC
 // ======================================================
 
 app.post(
   "/api/contacts",
+
   async (req, res) => {
     try {
       const {
         nom,
         email,
-        sujet,
         message,
       } = req.body;
 
@@ -2784,157 +2784,130 @@ app.post(
       ) {
         return res.status(400).json({
           message:
-            "Nom, email et message obligatoires",
+            "Nom, email et message obligatoires.",
         });
       }
 
-      // La colonne sujet est NOT NULL dans PostgreSQL.
-      const sujetFinal =
-        sujet?.trim() ||
-        "Contact général";
-
-      const result = await pool.query(
-        `INSERT INTO contact
+      const result =
+        await pool.query(
+          `
+          INSERT INTO contact
           (
             nom,
             email,
-            sujet,
             message
           )
-         VALUES
-          ($1, $2, $3, $4)
-         RETURNING
-          id_contact,
-          nom,
-          email,
-          sujet,
-          message,
-          created_at`,
-        [
-          nom.trim(),
-          email.trim(),
-          sujetFinal,
-          message.trim(),
-        ]
-      );
+          VALUES
+          ($1, $2, $3)
+          RETURNING *
+          `,
+          [
+            nom,
+            email,
+            message,
+          ]
+        );
 
       res.status(201).json({
         success: true,
         message:
-          "Message envoyé avec succès",
+          "Message envoyé avec succès.",
         contact:
           result.rows[0],
       });
     } catch (error) {
       console.error(
-        "❌ POST contact:",
+        "Erreur contact :",
         error
       );
 
       res.status(500).json({
         message:
-          "Erreur envoi message",
+          "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// CONTACT - ADMIN
-// ======================================================
-
-app.get(
-  "/api/contacts",
-  verifierToken,
-  verifierAdmin,
-  async (req, res) => {
-    try {
-      const result = await pool.query(`
-        SELECT
-          id_contact,
-          nom,
-          email,
-          sujet,
-          message,
-          created_at
-
-        FROM contact
-
-        ORDER BY
-          created_at DESC
-      `);
-
-      res.json(result.rows);
-    } catch (error) {
-      console.error(
-        "❌ GET contacts:",
-        error
-      );
-
-      res.status(500).json({
-        message:
-          "Erreur récupération contacts",
-      });
-    }
-  }
-);
-
-// ======================================================
-// CONTACT - SUPPRIMER
+// SUPPRESSION CONTACT
 // ======================================================
 
 app.delete(
   "/api/contacts/:id",
   verifierToken,
   verifierAdmin,
+
   async (req, res) => {
-    const id = Number(req.params.id);
-
     try {
-      if (isNaN(id)) {
-        return res.status(400).json({
-          message:
-            "ID contact invalide",
-        });
-      }
+      const id =
+        req.params.id;
 
-      const result = await pool.query(
-        `DELETE FROM contact
-         WHERE id_contact = $1
-         RETURNING id_contact`,
-        [id]
-      );
+      const result =
+        await pool.query(
+          `
+          DELETE FROM contact
+          WHERE id_contact = $1
+          RETURNING id_contact
+          `,
+          [id]
+        );
 
       if (
         result.rows.length === 0
       ) {
         return res.status(404).json({
           message:
-            "Contact introuvable",
+            "Message introuvable.",
         });
       }
 
       res.json({
         success: true,
         message:
-          "Message supprimé avec succès",
+          "Message supprimé.",
       });
     } catch (error) {
       console.error(
-        "❌ DELETE contact:",
+        "Erreur suppression contact :",
         error
       );
 
       res.status(500).json({
         message:
-          "Erreur suppression contact",
+          "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// ÉQUIPE - PUBLIC
+// NETTOYAGE DES VIEWERS LIVE
+// ======================================================
+
+async function nettoyerViewers() {
+  try {
+    await pool.query(`
+      DELETE FROM live_viewers
+      WHERE last_seen <
+        CURRENT_TIMESTAMP -
+        INTERVAL '5 minutes'
+    `);
+  } catch (error) {
+    console.error(
+      "Erreur nettoyage viewers :",
+      error
+    );
+  }
+}
+
+setInterval(
+  nettoyerViewers,
+  2 * 60 * 1000
+);
+
+// ======================================================
+// ÉQUIPE — PUBLIC
 // ======================================================
 
 app.get(
@@ -2946,12 +2919,8 @@ app.get(
           id_equipe,
           nom,
           fonction,
-
-          -- Alias pour conserver la compatibilité
-          -- avec le frontend actuel
           biographie AS bio,
           photo AS image_url,
-
           facebook,
           instagram,
           linkedin,
@@ -2959,92 +2928,97 @@ app.get(
           ordre,
           created_at,
           updated_at
-
         FROM equipe
-
-        WHERE afficher = TRUE
-
-        ORDER BY
-          ordre ASC,
-          created_at ASC
+        WHERE afficher = true
+        ORDER BY ordre ASC, id_equipe ASC
       `);
 
-      res.json(result.rows);
+      res.json({
+        membres: result.rows.map((membre) => ({
+          ...membre,
+          biographie: membre.bio,
+          photo: membre.image_url,
+        })),
+      });
+
     } catch (error) {
       console.error(
-        "❌ GET equipe:",
+        "Erreur équipe public :",
         error
       );
 
       res.status(500).json({
-        message:
-          "Erreur récupération équipe",
+        message: "Erreur serveur.",
       });
     }
   }
 );
 
 // ======================================================
-// ÉQUIPE - ADMIN
+// ÉQUIPE — ADMIN
 // ======================================================
 
 app.get(
   "/api/equipe/admin",
   verifierToken,
-  verifierEquipeEditoriale,
+  verifierAdmin,
+
   async (req, res) => {
     try {
       const result = await pool.query(`
-        SELECT *
+        SELECT
+          id_equipe,
+          nom,
+          fonction,
+          biographie AS bio,
+          photo AS image_url,
+          facebook,
+          instagram,
+          linkedin,
+          afficher,
+          ordre,
+          created_at,
+          updated_at
         FROM equipe
-
-        ORDER BY
-          ordre ASC,
-          created_at ASC
+        ORDER BY ordre ASC, id_equipe ASC
       `);
 
       res.json(result.rows);
     } catch (error) {
-      console.error(
-        "❌ GET admin equipe:",
-        error
-      );
+      console.error("Erreur équipe admin :", error);
 
       res.status(500).json({
-        message:
-          "Erreur récupération équipe",
+        message: "Erreur serveur.",
       });
     }
   }
 );
 
+
 // ======================================================
-// ÉQUIPE - AJOUTER
+// AJOUT ÉQUIPE
 // ======================================================
 
 app.post(
   "/api/equipe",
   verifierToken,
-  verifierEquipeEditoriale,
+  verifierAdmin,
   upload.single("image"),
+
   async (req, res) => {
     try {
       const {
         nom,
         fonction,
         bio,
-        biographie,
+        afficher,
+        ordre,
         facebook,
         instagram,
         linkedin,
-        afficher,
-        ordre,
       } = req.body;
 
-      if (
-        !nom ||
-        !fonction
-      ) {
+      if (!nom || !fonction) {
         if (req.file) {
           supprimerImage(
             `/uploads/${req.file.filename}`
@@ -3052,116 +3026,128 @@ app.post(
         }
 
         return res.status(400).json({
-          message:
-            "Nom et fonction obligatoires",
+          message: "Nom et fonction obligatoires.",
         });
       }
 
-      const photo =
-        req.file
-          ? `/uploads/${req.file.filename}`
-          : null;
+      const imageUrl = req.file
+        ? `/uploads/${req.file.filename}`
+        : null;
 
-      const bioFinal =
-        biographie !== undefined
-          ? biographie
-          : bio || null;
-
-      const afficherFinal =
-        afficher === undefined
-          ? true
-          : String(afficher) === "true";
-
-      const ordreFinal =
-        ordre !== undefined
-          ? Number(ordre) || 0
+      const ordreValue =
+        ordre !== undefined && ordre !== ""
+          ? Number(ordre)
           : 0;
 
+      const afficherValue =
+        afficher === undefined
+          ? true
+          : afficher !== "false";
+
       const result = await pool.query(
-        `INSERT INTO equipe
-          (
-            nom,
-            fonction,
-            biographie,
-            photo,
-            facebook,
-            instagram,
-            linkedin,
-            afficher,
-            ordre
-          )
-         VALUES
-          ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-         RETURNING *`,
-        [
-          nom.trim(),
-          fonction.trim(),
-          bioFinal,
+        `
+        INSERT INTO equipe
+        (
+          nom,
+          fonction,
+          biographie,
           photo,
+          facebook,
+          instagram,
+          linkedin,
+          afficher,
+          ordre
+        )
+        VALUES
+        ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING
+          id_equipe,
+          nom,
+          fonction,
+          biographie AS bio,
+          photo AS image_url,
+          facebook,
+          instagram,
+          linkedin,
+          afficher,
+          ordre,
+          created_at,
+          updated_at
+        `,
+        [
+          nom,
+          fonction,
+          bio || null,
+          imageUrl,
           facebook || null,
           instagram || null,
           linkedin || null,
-          afficherFinal,
-          ordreFinal,
+          afficherValue,
+          ordreValue,
         ]
       );
 
       res.status(201).json({
         success: true,
-        membre:
-          result.rows[0],
+        message: "Membre ajouté.",
+        equipe: result.rows[0],
       });
     } catch (error) {
+      console.error("Erreur ajout équipe :", error);
+
       if (req.file) {
         supprimerImage(
           `/uploads/${req.file.filename}`
         );
       }
 
-      console.error(
-        "❌ POST equipe:",
-        error
-      );
-
       res.status(500).json({
         message:
-          "Erreur ajout membre équipe",
+          error.message || "Erreur serveur.",
       });
     }
   }
 );
 
+
 // ======================================================
-// ÉQUIPE - MODIFIER
+// MODIFICATION ÉQUIPE
 // ======================================================
 
 app.put(
   "/api/equipe/:id",
   verifierToken,
-  verifierEquipeEditoriale,
+  verifierAdmin,
   upload.single("image"),
+
   async (req, res) => {
-    const id = Number(req.params.id);
-
     try {
-      if (isNaN(id)) {
-        return res.status(400).json({
-          message:
-            "ID membre invalide",
-        });
-      }
+      const id = req.params.id;
 
-      const oldResult =
-        await pool.query(
-          `SELECT *
-           FROM equipe
-           WHERE id_equipe = $1`,
-          [id]
-        );
+      const {
+        nom,
+        fonction,
+        bio,
+        afficher,
+        ordre,
+        facebook,
+        instagram,
+        linkedin,
+      } = req.body;
 
-      if (
-        oldResult.rows.length === 0
-      ) {
+      // Récupérer l'ancien membre
+      const oldResult = await pool.query(
+        `
+        SELECT
+          id_equipe,
+          photo
+        FROM equipe
+        WHERE id_equipe = $1
+        `,
+        [id]
+      );
+
+      if (oldResult.rows.length === 0) {
         if (req.file) {
           supprimerImage(
             `/uploads/${req.file.filename}`
@@ -3169,454 +3155,320 @@ app.put(
         }
 
         return res.status(404).json({
-          message:
-            "Membre introuvable",
+          message: "Membre introuvable.",
         });
       }
 
-      const oldMember =
-        oldResult.rows[0];
+      const oldImage =
+        oldResult.rows[0].photo;
 
-      const {
-        nom,
-        fonction,
-        bio,
-        biographie,
-        facebook,
-        instagram,
-        linkedin,
-        afficher,
-        ordre,
-      } = req.body;
+      // Si nouvelle photo, on utilise la nouvelle.
+      // Sinon on conserve l'ancienne.
+      const imageUrl = req.file
+        ? `/uploads/${req.file.filename}`
+        : oldImage;
 
-      const newPhoto =
-        req.file
-          ? `/uploads/${req.file.filename}`
-          : oldMember.photo;
+      const afficherValue =
+        afficher === undefined
+          ? null
+          : afficher !== "false";
 
-      const bioFinal =
-        biographie !== undefined
-          ? biographie
-          : bio !== undefined
-          ? bio
-          : oldMember.biographie;
-
-      let afficherFinal =
-        oldMember.afficher;
-
-      if (
-        afficher !== undefined
-      ) {
-        afficherFinal =
-          String(afficher) === "true";
-      }
-
-      const ordreFinal =
-        ordre !== undefined
-          ? Number(ordre) || 0
-          : oldMember.ordre;
+      const ordreValue =
+        ordre === undefined || ordre === ""
+          ? null
+          : Number(ordre);
 
       const result = await pool.query(
-        `UPDATE equipe
-         SET
-           nom = COALESCE($1, nom),
-           fonction = COALESCE($2, fonction),
-           biographie = $3,
-           photo = $4,
-           facebook = COALESCE($5, facebook),
-           instagram = COALESCE($6, instagram),
-           linkedin = COALESCE($7, linkedin),
-           afficher = $8,
-           ordre = $9,
-           updated_at = CURRENT_TIMESTAMP
-
-         WHERE id_equipe = $10
-
-         RETURNING *`,
+        `
+        UPDATE equipe
+        SET
+          nom = COALESCE($1, nom),
+          fonction = COALESCE($2, fonction),
+          biographie = COALESCE($3, biographie),
+          photo = $4,
+          facebook = COALESCE($5, facebook),
+          instagram = COALESCE($6, instagram),
+          linkedin = COALESCE($7, linkedin),
+          afficher = COALESCE($8, afficher),
+          ordre = COALESCE($9, ordre),
+          updated_at = CURRENT_TIMESTAMP
+        WHERE id_equipe = $10
+        RETURNING
+          id_equipe,
+          nom,
+          fonction,
+          biographie AS bio,
+          photo AS image_url,
+          facebook,
+          instagram,
+          linkedin,
+          afficher,
+          ordre,
+          created_at,
+          updated_at
+        `,
         [
           nom || null,
           fonction || null,
-          bioFinal,
-          newPhoto,
-          facebook !== undefined
-            ? facebook || null
-            : oldMember.facebook,
-          instagram !== undefined
-            ? instagram || null
-            : oldMember.instagram,
-          linkedin !== undefined
-            ? linkedin || null
-            : oldMember.linkedin,
-          afficherFinal,
-          ordreFinal,
+          bio || null,
+          imageUrl,
+          facebook || null,
+          instagram || null,
+          linkedin || null,
+          afficherValue,
+          ordreValue,
           id,
         ]
       );
 
+      // Supprimer l'ancienne photo seulement
+      // si une nouvelle photo a été uploadée.
       if (
         req.file &&
-        oldMember.photo &&
-        oldMember.photo !== newPhoto
+        oldImage &&
+        oldImage !== imageUrl
       ) {
-        supprimerImage(
-          oldMember.photo
-        );
+        supprimerImage(oldImage);
       }
 
       res.json({
         success: true,
-        membre:
-          result.rows[0],
+        message: "Membre modifié.",
+        equipe: result.rows[0],
       });
     } catch (error) {
+      console.error(
+        "Erreur modification équipe :",
+        error
+      );
+
       if (req.file) {
         supprimerImage(
           `/uploads/${req.file.filename}`
         );
       }
 
-      console.error(
-        "❌ PUT equipe:",
-        error
-      );
-
       res.status(500).json({
         message:
-          "Erreur modification membre",
+          error.message || "Erreur serveur.",
       });
     }
   }
 );
 
+
 // ======================================================
-// ÉQUIPE - SUPPRIMER
+// SUPPRESSION ÉQUIPE
 // ======================================================
 
 app.delete(
   "/api/equipe/:id",
   verifierToken,
-  verifierEquipeEditoriale,
-  async (req, res) => {
-    const id = Number(req.params.id);
+  verifierAdmin,
 
+  async (req, res) => {
     try {
-      if (isNaN(id)) {
-        return res.status(400).json({
-          message:
-            "ID membre invalide",
-        });
-      }
+      const id = req.params.id;
 
       const result = await pool.query(
-        `DELETE FROM equipe
-         WHERE id_equipe = $1
-         RETURNING
-           id_equipe,
-           photo`,
+        `
+        SELECT photo
+        FROM equipe
+        WHERE id_equipe = $1
+        `,
         [id]
       );
 
-      if (
-        result.rows.length === 0
-      ) {
+      if (result.rows.length === 0) {
         return res.status(404).json({
-          message:
-            "Membre introuvable",
+          message: "Membre introuvable.",
         });
       }
 
-      supprimerImage(
+      const imageUrl =
+        result.rows[0].photo;
 
-        result.rows[0].photo
-
+      await pool.query(
+        `
+        DELETE FROM equipe
+        WHERE id_equipe = $1
+        `,
+        [id]
       );
 
+      if (imageUrl) {
+        supprimerImage(imageUrl);
+      }
+
       res.json({
-
         success: true,
-
-        message:
-
-          "Membre supprimé avec succès",
-
+        message: "Membre supprimé.",
       });
-
     } catch (error) {
-
       console.error(
-
-        "❌ DELETE equipe:",
-
+        "Erreur suppression équipe :",
         error
-
       );
 
       res.status(500).json({
-
         message:
-
-          "Erreur suppression membre",
-
+          error.message || "Erreur serveur.",
       });
-
     }
-
   }
-
 );
 
 // ======================================================
-
-// GESTION ERREURS MULTER
-
+// ERREUR MULTER / ERREUR GLOBALE
 // ======================================================
 
 app.use(
-
   (error, req, res, next) => {
+    console.error(
+      "Erreur globale :",
+      error
+    );
 
     if (
-
-      error instanceof multer.MulterError
-
+      error instanceof
+      multer.MulterError
     ) {
-
-      console.error(
-
-        "❌ Erreur Multer:",
-
-        error
-
-      );
-
       if (
-
         error.code ===
-
         "LIMIT_FILE_SIZE"
-
       ) {
-
         return res.status(400).json({
-
           message:
-
-            "Fichier trop volumineux",
-
+            "Fichier trop volumineux.",
         });
-
       }
 
       if (
-
         error.code ===
-
         "LIMIT_FILE_COUNT"
-
       ) {
-
         return res.status(400).json({
-
           message:
-
-            "Trop de fichiers",
-
+            "Trop de fichiers envoyés.",
         });
-
       }
 
       return res.status(400).json({
-
         message:
-
-          error.message,
-
+          error.message ||
+          "Erreur upload.",
       });
-
     }
 
     if (error) {
-
-      console.error(
-
-        "❌ Erreur serveur:",
-
-        error
-
-      );
-
       return res.status(400).json({
-
         message:
-
           error.message ||
-
-          "Erreur serveur",
-
+          "Erreur serveur.",
       });
-
     }
 
     next();
-
   }
-
 );
 
 // ======================================================
-
 // ROUTE 404
-
 // ======================================================
 
 app.use(
-
   (req, res) => {
-
     res.status(404).json({
-
       success: false,
-
       message:
-
-        "Route API introuvable",
-
-      path: req.originalUrl,
-
+        "Route API introuvable.",
+      path:
+        req.originalUrl,
     });
-
   }
-
 );
 
 // ======================================================
-
 // DÉMARRAGE SERVEUR
-
 // ======================================================
 
 async function startServer() {
-
   try {
-
-    // Vérification DB
-
     await pool.query(
-
       "SELECT 1"
-
     );
 
     console.log(
-
-      "✅ PostgreSQL connecté"
-
+      "✅ Connexion PostgreSQL réussie."
     );
 
-    // Vérification JWT
-
-    if (!process.env.JWT_SECRET) {
-
-      console.warn(
-
-        "⚠️ JWT_SECRET n'est pas défini dans les variables d'environnement."
-
-      );
-
-    } else {
-
+    if (
+      fs.existsSync(
+        ffmpegPath
+      )
+    ) {
       console.log(
-
-        "✅ JWT_SECRET configuré"
-
+        `✅ FFmpeg trouvé : ${ffmpegPath}`
       );
-
+    } else {
+      console.warn(
+        `⚠️ FFmpeg introuvable : ${ffmpegPath}`
+      );
     }
 
-    // Vérification FFmpeg
-
-    await testFFmpeg();
+    if (
+      !process.env.JWT_SECRET
+    ) {
+      console.warn(
+        "⚠️ JWT_SECRET n'est pas défini."
+      );
+    }
 
     app.listen(
-
       PORT,
-
       "0.0.0.0",
-
       () => {
+        console.log("");
 
         console.log(
-
-          "=========================================="
-
+          "========================================"
         );
 
         console.log(
-
-          "🚀 Mikwo Pèp La TV API démarrée"
-
+          "🎙️ MIKWO PÈP LA TV"
         );
 
         console.log(
-
-          `📡 Port: ${PORT}`
-
+          "========================================"
         );
 
         console.log(
-
-          `🌐 Environnement: ${
-
-            process.env.NODE_ENV ||
-
-            "development"
-
-          }`
-
+          `🚀 Serveur démarré sur le port ${PORT}`
         );
 
         console.log(
-
-          `🗄️ Base: ${
-
-            process.env.DATABASE_URL
-
-              ? "Render PostgreSQL"
-
-              : "PostgreSQL local"
-
-          }`
-
+          "📡 API : /api"
         );
 
         console.log(
-
-          "=========================================="
-
+          "📺 Live : /api/live"
         );
 
+        console.log(
+          "========================================"
+        );
+
+        console.log("");
       }
-
     );
-
   } catch (error) {
-
     console.error(
-
-      "❌ Impossible de démarrer le serveur:"
-
-    );
-
-    console.error(
-
+      "❌ Impossible de démarrer le serveur :",
       error
-
     );
 
     process.exit(1);
-
   }
-
 }
 
 startServer();

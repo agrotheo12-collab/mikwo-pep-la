@@ -61,10 +61,13 @@ function AdminLive() {
         return "YouTube";
 
       case "facebook":
-        return "Facebook";
+        return "Facebook Live";
+
+      case "zoom":
+        return "Zoom";
 
       case "tiktok":
-        return "TikTok";
+        return "TikTok Live";
 
       case "obs":
         return "OBS / Stream";
@@ -98,6 +101,9 @@ function AdminLive() {
       case "facebook":
         return "📘";
 
+      case "zoom":
+        return "🟣";
+
       case "tiktok":
         return "🎵";
 
@@ -129,6 +135,9 @@ function AdminLive() {
 
       case "facebook":
         return "https://www.facebook.com/...";
+
+      case "zoom":
+        return "https://zoom.us/j/XXXXXXXXXXX";
 
       case "tiktok":
         return "https://www.tiktok.com/...";
@@ -185,8 +194,8 @@ function AdminLive() {
       }
 
       setLives(
-        Array.isArray(data.lives)
-          ? data.lives
+        Array.isArray(data)
+          ? data
           : []
       );
     } catch (err) {
@@ -291,6 +300,10 @@ function AdminLive() {
       return "Veuillez entrer une URL valide.";
     }
 
+    // ---------------------------------------------------
+    // YOUTUBE
+    // ---------------------------------------------------
+
     if (sourceType === "youtube") {
       if (
         !url.includes("youtube.com") &&
@@ -300,17 +313,42 @@ function AdminLive() {
       }
     }
 
+    // ---------------------------------------------------
+    // FACEBOOK
+    // ---------------------------------------------------
+
     if (sourceType === "facebook") {
-      if (!url.includes("facebook.com")) {
+      if (
+        !url.includes("facebook.com") &&
+        !url.includes("fb.watch")
+      ) {
         return "Veuillez entrer un lien Facebook valide.";
       }
     }
+
+    // ---------------------------------------------------
+    // ZOOM
+    // ---------------------------------------------------
+
+    if (sourceType === "zoom") {
+      if (!url.includes("zoom.us")) {
+        return "Veuillez entrer un lien Zoom valide.";
+      }
+    }
+
+    // ---------------------------------------------------
+    // TIKTOK
+    // ---------------------------------------------------
 
     if (sourceType === "tiktok") {
       if (!url.includes("tiktok.com")) {
         return "Veuillez entrer un lien TikTok valide.";
       }
     }
+
+    // ---------------------------------------------------
+    // HLS
+    // ---------------------------------------------------
 
     if (sourceType === "hls") {
       if (
@@ -657,6 +695,8 @@ function AdminLive() {
             className="admin-live-form"
           >
 
+            {/* TITRE */}
+
             <div className="admin-live-field">
 
               <label htmlFor="live-titre">
@@ -675,6 +715,8 @@ function AdminLive() {
 
             </div>
 
+            {/* DESCRIPTION */}
+
             <div className="admin-live-field">
 
               <label htmlFor="live-description">
@@ -692,6 +734,8 @@ function AdminLive() {
               />
 
             </div>
+
+            {/* SOURCE */}
 
             <div className="admin-live-field">
 
@@ -717,6 +761,10 @@ function AdminLive() {
 
                 <option value="facebook">
                   📘 Facebook Live
+                </option>
+
+                <option value="zoom">
+                  🟣 Zoom
                 </option>
 
                 <option value="tiktok">
@@ -748,6 +796,8 @@ function AdminLive() {
 
             </div>
 
+            {/* URL */}
+
             <div className="admin-live-field">
 
               <label htmlFor="live-stream-url">
@@ -765,6 +815,7 @@ function AdminLive() {
               />
 
               <small>
+
                 {sourceType === "hls" &&
                   "Utilisez une URL .m3u8 directe."}
 
@@ -773,6 +824,9 @@ function AdminLive() {
 
                 {sourceType === "facebook" &&
                   "Utilisez le lien de la diffusion Facebook."}
+
+                {sourceType === "zoom" &&
+                  "Utilisez votre lien Zoom ou, pour une diffusion intégrée, le flux HLS/RTMP configuré pour votre streaming."}
 
                 {sourceType === "tiktok" &&
                   "Utilisez le lien de votre TikTok Live."}
@@ -788,9 +842,12 @@ function AdminLive() {
 
                 {sourceType === "custom" &&
                   "Entrez l'URL de votre source."}
+
               </small>
 
             </div>
+
+            {/* STATUT */}
 
             <div className="admin-live-field">
 
@@ -818,6 +875,8 @@ function AdminLive() {
 
             </div>
 
+            {/* BOUTON */}
+
             <button
               type="submit"
               className="admin-live-submit"
@@ -835,6 +894,10 @@ function AdminLive() {
         </div>
 
       </section>
+
+      {/* =================================================
+          LISTE
+      ================================================= */}
 
       <section className="admin-live-list-section">
 
@@ -894,6 +957,8 @@ function AdminLive() {
                 className="admin-live-item"
               >
 
+                {/* TOP */}
+
                 <div className="admin-live-item-top">
 
                   <span
@@ -918,6 +983,8 @@ function AdminLive() {
 
                 </div>
 
+                {/* SOURCE */}
+
                 <div className="admin-live-source">
 
                   <span>
@@ -934,15 +1001,21 @@ function AdminLive() {
 
                 </div>
 
+                {/* TITRE */}
+
                 <h3>
                   {live.titre}
                 </h3>
+
+                {/* DESCRIPTION */}
 
                 {live.description && (
                   <p>
                     {live.description}
                   </p>
                 )}
+
+                {/* URL */}
 
                 <div className="admin-live-url">
 
@@ -956,24 +1029,28 @@ function AdminLive() {
 
                 </div>
 
+                {/* VIEWERS */}
+
                 <div className="admin-live-viewers">
 
                   <span>👁️</span>
 
                   <strong>
-                    {live.spectateurs || 0}
+                    {live.viewer_count || 0}
                   </strong>
 
                   <span>
                     spectateur
                     {Number(
-                      live.spectateurs
+                      live.viewer_count
                     ) > 1
                       ? "s"
                       : ""}
                   </span>
 
                 </div>
+
+                {/* ACTIONS */}
 
                 <div className="admin-live-actions">
 
