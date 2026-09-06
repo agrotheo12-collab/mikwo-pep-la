@@ -31,11 +31,70 @@ function APropos() {
           );
         }
 
-        setMembres(
+        // =================================================
+        // LE BACKEND PEUT RETOURNER :
+        //
+        // [
+        //   {...},
+        //   {...}
+        // ]
+        //
+        // OU :
+        //
+        // {
+        //   membres: [...]
+        // }
+        // =================================================
+
+        let listeMembres = [];
+
+        if (Array.isArray(data)) {
+          listeMembres = data;
+        } else if (
+          data &&
           Array.isArray(data.membres)
-            ? data.membres
-            : []
+        ) {
+          listeMembres = data.membres;
+        } else if (
+          data &&
+          Array.isArray(data.equipe)
+        ) {
+          listeMembres = data.equipe;
+        }
+
+        // =================================================
+        // AFFICHER UNIQUEMENT LES MEMBRES AUTORISÉS
+        // =================================================
+
+        listeMembres = listeMembres.filter(
+          (membre) => {
+            return (
+              membre.afficher === true ||
+              membre.afficher === "true" ||
+              membre.afficher === 1 ||
+              membre.afficher === "1" ||
+              membre.afficher === undefined ||
+              membre.afficher === null
+            );
+          }
         );
+
+        // =================================================
+        // TRIER PAR ORDRE
+        // =================================================
+
+        listeMembres.sort((a, b) => {
+          const ordreA =
+            Number(a.ordre) || 9999;
+
+          const ordreB =
+            Number(b.ordre) || 9999;
+
+          return ordreA - ordreB;
+        });
+
+        setMembres(listeMembres);
+
       } catch (err) {
         console.error(
           "Erreur chargement équipe :",
@@ -43,8 +102,12 @@ function APropos() {
         );
 
         setError(
-          "Impossible de charger les membres de l'équipe."
+          err.message ||
+            "Impossible de charger les membres de l'équipe."
         );
+
+        setMembres([]);
+
       } finally {
         setLoading(false);
       }
@@ -62,18 +125,61 @@ function APropos() {
       return "";
     }
 
+    const url = String(photo).trim();
+
+    if (!url) {
+      return "";
+    }
+
     if (
-      photo.startsWith("http://") ||
-      photo.startsWith("https://")
+      url.startsWith("http://") ||
+      url.startsWith("https://") ||
+      url.startsWith("data:")
     ) {
-      return photo;
+      return url;
     }
 
-    if (photo.startsWith("/")) {
-      return `${API_URL}${photo}`;
+    if (url.startsWith("/")) {
+      return `${API_URL}${url}`;
     }
 
-    return `${API_URL}/${photo}`;
+    return `${API_URL}/${url}`;
+  };
+
+  // =====================================================
+  // BIOGRAPHIE
+  // =====================================================
+
+  const renderBiography = (membre) => {
+    const bio =
+      membre.bio ||
+      membre.biographie ||
+      membre.description ||
+      "";
+
+    if (!bio) {
+      return null;
+    }
+
+    return (
+      <div className="apropos-member-biography">
+
+        {String(bio)
+          .split(/\r?\n\s*\r?\n/)
+          .filter(
+            (paragraphe) =>
+              paragraphe.trim()
+          )
+          .map(
+            (paragraphe, index) => (
+              <p key={index}>
+                {paragraphe.trim()}
+              </p>
+            )
+          )}
+
+      </div>
+    );
   };
 
   // =====================================================
@@ -160,6 +266,7 @@ function APropos() {
           <div className="apropos-mission-grid">
 
             <article className="apropos-mission-card">
+
               <div className="apropos-mission-icon">
                 📰
               </div>
@@ -173,9 +280,11 @@ function APropos() {
                 pertinente et accessible à notre
                 audience.
               </p>
+
             </article>
 
             <article className="apropos-mission-card">
+
               <div className="apropos-mission-icon">
                 🎙️
               </div>
@@ -189,9 +298,11 @@ function APropos() {
                 les opinions et les réalités
                 de la population.
               </p>
+
             </article>
 
             <article className="apropos-mission-card">
+
               <div className="apropos-mission-icon">
                 📺
               </div>
@@ -205,6 +316,7 @@ function APropos() {
                 pour rapprocher l'information
                 du public.
               </p>
+
             </article>
 
           </div>
@@ -246,6 +358,7 @@ function APropos() {
           ================================================= */}
 
           {loading && (
+
             <div className="apropos-equipe-loading">
 
               <div className="apropos-loader"></div>
@@ -255,6 +368,7 @@ function APropos() {
               </p>
 
             </div>
+
           )}
 
           {/* =================================================
@@ -262,6 +376,7 @@ function APropos() {
           ================================================= */}
 
           {!loading && error && (
+
             <div className="apropos-equipe-error">
 
               <span>
@@ -269,6 +384,7 @@ function APropos() {
               </span>
 
               <div>
+
                 <strong>
                   Impossible de charger l'équipe
                 </strong>
@@ -276,9 +392,11 @@ function APropos() {
                 <p>
                   {error}
                 </p>
+
               </div>
 
             </div>
+
           )}
 
           {/* =================================================
@@ -318,129 +436,156 @@ function APropos() {
 
               <div className="apropos-equipe-grid">
 
-                {membres.map((membre) => (
+                {membres.map((membre) => {
 
-                  <article
-                    className="apropos-member-card"
-                    key={membre.id_equipe}
-                  >
+                  const photo =
+                    membre.image_url ||
+                    membre.photo ||
+                    membre.photo_url ||
+                    "";
 
-                    {/* PHOTO */}
+                  const photoUrl =
+                    getPhotoUrl(photo);
 
-                    <div className="apropos-member-photo">
+                  return (
 
-                      {membre.photo ? (
+                    <article
+                      className="apropos-member-card"
+                      key={membre.id_equipe}
+                    >
 
-                        <img
-                          src={getPhotoUrl(
-                            membre.photo
-                          )}
-                          alt={membre.nom}
-                          loading="lazy"
-                        />
+                      {/* =====================================
+                          PHOTO
+                      ===================================== */}
 
-                      ) : (
+                      <div className="apropos-member-photo">
 
-                        <div className="apropos-member-no-photo">
-                          <span>
-                            👤
-                          </span>
-                        </div>
+                        {photoUrl ? (
 
-                      )}
+                          <img
+                            src={photoUrl}
+                            alt={
+                              membre.nom ||
+                              "Membre de l'équipe"
+                            }
+                            loading="lazy"
+                            onError={(event) => {
+                              event.currentTarget.style.display =
+                                "none";
+                            }}
+                          />
 
-                      <div className="apropos-member-photo-overlay"></div>
+                        ) : (
 
-                    </div>
+                          <div className="apropos-member-no-photo">
 
-                    {/* INFORMATIONS */}
+                            <span>
+                              👤
+                            </span>
 
-                    <div className="apropos-member-info">
+                          </div>
 
-                      <span className="apropos-member-label">
-                        ÉQUIPE MIKWO PÈP LA
-                      </span>
+                        )}
 
-                      <h3>
-                        {membre.nom}
-                      </h3>
+                        <div className="apropos-member-photo-overlay"></div>
 
-                      <div className="apropos-member-function">
-                        {membre.fonction}
                       </div>
 
-                      {membre.biographie && (
-  <div className="apropos-member-biography">
-    {membre.biographie
-      .split(/\n\s*\n/)
-      .filter((paragraphe) => paragraphe.trim())
-      .map((paragraphe, index) => (
-        <p key={index}>
-          {paragraphe.trim()}
-        </p>
-      ))}
-  </div>
-)}
+                      {/* =====================================
+                          INFORMATIONS
+                      ===================================== */}
 
-                      {/* RÉSEAUX SOCIAUX */}
+                      <div className="apropos-member-info">
 
-                      {(membre.facebook ||
-                        membre.instagram ||
-                        membre.linkedin) && (
+                        <span className="apropos-member-label">
+                          ÉQUIPE MIKWO PÈP LA
+                        </span>
 
-                        <div className="apropos-member-socials">
+                        <h3>
+                          {membre.nom ||
+                            "Membre de l'équipe"}
+                        </h3>
 
-                          {membre.facebook && (
-                            <a
-                              href={membre.facebook}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              aria-label={`Facebook de ${membre.nom}`}
-                              title="Facebook"
-                            >
-                              <span>
-                                f
-                              </span>
-                            </a>
+                        {membre.fonction && (
+
+                          <div className="apropos-member-function">
+                            {membre.fonction}
+                          </div>
+
+                        )}
+
+                        {/* BIOGRAPHIE */}
+
+                        {renderBiography(membre)}
+
+                        {/* =====================================
+                            RÉSEAUX SOCIAUX
+                        ===================================== */}
+
+                        {(membre.facebook ||
+                          membre.instagram ||
+                          membre.linkedin) && (
+
+                            <div className="apropos-member-socials">
+
+                              {membre.facebook && (
+
+                                <a
+                                  href={membre.facebook}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label={`Facebook de ${membre.nom}`}
+                                  title="Facebook"
+                                >
+                                  <span>
+                                    f
+                                  </span>
+                                </a>
+
+                              )}
+
+                              {membre.instagram && (
+
+                                <a
+                                  href={membre.instagram}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label={`Instagram de ${membre.nom}`}
+                                  title="Instagram"
+                                >
+                                  <span>
+                                    ◎
+                                  </span>
+                                </a>
+
+                              )}
+
+                              {membre.linkedin && (
+
+                                <a
+                                  href={membre.linkedin}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  aria-label={`LinkedIn de ${membre.nom}`}
+                                  title="LinkedIn"
+                                >
+                                  <span>
+                                    in
+                                  </span>
+                                </a>
+
+                              )}
+
+                            </div>
+
                           )}
 
-                          {membre.instagram && (
-                            <a
-                              href={membre.instagram}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              aria-label={`Instagram de ${membre.nom}`}
-                              title="Instagram"
-                            >
-                              <span>
-                                ◎
-                              </span>
-                            </a>
-                          )}
+                      </div>
 
-                          {membre.linkedin && (
-                            <a
-                              href={membre.linkedin}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              aria-label={`LinkedIn de ${membre.nom}`}
-                              title="LinkedIn"
-                            >
-                              <span>
-                                in
-                              </span>
-                            </a>
-                          )}
+                    </article>
 
-                        </div>
-
-                      )}
-
-                    </div>
-
-                  </article>
-
-                ))}
+                  );
+                })}
 
               </div>
 
@@ -472,6 +617,7 @@ function APropos() {
             <div className="apropos-values-list">
 
               <div>
+
                 <strong>
                   Intégrité
                 </strong>
@@ -481,9 +627,11 @@ function APropos() {
                   responsable, honnête et respectueuse
                   de notre audience.
                 </p>
+
               </div>
 
               <div>
+
                 <strong>
                   Proximité
                 </strong>
@@ -492,9 +640,11 @@ function APropos() {
                   Nous restons proches des réalités
                   et des préoccupations de la population.
                 </p>
+
               </div>
 
               <div>
+
                 <strong>
                   Engagement
                 </strong>
@@ -503,6 +653,7 @@ function APropos() {
                   Nous travaillons chaque jour pour
                   contribuer positivement à la société.
                 </p>
+
               </div>
 
             </div>

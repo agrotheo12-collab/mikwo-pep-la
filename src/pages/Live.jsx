@@ -430,34 +430,60 @@ function Live() {
     );
   };
 
-  // =====================================================
-  // PLAY
-  // =====================================================
+const handlePlay = () => {
+  setPlayerError("");
 
-  const handlePlay = () => {
-    setPlayerError("");
+  // ============================================
+  // PA GEN LIVE
+  // ============================================
 
-    if (!live) {
-      setPlayerError(
-        "La diffusion en direct n'est pas disponible pour le moment."
-      );
+  if (!live) {
+    setPlayerError(
+      "La diffusion en direct n'est pas disponible pour le moment."
+    );
 
-      return;
-    }
+    return;
+  }
 
-    if (
-      !live.stream_url ||
-      !live.stream_url.trim()
-    ) {
-      setPlayerError(
-        "L'URL du direct n'est pas configurée."
-      );
+  // ============================================
+  // LIVE HORS LIGNE
+  // ============================================
 
-      return;
-    }
+  if (
+    String(live.statut || "")
+      .trim()
+      .toLowerCase() !== "live"
+  ) {
+    setPlayerError(
+      "Le direct est actuellement hors ligne."
+    );
 
-    setIsPlaying(true);
-  };
+    setIsPlaying(false);
+
+    return;
+  }
+
+  // ============================================
+  // URL MANKE
+  // ============================================
+
+  if (
+    !live.stream_url ||
+    !live.stream_url.trim()
+  ) {
+    setPlayerError(
+      "L'URL du direct n'est pas configurée."
+    );
+
+    return;
+  }
+
+  // ============================================
+  // LANCER LE LIVE
+  // ============================================
+
+  setIsPlaying(true);
+};
 
   // =====================================================
   // INITIALISER LE PLAYER
