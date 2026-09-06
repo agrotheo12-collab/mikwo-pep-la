@@ -10,7 +10,9 @@ import {
 
 import "./Photos.css";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL =
+  import.meta.env.VITE_API_URL ||
+  "http://localhost:3000";
 
 // ======================================================
 // PHOTOS
@@ -81,11 +83,7 @@ function Photos() {
     return `${API_URL}/${url}`;
   };
 
-  // ======================================================
-// CHARGER PUBLICATIONS
-// ======================================================
-
-const chargerPublications = async () => {
+  const chargerPublications = async () => {
   try {
     setLoading(true);
     setError("");
@@ -100,13 +98,6 @@ const chargerPublications = async () => {
       throw new Error(
         data.message ||
           `Erreur serveur : ${response.status}`
-      );
-    }
-
-    if (data.success === false) {
-      throw new Error(
-        data.message ||
-          "Impossible de charger les photos."
       );
     }
 
@@ -152,7 +143,6 @@ const chargerPublications = async () => {
             photo.created_at,
 
           auteur:
-            photo.auteur ||
             "Mikwo Pèp La",
 
           photos: [],
@@ -183,7 +173,9 @@ const chargerPublications = async () => {
     });
 
     const publicationsData =
-      Array.from(groupes.values());
+      Array.from(
+        groupes.values()
+      );
 
     publicationsData.sort(
       (a, b) =>
