@@ -82,78 +82,134 @@ function Photos() {
   };
 
   // ======================================================
-  // CHARGER PUBLICATIONS
-  // ======================================================
+// CHARGER PUBLICATIONS
+// ======================================================
 
-  const chargerPublications =
-    async () => {
-      try {
-        setLoading(true);
-        setError("");
+const chargerPublications = async () => {
+  try {
+    setLoading(true);
+    setError("");
 
-        const response =
-          await fetch(
-            `${API_URL}/api/photo-publications`
-          );
+    const response = await fetch(
+      `${API_URL}/api/photos`
+    );
 
-        const data =
-          await response.json();
+    const data = await response.json();
 
-        if (!response.ok) {
-          throw new Error(
-            data.message ||
-              `Erreur serveur : ${response.status}`
-          );
-        }
+    if (!response.ok) {
+      throw new Error(
+        data.message ||
+          `Erreur serveur : ${response.status}`
+      );
+    }
 
-        if (
-          data.success === false
-        ) {
-          throw new Error(
-            data.message ||
-              "Impossible de charger les publications."
-          );
-        }
+    if (data.success === false) {
+      throw new Error(
+        data.message ||
+          "Impossible de charger les photos."
+      );
+    }
 
-        let publicationsData = [];
+    const photos = Array.isArray(data)
+      ? data
+      : Array.isArray(data.photos)
+      ? data.photos
+      : [];
 
-        if (
-          Array.isArray(data)
-        ) {
-          publicationsData = data;
-        } else if (
-          data &&
-          Array.isArray(
-            data.publications
-          )
-        ) {
-          publicationsData =
-            data.publications;
-        }
+    // ==================================================
+    // GROUPEMENT DES PHOTOS
+    // ==================================================
 
-        setPublications(
-          publicationsData
-        );
+    const groupes = new Map();
 
-      } catch (err) {
-        console.error(
-          "Erreur chargement publications :",
-          err
-        );
+    photos.forEach((photo) => {
+      const key = [
+        photo.titre || "",
+        photo.description || "",
+        photo.statut || "",
+        photo.created_at
+          ? new Date(
+              photo.created_at
+            ).getTime()
+          : "",
+      ].join("|");
 
-        setError(
-          err.message ||
-            "Une erreur est survenue lors du chargement des photos."
-        );
+      if (!groupes.has(key)) {
+        groupes.set(key, {
+          id_publication:
+            photo.id_photo,
 
-      } finally {
-        setLoading(false);
+          titre:
+            photo.titre || "",
+
+          description:
+            photo.description || "",
+
+          statut:
+            photo.statut || "publie",
+
+          created_at:
+            photo.created_at,
+
+          auteur:
+            photo.auteur ||
+            "Mikwo Pèp La",
+
+          photos: [],
+        });
       }
-    };
 
-  useEffect(() => {
-    chargerPublications();
-  }, []);
+      groupes
+        .get(key)
+        .photos.push({
+          id_photo:
+            photo.id_photo,
+
+          titre:
+            photo.titre || "",
+
+          description:
+            photo.description || "",
+
+          image_url:
+            photo.image_url,
+
+          statut:
+            photo.statut,
+
+          created_at:
+            photo.created_at,
+        });
+    });
+
+    const publicationsData =
+      Array.from(groupes.values());
+
+    publicationsData.sort(
+      (a, b) =>
+        new Date(b.created_at) -
+        new Date(a.created_at)
+    );
+
+    setPublications(
+      publicationsData
+    );
+
+  } catch (err) {
+    console.error(
+      "Erreur chargement publications :",
+      err
+    );
+
+    setError(
+      err.message ||
+        "Une erreur est survenue lors du chargement des photos."
+    );
+
+  } finally {
+    setLoading(false);
+  }
+};
 
   // ======================================================
   // PUBLICATION DEMANDÉE
