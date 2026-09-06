@@ -2873,128 +2873,62 @@ app.get(
 
 );
 
-// ======================================================
-
+/// ======================================================
 // PHOTO PUBLICATIONS
-
 // ======================================================
 
 app.get(
-
   "/api/photo-publications",
-
   async (req, res) => {
-
     try {
-
       const result =
-
         await pool.query(`
-
           SELECT
-
-            p.id_publication,
-
-            MIN(p.id_photo)
-
-              AS id_photo,
-
-            MIN(p.titre)
-
-              AS titre,
-
-            MIN(p.description)
-
-              AS description,
-
-            MIN(p.created_at)
-
-              AS created_at,
-
+            MIN(p.id_photo) AS id_publication,
+            MIN(p.id_photo) AS id_photo,
+            p.titre,
+            p.description,
+            MIN(p.created_at) AS created_at,
             JSON_AGG(
-
               JSON_BUILD_OBJECT(
-
                 'id_photo',
-
                 p.id_photo,
-
                 'image_url',
-
                 p.image_url,
-
                 'statut',
-
-                p.statut
-
+                p.statut,
+                'titre',
+                p.titre
               )
-
-              ORDER BY
-
-                p.id_photo ASC
-
+              ORDER BY p.id_photo ASC
             ) AS photos,
-
-            COUNT(
-
-              p.id_photo
-
-            )::int AS nombre_photos
-
+            COUNT(p.id_photo)::int AS nombre_photos
           FROM photo p
-
-          WHERE
-
-            p.statut = 'publie'
-
-            AND
-
-            p.id_publication
-
-              IS NOT NULL
-
+          WHERE p.statut = 'publie'
           GROUP BY
-
-            p.id_publication
-
+            p.titre,
+            p.description,
+            p.created_at
           ORDER BY
-
-            MIN(p.created_at)
-
-            DESC
-
+            MIN(p.created_at) DESC,
+            MIN(p.id_photo) DESC
         `);
 
-      res.json(
-
-        result.rows
-
-      );
+      res.json(result.rows);
 
     } catch (error) {
-
       console.error(
-
         "Erreur photo-publications :",
-
         error
-
       );
 
       res.status(500).json({
-
         success: false,
-
         message:
-
           "Erreur lors du chargement des publications photo.",
-
       });
-
     }
-
   }
-
 );
 
 // ======================================================
