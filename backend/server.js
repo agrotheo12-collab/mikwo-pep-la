@@ -2833,1073 +2833,400 @@ app.get(
 );
 
 // ======================================================
-
 // PHOTOS — CREATE
-
 // ======================================================
 
 app.post(
-
   "/api/photos",
-
   verifierToken,
-
   verifierEditeur,
-
-  upload.array(
-
-    "photos",
-
-    20
-
-  ),
-
+  upload.array("photos", 20),
   async (req, res) => {
-
-    const temporaryFiles =
-
-      [];
-
-    const uploadedCloudinaryFiles =
-
-      [];
+    const temporaryFiles = [];
+    const uploadedCloudinaryFiles = [];
 
     try {
-
-      if (
-
-        !req.files ||
-
-        req.files.length === 0
-
-      ) {
-
-        return res
-
-          .status(400)
-
-          .json({
-
-            success: false,
-
-            message:
-
-              "Aucune photo sélectionnée.",
-
-          });
-
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Aucune photo sélectionnée.",
+        });
       }
 
       temporaryFiles.push(
-
-        ...req.files.map(
-
-          (file) =>
-
-            file.path
-
-        )
-
+        ...req.files.map((file) => file.path)
       );
 
       const titre =
-
-        req.body.titre
-
+        typeof req.body.titre === "string"
           ? req.body.titre.trim()
-
           : "";
 
       const description =
-
-        req.body.description
-
+        typeof req.body.description === "string"
           ? req.body.description.trim()
-
           : "";
 
       const statut =
-
-        req.body.statut ||
-
-        "brouillon";
-
-      const publicationDemandee =
-
-        req.body.id_publication
-
-          ? req.body.id_publication.trim()
-
-          : null;
+        req.body.statut || "brouillon";
 
       if (!titre) {
-
-        return res
-
-          .status(400)
-
-          .json({
-
-            success: false,
-
-            message:
-
-              "Le titre est obligatoire.",
-
-          });
-
+        return res.status(400).json({
+          success: false,
+          message: "Le titre est obligatoire.",
+        });
       }
 
-      const statutsAutorises =
+      const statutsAutorises = [
+        "brouillon",
+        "publie",
+        "archive",
+      ];
 
-        [
-
-          "brouillon",
-
-          "publie",
-
-          "archive",
-
-        ];
-
-      if (
-
-        !statutsAutorises.includes(
-
-          statut
-
-        )
-
-      ) {
-
-        return res
-
-          .status(400)
-
-          .json({
-
-            success: false,
-
-            message:
-
-              "Statut de publication invalide.",
-
-          });
-
+      if (!statutsAutorises.includes(statut)) {
+        return res.status(400).json({
+          success: false,
+          message: "Statut de publication invalide.",
+        });
       }
 
-      let idPublication;
+      const cloudinaryFiles = [];
 
-      if (
+      // ==================================================
+      // UPLOAD CLOUDINARY
+      // ==================================================
 
-        publicationDemandee
-
-      ) {
-
-        const publication =
-
-          await pool.query(
-
-            `
-
-            SELECT
-
-              id_publication
-
-            FROM photo
-
-            WHERE
-
-              id_publication = $1
-
-            LIMIT 1
-
-            `,
-
-            [publicationDemandee]
-
-          );
-
-        if (
-
-          publication.rows
-
-            .length === 0
-
-        ) {
-
-          return res
-
-            .status(404)
-
-            .json({
-
-              success: false,
-
-              message:
-
-                "Publication photo introuvable.",
-
-            });
-
-        }
-
-        idPublication =
-
-          publicationDemandee;
-
-      } else {
-
-        idPublication =
-
-          randomUUID();
-
-      }
-
-      const cloudinaryFiles =
-
-        [];
-
-      for (
-
-        const file of req.files
-
-      ) {
-
+      for (const file of req.files) {
         const uploaded =
-
           await uploadImageToCloudinary(
-
             file.path,
-
             "mikwo-pep-la/photos"
-
           );
 
-        cloudinaryFiles.push(
-
-          uploaded
-
-        );
-
-        uploadedCloudinaryFiles.push(
-
-          uploaded
-
-        );
-
+        cloudinaryFiles.push(uploaded);
+        uploadedCloudinaryFiles.push(uploaded);
       }
 
-      const client =
-
-        await pool.connect();
+      const client = await pool.connect();
 
       try {
+        await client.query("BEGIN");
 
-        await client.query(
+        const photosInseres = [];
 
-          "BEGIN"
-
-        );
-
-        const photosInseres =
-
-          [];
-
-        for (
-
-          const file
-
-            of cloudinaryFiles
-
-        ) {
-
-          const result =
-
-            await client.query(
-
-              `
-
+        for (const file of cloudinaryFiles) {
+          const result = await client.query(
+            `
               INSERT INTO photo (
-
                 titre,
-
                 description,
-
                 image_url,
-
                 statut,
-
-                id_utilisateur,
-
-                id_publication
-
-              )
-
-              VALUES (
-
-                $1,$2,$3,$4,$5,$6
-
-              )
-
-              RETURNING
-
-                id_photo,
-
-                id_publication,
-
-                titre,
-
-                description,
-
-                image_url,
-
-                statut,
-
-                created_at,
-
                 id_utilisateur
-
-              `,
-
-              [
-
+              )
+              VALUES (
+                $1,
+                $2,
+                $3,
+                $4,
+                $5
+              )
+              RETURNING
+                id_photo,
                 titre,
-
                 description,
-
-                file.url,
-
+                image_url,
                 statut,
-
-                req.user
-
-                  .id_utilisateur,
-
-                idPublication,
-
-              ]
-
-            );
-
-          photosInseres.push(
-
-            result.rows[0]
-
+                created_at,
+                id_utilisateur
+            `,
+            [
+              titre,
+              description,
+              file.url,
+              statut,
+              req.user.id_utilisateur,
+            ]
           );
 
+          photosInseres.push(result.rows[0]);
         }
 
-        await client.query(
+        await client.query("COMMIT");
 
-          "COMMIT"
-
-        );
-
-        for (
-
-          const filePath
-
-            of temporaryFiles
-
-        ) {
-
-          supprimerFichierTemporaire(
-
-            filePath
-
-          );
-
+        // Supprimer les fichiers temporaires
+        for (const filePath of temporaryFiles) {
+          supprimerFichierTemporaire(filePath);
         }
 
-        res.status(201).json({
-
+        return res.status(201).json({
           success: true,
-
           message:
-
-            publicationDemandee
-
-              ? "Photos ajoutées à la publication avec succès."
-
-              : "Publication photo créée avec succès.",
-
-          id_publication:
-
-            idPublication,
-
-          nombre_photos:
-
-            photosInseres.length,
-
-          photos:
-
-            photosInseres,
-
+            "Publication photo créée avec succès.",
+          nombre_photos: photosInseres.length,
+          photos: photosInseres,
         });
 
       } catch (dbError) {
-
-        await client.query(
-
-          "ROLLBACK"
-
-        );
-
+        await client.query("ROLLBACK");
         throw dbError;
-
       } finally {
-
         client.release();
-
       }
 
     } catch (error) {
-
       console.error(
-
         "Erreur POST photos :",
-
         error
-
       );
 
-      for (
-
-        const filePath
-
-          of temporaryFiles
-
-      ) {
-
-        supprimerFichierTemporaire(
-
-          filePath
-
-        );
-
+      for (const filePath of temporaryFiles) {
+        supprimerFichierTemporaire(filePath);
       }
 
-      for (
-
-        const uploaded
-
-          of uploadedCloudinaryFiles
-
-      ) {
-
-        if (
-
-          uploaded.public_id
-
-        ) {
-
-          await cloudinary.uploader.destroy(
-
-            uploaded.public_id,
-
-            {
-
-              resource_type:
-
-                "image",
-
-            }
-
-          ).catch(() => {});
-
+      for (const uploaded of uploadedCloudinaryFiles) {
+        if (uploaded.public_id) {
+          await cloudinary.uploader
+            .destroy(uploaded.public_id, {
+              resource_type: "image",
+            })
+            .catch(() => {});
         }
-
       }
 
-      res.status(500).json({
-
+      return res.status(500).json({
         success: false,
-
         message:
-
           error.message ||
-
           "Erreur lors de l'ajout des photos.",
-
       });
-
     }
-
   }
-
 );
 
+
 // ======================================================
-
 // PHOTOS — UPDATE
-
 // ======================================================
 
 app.put(
-
   "/api/photos/:id_photo",
-
   verifierToken,
-
   verifierEditeur,
-
   async (req, res) => {
-
     try {
+      const idPhoto = Number(
+        req.params.id_photo
+      );
 
-      const idPhoto =
-
-        Number(
-
-          req.params.id_photo
-
-        );
-
-      if (
-
-        !Number.isInteger(
-
-          idPhoto
-
-        )
-
-      ) {
-
-        return res
-
-          .status(400)
-
-          .json({
-
-            success: false,
-
-            message:
-
-              "ID photo invalide.",
-
-          });
-
+      if (!Number.isInteger(idPhoto)) {
+        return res.status(400).json({
+          success: false,
+          message: "ID photo invalide.",
+        });
       }
 
-      const photoResult =
-
-        await pool.query(
-
-          `
-
+      const photoResult = await pool.query(
+        `
           SELECT
-
             id_photo,
-
-            id_publication,
-
             image_url,
-
             id_utilisateur
-
           FROM photo
-
           WHERE id_photo = $1
+        `,
+        [idPhoto]
+      );
 
-          `,
-
-          [idPhoto]
-
-        );
-
-      if (
-
-        photoResult.rows
-
-          .length === 0
-
-      ) {
-
-        return res
-
-          .status(404)
-
-          .json({
-
-            success: false,
-
-            message:
-
-              "Photo introuvable.",
-
-          });
-
+      if (photoResult.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Photo introuvable.",
+        });
       }
-
-      const photo =
-
-        photoResult.rows[0];
 
       const titre =
-
-        typeof req.body.titre ===
-
-        "string"
-
+        typeof req.body.titre === "string"
           ? req.body.titre.trim()
-
           : "";
 
       const description =
-
-        typeof req.body.description ===
-
-        "string"
-
+        typeof req.body.description === "string"
           ? req.body.description.trim()
-
           : "";
 
       const statut =
-
-        typeof req.body.statut ===
-
-        "string"
-
+        typeof req.body.statut === "string"
           ? req.body.statut
-
           : "brouillon";
 
       if (!titre) {
-
-        return res
-
-          .status(400)
-
-          .json({
-
-            success: false,
-
-            message:
-
-              "Le titre est obligatoire.",
-
-          });
-
+        return res.status(400).json({
+          success: false,
+          message: "Le titre est obligatoire.",
+        });
       }
 
-      const statutsAutorises =
+      const statutsAutorises = [
+        "brouillon",
+        "publie",
+        "archive",
+      ];
 
-        [
-
-          "brouillon",
-
-          "publie",
-
-          "archive",
-
-        ];
-
-      if (
-
-        !statutsAutorises.includes(
-
-          statut
-
-        )
-
-      ) {
-
-        return res
-
-          .status(400)
-
-          .json({
-
-            success: false,
-
-            message:
-
-              "Statut invalide.",
-
-          });
-
+      if (!statutsAutorises.includes(statut)) {
+        return res.status(400).json({
+          success: false,
+          message: "Statut invalide.",
+        });
       }
 
       if (
-
         !(await verifierProprietaire(
-
           "photo",
-
           "id_photo",
-
           idPhoto,
-
           req.user,
-
           res
-
         ))
-
       ) {
-
         return;
-
       }
 
-      let result;
+      const result = await pool.query(
+        `
+          UPDATE photo
+          SET
+            titre = $1,
+            description = $2,
+            statut = $3
+          WHERE id_photo = $4
+          RETURNING
+            id_photo,
+            titre,
+            description,
+            image_url,
+            statut,
+            created_at,
+            id_utilisateur
+        `,
+        [
+          titre,
+          description,
+          statut,
+          idPhoto,
+        ]
+      );
 
-      if (
-
-        photo.id_publication
-
-      ) {
-
-        result =
-
-          await pool.query(
-
-            `
-
-            UPDATE photo
-
-            SET
-
-              titre = $1,
-
-              description = $2,
-
-              statut = $3
-
-            WHERE
-
-              id_publication = $4
-
-            RETURNING
-
-              id_photo,
-
-              id_publication,
-
-              titre,
-
-              description,
-
-              image_url,
-
-              statut,
-
-              created_at,
-
-              id_utilisateur
-
-            `,
-
-            [
-
-              titre,
-
-              description,
-
-              statut,
-
-              photo.id_publication,
-
-            ]
-
-          );
-
-      } else {
-
-        result =
-
-          await pool.query(
-
-            `
-
-            UPDATE photo
-
-            SET
-
-              titre = $1,
-
-              description = $2,
-
-              statut = $3
-
-            WHERE id_photo = $4
-
-            RETURNING
-
-              id_photo,
-
-              id_publication,
-
-              titre,
-
-              description,
-
-              image_url,
-
-              statut,
-
-              created_at,
-
-              id_utilisateur
-
-            `,
-
-            [
-
-              titre,
-
-              description,
-
-              statut,
-
-              idPhoto,
-
-            ]
-
-          );
-
-      }
-
-      res.json({
-
+      return res.json({
         success: true,
-
-        message:
-
-          "Photo modifiée avec succès.",
-
-        photo:
-
-          result.rows[0],
-
+        message: "Photo modifiée avec succès.",
+        photo: result.rows[0],
       });
 
     } catch (error) {
-
       console.error(
-
         "Erreur PUT photo :",
-
         error
-
       );
 
-      res.status(500).json({
-
+      return res.status(500).json({
         success: false,
-
         message:
-
           error.message ||
-
           "Erreur lors de la modification de la photo.",
-
       });
-
     }
-
   }
-
 );
 
+
 // ======================================================
-
 // PHOTOS — DELETE UNE
-
 // ======================================================
 
 app.delete(
-
   "/api/photos/:id_photo",
-
   verifierToken,
-
   verifierEditeur,
-
   async (req, res) => {
-
     try {
+      const idPhoto = Number(
+        req.params.id_photo
+      );
 
-      const idPhoto =
-
-        Number(
-
-          req.params.id_photo
-
-        );
-
-      if (
-
-        !Number.isInteger(
-
-          idPhoto
-
-        )
-
-      ) {
-
-        return res
-
-          .status(400)
-
-          .json({
-
-            success: false,
-
-            message:
-
-              "ID photo invalide.",
-
-          });
-
+      if (!Number.isInteger(idPhoto)) {
+        return res.status(400).json({
+          success: false,
+          message: "ID photo invalide.",
+        });
       }
 
-      const result =
-
-        await pool.query(
-
-          `
-
+      const result = await pool.query(
+        `
           SELECT
-
             id_photo,
-
-            id_publication,
-
             image_url
-
           FROM photo
-
           WHERE id_photo = $1
+        `,
+        [idPhoto]
+      );
 
-          `,
-
-          [idPhoto]
-
-        );
-
-      if (
-
-        result.rows.length ===
-
-        0
-
-      ) {
-
-        return res
-
-          .status(404)
-
-          .json({
-
-            success: false,
-
-            message:
-
-              "Photo introuvable.",
-
-          });
-
+      if (result.rows.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "Photo introuvable.",
+        });
       }
 
-      const photo =
-
-        result.rows[0];
+      const photo = result.rows[0];
 
       if (
-
         !(await verifierProprietaire(
-
           "photo",
-
           "id_photo",
-
           idPhoto,
-
           req.user,
-
           res
-
         ))
-
       ) {
-
         return;
-
       }
 
       await pool.query(
-
         `
-
-        DELETE FROM photo
-
-        WHERE id_photo = $1
-
+          DELETE FROM photo
+          WHERE id_photo = $1
         `,
-
         [idPhoto]
-
       );
 
-      if (
-
-        photo.image_url
-
-      ) {
-
+      if (photo.image_url) {
         await deleteImageFromCloudinary(
-
           photo.image_url
-
         );
-
       }
 
-      res.json({
-
+      return res.json({
         success: true,
-
-        message:
-
-          "Photo supprimée avec succès.",
-
+        message: "Photo supprimée avec succès.",
         id_photo: idPhoto,
-
-        id_publication:
-
-          photo.id_publication,
-
       });
 
     } catch (error) {
-
       console.error(
-
         "Erreur DELETE photo :",
-
         error
-
       );
 
-      res.status(500).json({
-
+      return res.status(500).json({
         success: false,
-
         message:
-
           error.message ||
-
           "Erreur lors de la suppression de la photo.",
-
       });
-
     }
-
   }
-
 );
 
 // ======================================================
