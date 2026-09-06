@@ -2735,8 +2735,6 @@ app.get(
 
             p.id_photo,
 
-            p.id_publication,
-
             p.titre,
 
             p.description,
