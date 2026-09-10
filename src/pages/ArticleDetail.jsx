@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import "./ArticleDetail.css";
 
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 // =====================================================
 // URL IMAGE
@@ -31,15 +32,6 @@ function getImageUrl(image) {
 }
 
 function ArticleDetail() {
-  /*
-   * App.jsx itilize /actualites/:id.
-   *
-   * Nou rele li "id" isit la.
-   *
-   * Men nou kite slug tou pou konpatibilite
-   * ak ansyen URL yo.
-   */
-
   const params = useParams();
 
   const id = params.id || null;
@@ -65,17 +57,10 @@ function ArticleDetail() {
         );
 
         if (!response.ok) {
-          throw new Error(
-            "Erreur serveur"
-          );
+          throw new Error("Erreur serveur");
         }
 
-        const data =
-          await response.json();
-
-        /*
-         * API a dwe retounen yon tableau.
-         */
+        const data = await response.json();
 
         const articles =
           Array.isArray(data)
@@ -97,31 +82,24 @@ function ArticleDetail() {
         // =================================================
 
         if (id) {
-          articleTrouve =
-            articles.find(
-              (item) =>
-                String(
-                  item.id_article
-                ) === String(id)
-            );
+          articleTrouve = articles.find(
+            (item) =>
+              String(item.id_article) ===
+              String(id)
+          );
         }
 
         // =================================================
-        // 2. SI PA GEN ID, CHERCHE PAR SLUG
+        // 2. CHERCHE PAR SLUG
         // =================================================
 
         if (!articleTrouve && slug) {
-          articleTrouve =
-            articles.find(
-              (item) =>
-                item.slug &&
-                String(
-                  item.slug
-                ).toLowerCase() ===
-                  String(
-                    slug
-                  ).toLowerCase()
-            );
+          articleTrouve = articles.find(
+            (item) =>
+              item.slug &&
+              String(item.slug).toLowerCase() ===
+                String(slug).toLowerCase()
+          );
         }
 
         // =================================================
@@ -134,7 +112,6 @@ function ArticleDetail() {
           );
 
           setArticle(null);
-
           return;
         }
 
@@ -144,15 +121,13 @@ function ArticleDetail() {
 
         if (
           articleTrouve.statut &&
-          articleTrouve.statut !==
-            "publie"
+          articleTrouve.statut !== "publie"
         ) {
           setError(
             "Désolé, cette actualité n'est pas encore disponible."
           );
 
           setArticle(null);
-
           return;
         }
 
@@ -160,9 +135,7 @@ function ArticleDetail() {
         // ARTICLE OK
         // =================================================
 
-        setArticle(
-          articleTrouve
-        );
+        setArticle(articleTrouve);
 
       } catch (err) {
         console.error(
@@ -185,21 +158,95 @@ function ArticleDetail() {
   }, [id, slug]);
 
   // =====================================================
+  // FONCTION PARTAGER
+  // =====================================================
+
+  const partagerArticle = async () => {
+    if (!article) return;
+
+    const url = window.location.href;
+
+    const titre =
+      article.titre ||
+      "Mikwo Pèp La Web TV";
+
+    const texte = `${titre}\n\n${url}`;
+
+    try {
+      // =================================================
+      // PARTAGE NATIF
+      // =================================================
+
+      if (
+        navigator.share &&
+        typeof navigator.share === "function"
+      ) {
+        await navigator.share({
+          title: titre,
+          text: titre,
+          url: url,
+        });
+
+        return;
+      }
+
+      // =================================================
+      // SI PARTAGE NATIF PA DISPONIB
+      // KOPYE LIEN AN
+      // =================================================
+
+      if (
+        navigator.clipboard &&
+        typeof navigator.clipboard.writeText ===
+          "function"
+      ) {
+        await navigator.clipboard.writeText(
+          texte
+        );
+
+        alert(
+          "Lien de l'article copié. Vous pouvez maintenant le partager."
+        );
+
+        return;
+      }
+
+      // =================================================
+      // DERNYE SOLISYON
+      // =================================================
+
+      window.prompt(
+        "Copiez le lien de cet article :",
+        url
+      );
+
+    } catch (err) {
+      // Itilizatè a ka fèmen meni Share la.
+      // Nou pa montre yon erè nan ka sa a.
+      if (
+        err?.name !==
+        "AbortError"
+      ) {
+        console.error(
+          "Erreur partage :",
+          err
+        );
+      }
+    }
+  };
+
+  // =====================================================
   // LOADING
   // =====================================================
 
   if (loading) {
     return (
       <main className="article-detail-page">
-
         <div className="article-detail-container">
-
           <div className="article-loading">
             Chargement de l'actualité...
           </div>
-
         </div>
-
       </main>
     );
   }
@@ -211,9 +258,7 @@ function ArticleDetail() {
   if (error || !article) {
     return (
       <main className="article-detail-page">
-
         <div className="article-detail-container">
-
           <div className="article-not-found">
 
             <div className="article-error-icon">
@@ -237,9 +282,7 @@ function ArticleDetail() {
             </Link>
 
           </div>
-
         </div>
-
       </main>
     );
   }
@@ -248,11 +291,10 @@ function ArticleDetail() {
   // IMAGE
   // =====================================================
 
-  const imageUrl =
-    getImageUrl(
-      article.image ||
-      article.image_url
-    );
+  const imageUrl = getImageUrl(
+    article.image_url ||
+      article.image
+  );
 
   // =====================================================
   // DATE
@@ -309,7 +351,7 @@ function ArticleDetail() {
               ACTUALITÉ
             </span>
 
-            <h1>
+            <h1 className="article-detail-title">
               {article.titre}
             </h1>
 
@@ -359,14 +401,9 @@ function ArticleDetail() {
             {contenu
               .split("\n")
               .map(
-                (
-                  paragraph,
-                  index
-                ) => {
+                (paragraph, index) => {
 
-                  if (
-                    !paragraph.trim()
-                  ) {
+                  if (!paragraph.trim()) {
                     return null;
                   }
 
@@ -377,6 +414,32 @@ function ArticleDetail() {
                   );
                 }
               )}
+
+          </div>
+
+          {/* =================================================
+              PARTAGER
+          ================================================= */}
+
+          <div className="article-share">
+
+            <button
+              type="button"
+              className="article-share-button"
+              onClick={partagerArticle}
+              aria-label="Partager cet article"
+            >
+              <span
+                className="article-share-icon"
+                aria-hidden="true"
+              >
+                ↗️
+              </span>
+
+              <span>
+                Partager
+              </span>
+            </button>
 
           </div>
 

@@ -10,7 +10,8 @@
   margin: 0 auto;
 }
 
-.article-back {
+.article-back,
+.article-back-link {
   display: inline-block;
   margin-bottom: 25px;
   color: #d71920;
@@ -18,7 +19,8 @@
   text-decoration: none;
 }
 
-.article-back:hover {
+.article-back:hover,
+.article-back-link:hover {
   text-decoration: underline;
 }
 
@@ -29,7 +31,8 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-.article-detail-category {
+.article-detail-category,
+.article-detail-label {
   display: inline-block;
   background: #d71920;
   color: #ffffff;
@@ -41,34 +44,59 @@
   margin-bottom: 18px;
 }
 
+/* =====================================================
+   TIT ARTICLE
+   ===================================================== */
+
 .article-detail-title {
   margin: 0;
   color: #111111;
   font-size: 42px;
-  line-height: 1.15;
+
+  /* Espas ant liy yo */
+  line-height: 1.32;
+
   font-weight: 800;
+  letter-spacing: -0.4px;
 }
 
+/* =====================================================
+   META
+   ===================================================== */
+
 .article-detail-meta {
-  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+
+  margin-top: 20px;
   margin-bottom: 30px;
+
   color: #666666;
   font-size: 14px;
 }
 
-.article-detail-image {
+/* =====================================================
+   IMAGE
+   ===================================================== */
+
+.article-detail-image-wrapper {
   width: 100%;
   margin-bottom: 35px;
   overflow: hidden;
   border-radius: 6px;
 }
 
-.article-detail-image img {
+.article-detail-image {
   width: 100%;
   max-height: 600px;
   display: block;
   object-fit: cover;
 }
+
+/* =====================================================
+   CONTENU
+   ===================================================== */
 
 .article-detail-content {
   max-width: 850px;
@@ -82,11 +110,78 @@
   line-height: 1.8;
 }
 
+/* =====================================================
+   PARTAGER
+   ===================================================== */
+
+.article-share {
+  max-width: 850px;
+  margin: 35px auto 0;
+  padding-top: 25px;
+  border-top: 1px solid #e5e5e5;
+
+  display: flex;
+  justify-content: flex-start;
+}
+
+.article-share-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  padding: 12px 22px;
+
+  border: none;
+  border-radius: 6px;
+
+  background: #d71920;
+  color: #ffffff;
+
+  font-size: 15px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.article-share-button:hover {
+  background: #b9141a;
+  transform: translateY(-1px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.12);
+}
+
+.article-share-button:active {
+  transform: translateY(0);
+}
+
+.article-share-button:focus-visible {
+  outline: 3px solid rgba(215, 25, 32, 0.25);
+  outline-offset: 3px;
+}
+
+.article-share-icon {
+  font-size: 19px;
+  line-height: 1;
+}
+
+/* =====================================================
+   LOADING
+   ===================================================== */
+
 .article-loading {
   text-align: center;
   padding: 80px 20px;
   font-size: 18px;
 }
+
+/* =====================================================
+   NOT FOUND
+   ===================================================== */
 
 .article-not-found {
   background: #ffffff;
@@ -111,6 +206,10 @@
   text-decoration: none;
 }
 
+/* =====================================================
+   MOBILE
+   ===================================================== */
+
 @media (max-width: 768px) {
   .article-detail-page {
     padding: 25px 15px 50px;
@@ -122,6 +221,17 @@
 
   .article-detail-title {
     font-size: 30px;
+
+    /* Pi bon respirasyon sou telefòn */
+    line-height: 1.35;
+
+    letter-spacing: -0.2px;
+  }
+
+  .article-detail-meta {
+    margin-top: 18px;
+    margin-bottom: 25px;
+    gap: 7px 15px;
   }
 
   .article-detail-content p {
@@ -129,7 +239,17 @@
     line-height: 1.7;
   }
 
-  .article-detail-image img {
+  .article-detail-image {
     max-height: 400px;
+  }
+
+  .article-share {
+    margin-top: 30px;
+    padding-top: 20px;
+  }
+
+  .article-share-button {
+    width: 100%;
+    padding: 13px 20px;
   }
 }
