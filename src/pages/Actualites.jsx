@@ -2,16 +2,23 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Actualites.css";
 
-const API_URL = import.meta.env.VITE_API_URL;
+// =====================================================
+// CONFIGURATION API
+// =====================================================
+
+const API_URL = (
+  import.meta.env.VITE_API_URL || ""
+).replace(/\/$/, "");
 
 function Actualites() {
   const [actualites, setActualites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erreur, setErreur] = useState("");
-  const [categorieActive, setCategorieActive] = useState("Toutes");
+  const [categorieActive, setCategorieActive] =
+    useState("Toutes");
 
   // =====================================================
-  // URL IMAGE / VIDEO
+  // URL MEDIA
   // =====================================================
 
   const getMediaUrl = (mediaUrl) => {
@@ -36,7 +43,6 @@ function Actualites() {
     return `${API_URL}/${url}`;
   };
 
-  // Alias pour les images
   const getImageUrl = (imageUrl) => {
     return getMediaUrl(imageUrl);
   };
@@ -46,78 +52,40 @@ function Actualites() {
   // =====================================================
 
   useEffect(() => {
+    let actif = true;
+
     const chargerActualites = async () => {
       try {
         setLoading(true);
         setErreur("");
 
-        const [articlesResponse, photosResponse, videosResponse] =
-          await Promise.all([
-            fetch(`${API_URL}/api/articles`),
-            fetch(`${API_URL}/api/photo-publications`),
-            fetch(`${API_URL}/api/videos`),
-          ]);
+        // =================================================
+        // ARTICLES
+        // LES ARTICLES SONT LA SOURCE PRINCIPALE
+        // =================================================
+
+        const articlesResponse = await fetch(
+          `${API_URL}/api/articles`
+        );
 
         if (!articlesResponse.ok) {
           throw new Error(
-            "Impossible de charger les articles."
+            `Erreur API articles: ${articlesResponse.status}`
           );
         }
-
-        if (!photosResponse.ok) {
-          throw new Error(
-            "Impossible de charger les publications photo."
-          );
-        }
-
-        // =================================================
-        // ARTICLES
-        // =================================================
 
         const articlesData =
           await articlesResponse.json();
 
-        const articles = Array.isArray(articlesData)
+        const articles = Array.isArray(
+          articlesData
+        )
           ? articlesData
-          : Array.isArray(articlesData.articles)
+          : Array.isArray(
+              articlesData.articles
+            )
           ? articlesData.articles
           : [];
-
-        // =================================================
-        // PHOTOS
-        // =================================================
-
-        const photosData =
-          await photosResponse.json();
-
-        const publicationsPhotos = Array.isArray(
-          photosData
-        )
-          ? photosData
-          : Array.isArray(
-              photosData.publications
-            )
-          ? photosData.publications
-          : [];
-
-        // =================================================
-        // VIDÉOS
-        // =================================================
-
-        let videos = [];
-
-        if (videosResponse.ok) {
-          const videosData =
-            await videosResponse.json();
-
-          videos = Array.isArray(videosData)
-            ? videosData
-            : Array.isArray(
-                videosData.videos
-              )
-            ? videosData.videos
-            : [];
-        }
 
         // =================================================
         // NORMALISER ARTICLES
@@ -126,6 +94,7 @@ function Actualites() {
         const articlesNormalises = articles
           .filter(
             (article) =>
+              !article.statut ||
               article.statut === "publie"
           )
           .map((article) => ({
@@ -148,12 +117,13 @@ function Actualites() {
               "",
 
             image:
-              article.image ||
               article.image_url ||
+              article.image ||
               "",
 
             categorie:
               article.categorie ||
+              article.nom_categorie ||
               "Actualités",
 
             auteur:
@@ -167,6 +137,44 @@ function Actualites() {
             original:
               article,
           }));
+
+        // =================================================
+        // PHOTOS
+        // SI CETTE API ÉCHOUE, ON NE BLOQUE PAS
+        // LES ARTICLES
+        // =================================================
+
+        let publicationsPhotos = [];
+
+        try {
+          const photosResponse = await fetch(
+            `${API_URL}/api/photo-publications`
+          );
+
+          if (photosResponse.ok) {
+            const photosData =
+              await photosResponse.json();
+
+            publicationsPhotos =
+              Array.isArray(photosData)
+                ? photosData
+                : Array.isArray(
+                    photosData.publications
+                  )
+                ? photosData.publications
+                : [];
+          } else {
+            console.warn(
+              "API photos indisponible :",
+              photosResponse.status
+            );
+          }
+        } catch (photoError) {
+          console.warn(
+            "Erreur chargement photos :",
+            photoError
+          );
+        }
 
         // =================================================
         // NORMALISER PHOTOS
@@ -196,6 +204,7 @@ function Actualites() {
 
               categorie:
                 publication.categorie ||
+                publication.nom_categorie ||
                 "Actualités",
 
               auteur:
@@ -219,6 +228,45 @@ function Actualites() {
           );
 
         // =================================================
+        // VIDEOS
+        // SI CETTE API ÉCHOUE, ON NE BLOQUE PAS
+        // LES ARTICLES
+        // =================================================
+
+        let videos = [];
+
+        try {
+          const videosResponse = await fetch(
+            `${API_URL}/api/videos`
+          );
+
+          if (videosResponse.ok) {
+            const videosData =
+              await videosResponse.json();
+
+            videos = Array.isArray(
+              videosData
+            )
+              ? videosData
+              : Array.isArray(
+                  videosData.videos
+                )
+              ? videosData.videos
+              : [];
+          } else {
+            console.warn(
+              "API vidéos indisponible :",
+              videosResponse.status
+            );
+          }
+        } catch (videoError) {
+          console.warn(
+            "Erreur chargement vidéos :",
+            videoError
+          );
+        }
+
+        // =================================================
         // NORMALISER VIDÉOS
         // =================================================
 
@@ -226,6 +274,7 @@ function Actualites() {
           videos
             .filter(
               (video) =>
+                !video.statut ||
                 video.statut === "publie"
             )
             .map((video) => ({
@@ -246,10 +295,12 @@ function Actualites() {
 
               description:
                 video.description ||
+                video.contenu ||
                 "",
 
               video_url:
                 video.video_url ||
+                video.url ||
                 "",
 
               thumbnail:
@@ -259,6 +310,7 @@ function Actualites() {
 
               categorie:
                 video.categorie ||
+                video.nom_categorie ||
                 "Actualités",
 
               auteur:
@@ -281,28 +333,38 @@ function Actualites() {
 
         toutesLesActualites.sort(
           (a, b) =>
-            new Date(b.date) -
-            new Date(a.date)
+            new Date(b.date || 0) -
+            new Date(a.date || 0)
         );
 
-        setActualites(
-          toutesLesActualites
-        );
+        if (actif) {
+          setActualites(
+            toutesLesActualites
+          );
+        }
       } catch (error) {
         console.error(
           "Erreur Actualités :",
           error
         );
 
-        setErreur(
-          "Impossible de charger les actualités."
-        );
+        if (actif) {
+          setErreur(
+            "Impossible de charger les actualités."
+          );
+        }
       } finally {
-        setLoading(false);
+        if (actif) {
+          setLoading(false);
+        }
       }
     };
 
     chargerActualites();
+
+    return () => {
+      actif = false;
+    };
   }, []);
 
   // =====================================================
@@ -449,8 +511,20 @@ function Actualites() {
     const premierePhoto =
       publication.photos[0];
 
+    if (
+      typeof premierePhoto ===
+      "string"
+    ) {
+      return getImageUrl(
+        premierePhoto
+      );
+    }
+
     return getImageUrl(
-      premierePhoto.image_url
+      premierePhoto.image_url ||
+        premierePhoto.image ||
+        premierePhoto.url ||
+        ""
     );
   };
 
@@ -498,17 +572,13 @@ function Actualites() {
   if (loading) {
     return (
       <main className="actualites-page">
-
         <div className="actualites-loading">
-
           <div className="actualites-spinner"></div>
 
           <p>
             Chargement des actualités...
           </p>
-
         </div>
-
       </main>
     );
   }
@@ -520,9 +590,7 @@ function Actualites() {
   if (erreur) {
     return (
       <main className="actualites-page">
-
         <div className="actualites-error">
-
           <div className="error-icon">
             !
           </div>
@@ -542,9 +610,7 @@ function Actualites() {
           >
             Réessayer
           </button>
-
         </div>
-
       </main>
     );
   }
@@ -561,7 +627,6 @@ function Actualites() {
       ================================================= */}
 
       <section className="actualites-header">
-
         <div className="actualites-header-inner">
 
           <div className="actualites-header-content">
@@ -583,15 +648,11 @@ function Actualites() {
           </div>
 
           <div className="actualites-header-badge">
-
             <span className="badge-dot"></span>
-
             INFORMATION
-
           </div>
 
         </div>
-
       </section>
 
       {/* =================================================
@@ -599,7 +660,6 @@ function Actualites() {
       ================================================= */}
 
       <nav className="categories-bar">
-
         <div className="categories-inner">
 
           {categories.map(
@@ -624,7 +684,6 @@ function Actualites() {
           )}
 
         </div>
-
       </nav>
 
       {/* =================================================
@@ -648,8 +707,7 @@ function Actualites() {
 
             <p>
               Aucune publication
-              disponible dans cette
-              catégorie.
+              disponible.
             </p>
 
           </div>
@@ -663,104 +721,52 @@ function Actualites() {
             ========================================= */}
 
             {aLaUne && (
-
               <section className="une-section">
 
                 <div className="section-title">
-
                   <span></span>
 
                   <h2>
                     À LA UNE
                   </h2>
-
                 </div>
 
                 <article className="une-card">
 
                   <div className="une-media">
 
-                    {/* ARTICLE */}
-
-                    {aLaUne.type ===
-                      "article" &&
-                      getImagePrincipale(
-                        aLaUne
-                      ) && (
-
-                      <img
-                        src={getImagePrincipale(
-                          aLaUne
-                        )}
-                        alt={
-                          aLaUne.titre
-                        }
-                      />
-
-                    )}
-
-                    {/* PHOTO */}
-
-                    {aLaUne.type ===
-                      "photo" &&
-                      getImagePrincipale(
-                        aLaUne
-                      ) && (
-
-                      <img
-                        src={getImagePrincipale(
-                          aLaUne
-                        )}
-                        alt={
-                          aLaUne.titre
-                        }
-                      />
-
-                    )}
-
-                    {/* VIDEO */}
-
-                    {aLaUne.type ===
-                      "video" &&
-                      getImagePrincipale(
-                        aLaUne
-                      ) && (
-
-                      <div className="video-cover">
-
-                        <img
-                          src={getImagePrincipale(
-                            aLaUne
-                          )}
-                          alt={
-                            aLaUne.titre
-                          }
-                        />
-
-                        <div className="video-play">
-
-                          ▶️
-
-                        </div>
-
-                      </div>
-
-                    )}
-
-                    {/* PLACEHOLDER */}
-
-                    {!getImagePrincipale(
+                    {getImagePrincipale(
                       aLaUne
-                    ) && (
+                    ) ? (
+
+                      <img
+                        src={getImagePrincipale(
+                          aLaUne
+                        )}
+                        alt={
+                          aLaUne.titre
+                        }
+                        onError={(e) => {
+                          e.currentTarget.style.display =
+                            "none";
+                        }}
+                      />
+
+                    ) : (
 
                       <div className="media-placeholder">
-
                         <span>
                           MIKWO PÈP LA
                         </span>
-
                       </div>
 
+                    )}
+
+                    {aLaUne.type ===
+                      "video" && (
+                      <div className="video-play">
+                        ▶️
+                      </div>
                     )}
 
                     <div className="une-label">
@@ -769,29 +775,20 @@ function Actualites() {
 
                     {aLaUne.type ===
                       "photo" && (
-
                       <div className="media-type">
-
                         📷{" "}
                         {aLaUne.nombre_photos ||
-                          aLaUne.photos
-                            ?.length ||
+                          aLaUne.photos?.length ||
                           0}{" "}
                         photos
-
                       </div>
-
                     )}
 
                     {aLaUne.type ===
                       "video" && (
-
                       <div className="media-type video-label">
-
                         🎥 VIDÉO
-
                       </div>
-
                     )}
 
                   </div>
@@ -819,78 +816,55 @@ function Actualites() {
                     </h3>
 
                     {aLaUne.description && (
-
                       <p>
                         {descriptionCourte(
                           aLaUne.description,
                           260
                         )}
                       </p>
-
                     )}
 
                     <div className="une-bottom">
 
                       <span className="author">
-
                         Par{" "}
-
                         {
                           aLaUne.auteur
                         }
-
                       </span>
-
-                      {/* ARTICLE */}
 
                       {aLaUne.type ===
                         "article" &&
                       aLaUne.id_article ? (
-
                         <Link
                           to={`/actualites/${aLaUne.id_article}`}
                           className="read-more"
                         >
                           Lire l'article
-                          <span>
-                            →
-                          </span>
+                          <span>→</span>
                         </Link>
-
                       ) : null}
-
-                      {/* PHOTO */}
 
                       {aLaUne.type ===
                         "photo" && (
-
                         <Link
                           to="/photos"
                           className="read-more"
                         >
                           Voir le reportage
-                          <span>
-                            →
-                          </span>
+                          <span>→</span>
                         </Link>
-
                       )}
-
-                      {/* VIDEO */}
 
                       {aLaUne.type ===
                         "video" && (
-
                         <Link
                           to="/videos"
                           className="read-more"
                         >
                           Voir la vidéo
-                          <span>
-                            →
-                          </span>
+                          <span>→</span>
                         </Link>
-
                       )}
 
                     </div>
@@ -900,7 +874,6 @@ function Actualites() {
                 </article>
 
               </section>
-
             )}
 
             {/* =========================================
@@ -909,7 +882,6 @@ function Actualites() {
 
             {dernieresActualites.length >
               0 && (
-
               <section className="feed-section">
 
                 <div className="section-title">
@@ -935,9 +907,7 @@ function Actualites() {
                         actualite.type ===
                         "article"
                       ) {
-
                         return (
-
                           <article
                             className="news-item"
                             key={
@@ -950,7 +920,6 @@ function Actualites() {
                               {getImagePrincipale(
                                 actualite
                               ) ? (
-
                                 <img
                                   src={getImagePrincipale(
                                     actualite
@@ -958,16 +927,15 @@ function Actualites() {
                                   alt={
                                     actualite.titre
                                   }
+                                  onError={(e) => {
+                                    e.currentTarget.style.display =
+                                      "none";
+                                  }}
                                 />
-
                               ) : (
-
                                 <div className="media-placeholder small">
-
                                   MIKWO PÈP LA
-
                                 </div>
-
                               )}
 
                             </div>
@@ -997,14 +965,12 @@ function Actualites() {
                               </h3>
 
                               {actualite.description && (
-
                                 <p>
                                   {descriptionCourte(
                                     actualite.description,
                                     180
                                   )}
                                 </p>
-
                               )}
 
                               <div className="news-footer">
@@ -1017,13 +983,11 @@ function Actualites() {
                                 </span>
 
                                 {actualite.id_article && (
-
                                   <Link
                                     to={`/actualites/${actualite.id_article}`}
                                   >
                                     Lire l'article →
                                   </Link>
-
                                 )}
 
                               </div>
@@ -1031,22 +995,18 @@ function Actualites() {
                             </div>
 
                           </article>
-
                         );
-
                       }
 
                       // =================================
-                      // PUBLICATION PHOTO
+                      // PHOTO
                       // =================================
 
                       if (
                         actualite.type ===
                         "photo"
                       ) {
-
                         return (
-
                           <article
                             className="photo-publication"
                             key={
@@ -1089,13 +1049,11 @@ function Actualites() {
                             </div>
 
                             {actualite.description && (
-
                               <p className="photo-description">
                                 {
                                   actualite.description
                                 }
                               </p>
-
                             )}
 
                             {actualite.photos &&
@@ -1110,60 +1068,68 @@ function Actualites() {
                                 >
 
                                   {actualite.photos
-                                    .slice(
-                                      0,
-                                      4
-                                    )
+                                    .slice(0, 4)
                                     .map(
                                       (
                                         photo,
                                         index
-                                      ) => (
+                                      ) => {
 
-                                        <div
-                                          className="photo-grid-item"
-                                          key={
-                                            photo.id_photo ||
-                                            index
-                                          }
-                                        >
+                                        const photoUrl =
+                                          typeof photo ===
+                                          "string"
+                                            ? getImageUrl(
+                                                photo
+                                              )
+                                            : getImageUrl(
+                                                photo.image_url ||
+                                                  photo.image ||
+                                                  photo.url ||
+                                                  ""
+                                              );
 
-                                          <img
-                                            src={getImageUrl(
-                                              photo.image_url
-                                            )}
-                                            alt={
-                                              photo.titre ||
-                                              actualite.titre
+                                        return (
+                                          <div
+                                            className="photo-grid-item"
+                                            key={
+                                              photo.id_photo ||
+                                              index
                                             }
-                                          />
+                                          >
 
-                                          {index ===
-                                            3 &&
-                                            actualite
-                                              .photos
-                                              .length >
-                                              4 && (
+                                            {photoUrl && (
+                                              <img
+                                                src={
+                                                  photoUrl
+                                                }
+                                                alt={
+                                                  photo.titre ||
+                                                  actualite.titre
+                                                }
+                                              />
+                                            )}
 
-                                            <div className="more-photos">
-
-                                              +
-                                              {actualite
+                                            {index ===
+                                              3 &&
+                                              actualite
                                                 .photos
-                                                .length -
-                                                4}
+                                                .length >
+                                                4 && (
+                                              <div className="more-photos">
+                                                +
+                                                {actualite
+                                                  .photos
+                                                  .length -
+                                                  4}
+                                              </div>
+                                            )}
 
-                                            </div>
-
-                                          )}
-
-                                        </div>
-
-                                      )
+                                          </div>
+                                        );
+                                      }
                                     )}
 
                                 </div>
-
                               )}
 
                             <div className="news-footer">
@@ -1176,31 +1142,25 @@ function Actualites() {
                               </span>
 
                               <Link to="/photos">
-
                                 Voir toutes les
                                 photos →
-
                               </Link>
 
                             </div>
 
                           </article>
-
                         );
-
                       }
 
                       // =================================
-                      // VIDÉO
+                      // VIDEO
                       // =================================
 
                       if (
                         actualite.type ===
                         "video"
                       ) {
-
                         return (
-
                           <article
                             className="video-publication"
                             key={
@@ -1224,9 +1184,7 @@ function Actualites() {
                                   />
 
                                   <div className="video-play">
-
                                     ▶️
-
                                   </div>
 
                                 </div>
@@ -1244,11 +1202,9 @@ function Actualites() {
                               ) : (
 
                                 <div className="media-placeholder">
-
                                   <span>
                                     MIKWO PÈP LA
                                   </span>
-
                                 </div>
 
                               )}
@@ -1280,14 +1236,12 @@ function Actualites() {
                               </h3>
 
                               {actualite.description && (
-
                                 <p>
                                   {descriptionCourte(
                                     actualite.description,
                                     180
                                   )}
                                 </p>
-
                               )}
 
                               <div className="news-footer">
@@ -1300,9 +1254,7 @@ function Actualites() {
                                 </span>
 
                                 <Link to="/videos">
-
                                   Voir la vidéo →
-
                                 </Link>
 
                               </div>
@@ -1310,9 +1262,7 @@ function Actualites() {
                             </div>
 
                           </article>
-
                         );
-
                       }
 
                       return null;
@@ -1322,11 +1272,9 @@ function Actualites() {
                 </div>
 
               </section>
-
             )}
 
           </>
-
         )}
 
       </div>
