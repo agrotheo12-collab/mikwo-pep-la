@@ -350,8 +350,14 @@ function Accueil() {
         setLoadingPhotos(true);
         setErrorPhotos("");
 
+        // -------------------------------------------------
+        // IMPORTANT :
+        // On utilise /api/photos qui fonctionne
+        // sur la base PostgreSQL actuelle.
+        // -------------------------------------------------
+
         const response = await fetch(
-          `${API_URL}/api/photo-publications`
+          `${API_URL}/api/photos`
         );
 
         const data = await response.json();
@@ -359,36 +365,45 @@ function Accueil() {
         if (!response.ok) {
           throw new Error(
             data.message ||
-              "Erreur lors du chargement des publications photo."
+              "Erreur lors du chargement des photos."
           );
         }
 
-        let listePublications = [];
+        // -------------------------------------------------
+        // LE BACKEND RETOURNE :
+        // [
+        //   {
+        //     id_photo,
+        //     titre,
+        //     description,
+        //     image_url,
+        //     statut,
+        //     created_at,
+        //     id_utilisateur
+        //   }
+        // ]
+        // -------------------------------------------------
 
-        // -------------------------------------------------
-        // LE BACKEND PEUT RETOURNER:
-        // []
-        // OU { publications: [] }
-        // -------------------------------------------------
+        let listePhotos = [];
 
         if (Array.isArray(data)) {
-          listePublications = data;
+          listePhotos = data;
         } else if (
           data &&
-          Array.isArray(data.publications)
+          Array.isArray(data.photos)
         ) {
-          listePublications = data.publications;
+          listePhotos = data.photos;
         }
 
         // -------------------------------------------------
-        // GARDER LES PUBLICATIONS PUBLIÉES
+        // GARDER LES PHOTOS PUBLIÉES
         // -------------------------------------------------
 
-        listePublications =
-          listePublications.filter(
-            (publication) => {
+        listePhotos =
+          listePhotos.filter(
+            (photo) => {
               const statut = String(
-                publication.statut || ""
+                photo.statut || ""
               ).toLowerCase();
 
               if (!statut) {
@@ -404,6 +419,86 @@ function Accueil() {
                 statut === "active"
               );
             }
+          );
+
+        // -------------------------------------------------
+        // GROUPER LES PHOTOS EN PUBLICATIONS
+        // -------------------------------------------------
+        //
+        // Les photos d'une même publication ont :
+        // - le même titre
+        // - la même description
+        // - la même date created_at
+        //
+        // Cela permet de transformer les lignes
+        // PostgreSQL en publications photo.
+        // -------------------------------------------------
+
+        const groupes = new Map();
+
+        listePhotos.forEach((photo) => {
+          const key = [
+            photo.titre || "",
+            photo.description || "",
+            photo.statut || "",
+            photo.created_at
+              ? new Date(
+                  photo.created_at
+                ).getTime()
+              : "",
+          ].join("|");
+
+          if (!groupes.has(key)) {
+            groupes.set(key, {
+              id_publication:
+                photo.id_photo,
+
+              titre:
+                photo.titre || "",
+
+              description:
+                photo.description || "",
+
+              statut:
+                photo.statut || "publie",
+
+              created_at:
+                photo.created_at,
+
+              auteur:
+                photo.auteur ||
+                "Mikwo Pèp La",
+
+              photos: [],
+            });
+          }
+
+          groupes
+            .get(key)
+            .photos.push({
+              id_photo:
+                photo.id_photo,
+
+              titre:
+                photo.titre || "",
+
+              description:
+                photo.description || "",
+
+              image_url:
+                photo.image_url,
+
+              statut:
+                photo.statut,
+
+              created_at:
+                photo.created_at,
+            });
+        });
+
+        let listePublications =
+          Array.from(
+            groupes.values()
           );
 
         // -------------------------------------------------
