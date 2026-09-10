@@ -83,29 +83,146 @@ function Photos() {
     return `${API_URL}/${url}`;
   };
 
+  // ======================================================
+  // CHARGER LES PUBLICATIONS
+  // ======================================================
+
   const chargerPublications = async () => {
-  try {
-    setLoading(true);
-    setError("");
+    try {
+      setLoading(true);
+      setError("");
 
-    const response = await fetch(
-      `${API_URL}/api/photos`
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.message ||
-          `Erreur serveur : ${response.status}`
+      const response = await fetch(
+        `${API_URL}/api/photos`
       );
-    }
 
-    const photos = Array.isArray(data)
-      ? data
-      : Array.isArray(data.photos)
-      ? data.photos
-      : []
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            `Erreur serveur : ${response.status}`
+        );
+      }
+
+      const photos = Array.isArray(data)
+        ? data
+        : Array.isArray(data.photos)
+        ? data.photos
+        : [];
+
+      // ==================================================
+      // GROUPEMENT DES PHOTOS EN PUBLICATIONS
+      // ==================================================
+
+      const groupes = new Map();
+
+      photos.forEach((photo) => {
+        const key = [
+          photo.titre || "",
+          photo.description || "",
+          photo.statut || "",
+          photo.created_at
+            ? new Date(
+                photo.created_at
+              ).getTime()
+            : "",
+        ].join("|");
+
+        if (!groupes.has(key)) {
+          groupes.set(key, {
+            id_publication:
+              photo.id_photo,
+
+            titre:
+              photo.titre || "",
+
+            description:
+              photo.description || "",
+
+            statut:
+              photo.statut || "publie",
+
+            created_at:
+              photo.created_at,
+
+            auteur:
+              photo.auteur ||
+              "Mikwo Pèp La",
+
+            photos: [],
+          });
+        }
+
+        groupes
+          .get(key)
+          .photos.push({
+            id_photo:
+              photo.id_photo,
+
+            titre:
+              photo.titre || "",
+
+            description:
+              photo.description || "",
+
+            image_url:
+              photo.image_url,
+
+            statut:
+              photo.statut,
+
+            created_at:
+              photo.created_at,
+          });
+      });
+
+      const publicationsData =
+        Array.from(
+          groupes.values()
+        );
+
+      // ==================================================
+      // PLUS RÉCENTES EN PREMIER
+      // ==================================================
+
+      publicationsData.sort(
+        (a, b) =>
+          new Date(
+            b.created_at
+          ) -
+          new Date(
+            a.created_at
+          )
+      );
+
+      setPublications(
+        publicationsData
+      );
+
+    } catch (err) {
+      console.error(
+        "Erreur chargement publications :",
+        err
+      );
+
+      setError(
+        err.message ||
+          "Une erreur est survenue lors du chargement des photos."
+      );
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ======================================================
+  // CHARGEMENT INITIAL
+  // ======================================================
+
+  useEffect(() => {
+    chargerPublications();
+  }, []);
 
   // ======================================================
   // PUBLICATION DEMANDÉE
