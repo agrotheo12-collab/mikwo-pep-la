@@ -3,13 +3,19 @@ import { Link } from "react-router-dom";
 import "./Recherche.css";
 
 // ======================================================
+// API
+// ======================================================
+
+const API_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:3000";
+
+// ======================================================
 // NORMALISER TEXTE
 // Retire aksan + miniskil + karaktè espesyal
 // ======================================================
 
 const normaliserTexte = (texte = "") => {
-  return texte
-    .toString()
+  return String(texte)
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
@@ -20,7 +26,6 @@ const normaliserTexte = (texte = "") => {
 
 // ======================================================
 // DISTANCE LEVENSHTEIN
-// Pèmèt nou tolere erè òtograf
 // ======================================================
 
 const distanceLevenshtein = (a, b) => {
@@ -63,99 +68,83 @@ const distanceLevenshtein = (a, b) => {
 // CORRESPONDANCE RECHERCHE
 // ======================================================
 
-const correspondRecherche = (
-  texte,
-  recherche
-) => {
-  const texteNormalise =
-    normaliserTexte(texte);
+const correspondRecherche = (texte, recherche) => {
+  const texteNormalise = normaliserTexte(texte);
+  const rechercheNormalisee = normaliserTexte(recherche);
 
-  const rechercheNormalisee =
-    normaliserTexte(recherche);
-
-  if (
-    !texteNormalise ||
-    !rechercheNormalisee
-  ) {
+  if (!texteNormalise || !rechercheNormalisee) {
     return false;
   }
 
   // Correspondance exacte
-  if (
-    texteNormalise.includes(
-      rechercheNormalisee
-    )
-  ) {
+  if (texteNormalise.includes(rechercheNormalisee)) {
     return true;
   }
 
-  const motsRecherche =
-    rechercheNormalisee.split(" ");
+  const motsRecherche = rechercheNormalisee.split(" ");
+  const motsTexte = texteNormalise.split(" ");
 
-  const motsTexte =
-    texteNormalise.split(" ");
-
-  return motsRecherche.every(
-    (motRecherche) => {
-      if (motRecherche.length <= 2) {
-        return motsTexte.some(
-          (motTexte) =>
-            motTexte === motRecherche
-        );
-      }
-
+  return motsRecherche.every((motRecherche) => {
+    if (motRecherche.length <= 2) {
       return motsTexte.some(
-        (motTexte) => {
-          // Mot contenu dans l'autre
-          if (
-            motTexte.includes(motRecherche) ||
-            motRecherche.includes(motTexte)
-          ) {
-            return true;
-          }
-
-          const distance =
-            distanceLevenshtein(
-              motRecherche,
-              motTexte
-            );
-
-          // Tolérance selon longueur
-          if (motRecherche.length <= 4) {
-            return distance <= 1;
-          }
-
-          if (motRecherche.length <= 7) {
-            return distance <= 2;
-          }
-
-          return distance <= 3;
-        }
+        (motTexte) => motTexte === motRecherche
       );
     }
-  );
+
+    return motsTexte.some((motTexte) => {
+      // Mot contenu dans l'autre
+      if (
+        motTexte.includes(motRecherche) ||
+        motRecherche.includes(motTexte)
+      ) {
+        return true;
+      }
+
+      const distance = distanceLevenshtein(
+        motRecherche,
+        motTexte
+      );
+
+      if (motRecherche.length <= 4) {
+        return distance <= 1;
+      }
+
+      if (motRecherche.length <= 7) {
+        return distance <= 2;
+      }
+
+      return distance <= 3;
+    });
+  });
 };
 
 // ======================================================
 // EXTRAIRE URL IMAGE
+// Compatible Cloudinary + anciennes URLs /uploads
 // ======================================================
 
 const getImageUrl = (imageUrl) => {
   if (!imageUrl) return "";
 
+  const url = String(imageUrl).trim();
+
+  if (!url) return "";
+
+  // Cloudinary ou autre URL complète
   if (
-    imageUrl.startsWith("http://") ||
-    imageUrl.startsWith("https://") ||
-    imageUrl.startsWith("data:")
+    url.startsWith("http://") ||
+    url.startsWith("https://") ||
+    url.startsWith("data:")
   ) {
-    return imageUrl;
+    return url;
   }
 
-  if (imageUrl.startsWith("/")) {
-    return `${import.meta.env.VITE_API_URL}${imageUrl}`;
+  // Anciennes images locales
+  if (url.startsWith("/")) {
+    return `${API_URL}${url}`;
   }
 
-  return `${import.meta.env.VITE_API_URL}/${imageUrl}`;
+  return `${API_URL}/${url}`;
 };
 
 // ======================================================
@@ -180,35 +169,35 @@ const formatDate = (date) => {
 };
 
 // ======================================================
+// NETTOYER HTML
+// ======================================================
+
+const nettoyerTexte = (texte = "") => {
+  return String(texte)
+    .replace(/<[^>]*>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+};
+
+// ======================================================
 // COMPOSANT
 // ======================================================
 
 function Recherche() {
-  const [recherche, setRecherche] =
-    useState("");
+  const [recherche, setRecherche] = useState("");
 
-  const [articles, setArticles] =
-    useState([]);
+  const [articles, setArticles] = useState([]);
+  const [videos, setVideos] = useState([]);
+  const [photos, setPhotos] = useState([]);
 
-  const [videos, setVideos] =
-    useState([]);
+  const [resultats, setResultats] = useState({
+    articles: [],
+    videos: [],
+    photos: [],
+  });
 
-  const [photos, setPhotos] =
-    useState([]);
-
-  const [resultats, setResultats] =
-    useState({
-      articles: [],
-      videos: [],
-      photos: [],
-    });
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [erreur, setErreur] =
-    useState("");
-
+  const [loading, setLoading] = useState(false);
+  const [erreur, setErreur] = useState("");
   const [rechercheEffectuee, setRechercheEffectuee] =
     useState(false);
 
@@ -221,67 +210,103 @@ function Recherche() {
       setLoading(true);
       setErreur("");
 
-      try {
-        const [
-          articlesResponse,
-          videosResponse,
-          photosResponse,
-        ] = await Promise.all([
-          fetch("/api/articles"),
-          fetch("/api/videos"),
-          fetch("/api/photo-publications"),
-        ]);
+      // -----------------------------------------------
+      // ARTICLES
+      // -----------------------------------------------
 
-        if (
-          !articlesResponse.ok ||
-          !videosResponse.ok ||
-          !photosResponse.ok
-        ) {
+      try {
+        const response = await fetch(
+          `${API_URL}/api/articles`
+        );
+
+        if (!response.ok) {
           throw new Error(
-            "Impossible de charger les données."
+            `Articles HTTP ${response.status}`
           );
         }
 
-        const articlesData =
-          await articlesResponse.json();
-
-        const videosData =
-          await videosResponse.json();
-
-        const photosData =
-          await photosResponse.json();
+        const data = await response.json();
 
         setArticles(
-          Array.isArray(articlesData)
-            ? articlesData
-            : []
+          Array.isArray(data) ? data : []
         );
+      } catch (error) {
+        console.error(
+          "Erreur chargement articles :",
+          error
+        );
+
+        setArticles([]);
+        setErreur(
+          "Impossible de charger les actualités."
+        );
+      }
+
+      // -----------------------------------------------
+      // VIDEOS
+      // -----------------------------------------------
+
+      try {
+        const response = await fetch(
+          `${API_URL}/api/videos`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Videos HTTP ${response.status}`
+          );
+        }
+
+        const data = await response.json();
 
         setVideos(
-          Array.isArray(videosData)
-            ? videosData
-            : []
+          Array.isArray(data) ? data : []
+        );
+      } catch (error) {
+        console.error(
+          "Erreur chargement vidéos :",
+          error
         );
 
+        // Pa kite rechèch la kraze
+        setVideos([]);
+      }
+
+      // -----------------------------------------------
+      // PHOTOS
+      // -----------------------------------------------
+
+      try {
+        const response = await fetch(
+          `${API_URL}/api/photo-publications`
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Photos HTTP ${response.status}`
+          );
+        }
+
+        const data = await response.json();
+
         setPhotos(
-          Array.isArray(
-            photosData?.publications
-          )
-            ? photosData.publications
+          Array.isArray(data?.publications)
+            ? data.publications
+            : Array.isArray(data)
+            ? data
             : []
         );
       } catch (error) {
         console.error(
-          "Erreur recherche :",
+          "Erreur chargement photos :",
           error
         );
 
-        setErreur(
-          "Impossible de charger les contenus."
-        );
-      } finally {
-        setLoading(false);
+        // Pa kite rechèch la kraze
+        setPhotos([]);
       }
+
+      setLoading(false);
     };
 
     chargerDonnees();
@@ -292,8 +317,7 @@ function Recherche() {
   // ====================================================
 
   const effectuerRecherche = () => {
-    const terme =
-      recherche.trim();
+    const terme = recherche.trim();
 
     if (!terme) {
       setResultats({
@@ -303,16 +327,15 @@ function Recherche() {
       });
 
       setRechercheEffectuee(false);
-
       return;
     }
 
-    // ----------------------------------------------
+    // -----------------------------------------------
     // ARTICLES
-    // ----------------------------------------------
+    // -----------------------------------------------
 
-    const articlesTrouves =
-      articles.filter((article) => {
+    const articlesTrouves = articles.filter(
+      (article) => {
         return (
           correspondRecherche(
             article.titre,
@@ -331,14 +354,15 @@ function Recherche() {
             terme
           )
         );
-      });
+      }
+    );
 
-    // ----------------------------------------------
+    // -----------------------------------------------
     // VIDEOS
-    // ----------------------------------------------
+    // -----------------------------------------------
 
-    const videosTrouvees =
-      videos.filter((video) => {
+    const videosTrouvees = videos.filter(
+      (video) => {
         return (
           correspondRecherche(
             video.titre,
@@ -353,14 +377,15 @@ function Recherche() {
             terme
           )
         );
-      });
+      }
+    );
 
-    // ----------------------------------------------
+    // -----------------------------------------------
     // PHOTOS
-    // ----------------------------------------------
+    // -----------------------------------------------
 
-    const photosTrouvees =
-      photos.filter((publication) => {
+    const photosTrouvees = photos.filter(
+      (publication) => {
         return (
           correspondRecherche(
             publication.titre,
@@ -375,7 +400,8 @@ function Recherche() {
             terme
           )
         );
-      });
+      }
+    );
 
     setResultats({
       articles: articlesTrouves,
@@ -392,12 +418,11 @@ function Recherche() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     effectuerRecherche();
   };
 
   // ====================================================
-  // NOMBRE TOTAL
+  // TOTAL
   // ====================================================
 
   const totalResultats =
@@ -411,47 +436,34 @@ function Recherche() {
 
   return (
     <main className="recherche-page">
-
       <div className="container recherche-container">
 
-        {/* ============================================
-            HEADER
-        ============================================ */}
+        {/* HEADER */}
 
         <div className="recherche-header">
-
           <span className="recherche-kicker">
             MIKWO PÈP LA
           </span>
 
-          <h1>
-            Recherche
-          </h1>
+          <h1>Recherche</h1>
 
           <p>
-            Recherchez une actualité,
-            une vidéo ou une publication
-            sur Mikwo Pèp La.
+            Recherchez une actualité, une vidéo
+            ou une publication sur Mikwo Pèp La.
           </p>
-
         </div>
 
-        {/* ============================================
-            FORMULAIRE
-        ============================================ */}
+        {/* FORMULAIRE */}
 
         <form
           className="recherche-form"
           onSubmit={handleSubmit}
         >
-
           <input
             type="search"
             value={recherche}
             onChange={(e) =>
-              setRecherche(
-                e.target.value
-              )
+              setRecherche(e.target.value)
             }
             placeholder="Que recherchez-vous ?"
             aria-label="Rechercher"
@@ -463,15 +475,11 @@ function Recherche() {
           >
             🔎 Rechercher
           </button>
-
         </form>
 
-        {/* ============================================
-            LIENS RAPIDES
-        ============================================ */}
+        {/* LIENS RAPIDES */}
 
         <div className="recherche-links">
-
           <Link to="/actualites">
             Voir les actualités
           </Link>
@@ -483,32 +491,24 @@ function Recherche() {
           <Link to="/videos">
             Voir les vidéos
           </Link>
-
         </div>
 
-        {/* ============================================
-            LOADING
-        ============================================ */}
+        {/* LOADING */}
 
         {loading && (
           <div className="recherche-loading">
-
             <div className="recherche-spinner"></div>
 
             <p>
               Chargement des contenus...
             </p>
-
           </div>
         )}
 
-        {/* ============================================
-            ERREUR
-        ============================================ */}
+        {/* ERREUR */}
 
         {!loading && erreur && (
           <div className="recherche-error">
-
             <div className="recherche-error-icon">
               !
             </div>
@@ -517,16 +517,11 @@ function Recherche() {
               Une erreur est survenue
             </h2>
 
-            <p>
-              {erreur}
-            </p>
-
+            <p>{erreur}</p>
           </div>
         )}
 
-        {/* ============================================
-            RÉSULTATS
-        ============================================ */}
+        {/* RÉSULTATS */}
 
         {!loading &&
           !erreur &&
@@ -534,7 +529,6 @@ function Recherche() {
             <section className="recherche-results">
 
               <div className="recherche-results-header">
-
                 <h2>
                   Résultats de recherche
                 </h2>
@@ -545,16 +539,12 @@ function Recherche() {
                     ? "s"
                     : ""}
                 </span>
-
               </div>
 
-              {/* ======================================
-                  AUCUN RÉSULTAT
-              ====================================== */}
+              {/* AUCUN RÉSULTAT */}
 
               {totalResultats === 0 && (
                 <div className="recherche-empty">
-
                   <div className="recherche-empty-icon">
                     🔎
                   </div>
@@ -572,7 +562,6 @@ function Recherche() {
                     Essayez avec un autre mot
                     ou vérifiez l'orthographe.
                   </small>
-
                 </div>
               )}
 
@@ -584,7 +573,6 @@ function Recherche() {
                 <section className="recherche-section">
 
                   <div className="recherche-section-title">
-
                     <h3>
                       📰 Actualités
                     </h3>
@@ -592,90 +580,101 @@ function Recherche() {
                     <span>
                       {resultats.articles.length}
                     </span>
-
                   </div>
 
                   <div className="recherche-grid">
 
                     {resultats.articles.map(
-                      (article) => (
-                        <article
-                          className="recherche-card"
-                          key={
-                            article.id_article
-                          }
-                        >
+                      (article) => {
 
-                          {article.image && (
-                            <img
-                              src={getImageUrl(
-                                article.image
-                              )}
-                              alt={
-                                article.titre
-                              }
-                              className="recherche-card-image"
-                            />
-                          )}
+                        const image =
+                          article.image_url ||
+                          article.image;
 
-                          <div className="recherche-card-content">
+                        return (
+                          <article
+                            className="recherche-card"
+                            key={
+                              article.id_article
+                            }
+                          >
 
-                            <span className="recherche-card-type">
-                              ACTUALITÉ
-                            </span>
+                            {image && (
+                              <img
+                                src={getImageUrl(
+                                  image
+                                )}
+                                alt={
+                                  article.titre ||
+                                  "Actualité"
+                                }
+                                className="recherche-card-image"
+                                onError={(e) => {
+                                  e.currentTarget.style.display =
+                                    "none";
+                                }}
+                              />
+                            )}
 
-                            <h4>
-                              {article.titre}
-                            </h4>
+                            <div className="recherche-card-content">
 
-                            {article.contenu && (
-                              <p>
-                                {article.contenu
-                                  .replace(
-                                    /<[^>]*>/g,
-                                    ""
-                                  )
-                                  .slice(
+                              <span className="recherche-card-type">
+                                ACTUALITÉ
+                              </span>
+
+                              <h4>
+                                {article.titre}
+                              </h4>
+
+                              {article.contenu && (
+                                <p>
+                                  {nettoyerTexte(
+                                    article.contenu
+                                  ).slice(
                                     0,
                                     140
                                   )}
-                                {article.contenu
-                                  .length > 140
-                                  ? "..."
-                                  : ""}
-                              </p>
-                            )}
 
-                            <div className="recherche-card-meta">
+                                  {nettoyerTexte(
+                                    article.contenu
+                                  ).length > 140
+                                    ? "..."
+                                    : ""}
+                                </p>
+                              )}
 
-                              <span>
-                                {article.auteur ||
-                                  "Mikwo Pèp La"}
-                              </span>
+                              <div className="recherche-card-meta">
 
-                              <span>
-                                {formatDate(
-                                  article.created_at
-                                )}
-                              </span>
+                                <span>
+                                  {article.auteur ||
+                                    "Mikwo Pèp La"}
+                                </span>
+
+                                <span>
+                                  {formatDate(
+                                    article.created_at
+                                  )}
+                                </span>
+
+                              </div>
+
+                              <Link
+                                to={`/actualites/${
+                                  article.slug ||
+                                  article.id_article
+                                }`}
+                                className="recherche-card-link"
+                              >
+                                Lire l'article →
+                              </Link>
 
                             </div>
-
-                            <Link
-                              to={`/actualites/${article.slug || article.id_article}`}
-                              className="recherche-card-link"
-                            >
-                              Lire l'article →
-                            </Link>
-
-                          </div>
-
-                        </article>
-                      )
+                          </article>
+                        );
+                      }
                     )}
 
                   </div>
-
                 </section>
               )}
 
@@ -687,7 +686,6 @@ function Recherche() {
                 <section className="recherche-section">
 
                   <div className="recherche-section-title">
-
                     <h3>
                       🎥 Vidéos
                     </h3>
@@ -695,85 +693,99 @@ function Recherche() {
                     <span>
                       {resultats.videos.length}
                     </span>
-
                   </div>
 
                   <div className="recherche-grid">
 
                     {resultats.videos.map(
-                      (video) => (
-                        <article
-                          className="recherche-card"
-                          key={
-                            video.id_video
-                          }
-                        >
+                      (video) => {
 
-                          {video.thumbnail && (
-                            <img
-                              src={getImageUrl(
-                                video.thumbnail
-                              )}
-                              alt={
-                                video.titre
-                              }
-                              className="recherche-card-image"
-                            />
-                          )}
+                        const thumbnail =
+                          video.thumbnail_url ||
+                          video.thumbnail ||
+                          video.image_url;
 
-                          <div className="recherche-card-content">
+                        return (
+                          <article
+                            className="recherche-card"
+                            key={
+                              video.id_video
+                            }
+                          >
 
-                            <span className="recherche-card-type">
-                              VIDÉO
-                            </span>
-
-                            <h4>
-                              {video.titre}
-                            </h4>
-
-                            {video.description && (
-                              <p>
-                                {video.description.slice(
-                                  0,
-                                  140
+                            {thumbnail && (
+                              <img
+                                src={getImageUrl(
+                                  thumbnail
                                 )}
-                                {video.description
-                                  .length > 140
-                                  ? "..."
-                                  : ""}
-                              </p>
+                                alt={
+                                  video.titre ||
+                                  "Vidéo"
+                                }
+                                className="recherche-card-image"
+                                onError={(e) => {
+                                  e.currentTarget.style.display =
+                                    "none";
+                                }}
+                              />
                             )}
 
-                            <div className="recherche-card-meta">
+                            <div className="recherche-card-content">
 
-                              <span>
-                                {video.auteur ||
-                                  "Mikwo Pèp La"}
+                              <span className="recherche-card-type">
+                                VIDÉO
                               </span>
 
-                              <span>
-                                {formatDate(
-                                  video.created_at
-                                )}
-                              </span>
+                              <h4>
+                                {video.titre}
+                              </h4>
+
+                              {video.description && (
+                                <p>
+                                  {String(
+                                    video.description
+                                  ).slice(
+                                    0,
+                                    140
+                                  )}
+
+                                  {String(
+                                    video.description
+                                  ).length > 140
+                                    ? "..."
+                                    : ""}
+                                </p>
+                              )}
+
+                              <div className="recherche-card-meta">
+
+                                <span>
+                                  {video.auteur ||
+                                    "Mikwo Pèp La"}
+                                </span>
+
+                                <span>
+                                  {formatDate(
+                                    video.created_at
+                                  )}
+                                </span>
+
+                              </div>
+
+                              <Link
+                                to="/videos"
+                                className="recherche-card-link"
+                              >
+                                Voir la vidéo →
+                              </Link>
 
                             </div>
-
-                            <Link
-                              to="/videos"
-                              className="recherche-card-link"
-                            >
-                              Voir la vidéo →
-                            </Link>
-
-                          </div>
-
-                        </article>
-                      )
+                          </article>
+                        );
+                      }
                     )}
 
                   </div>
-
                 </section>
               )}
 
@@ -785,7 +797,6 @@ function Recherche() {
                 <section className="recherche-section">
 
                   <div className="recherche-section-title">
-
                     <h3>
                       📷 Photos
                     </h3>
@@ -793,7 +804,6 @@ function Recherche() {
                     <span>
                       {resultats.photos.length}
                     </span>
-
                   </div>
 
                   <div className="recherche-grid">
@@ -804,6 +814,10 @@ function Recherche() {
                         const premierePhoto =
                           publication.photos?.[0];
 
+                        const image =
+                          premierePhoto?.image_url ||
+                          premierePhoto?.image;
+
                         return (
                           <article
                             className="recherche-card"
@@ -812,15 +826,20 @@ function Recherche() {
                             }
                           >
 
-                            {premierePhoto?.image_url && (
+                            {image && (
                               <img
                                 src={getImageUrl(
-                                  premierePhoto.image_url
+                                  image
                                 )}
                                 alt={
-                                  publication.titre
+                                  publication.titre ||
+                                  "Publication photo"
                                 }
                                 className="recherche-card-image"
+                                onError={(e) => {
+                                  e.currentTarget.style.display =
+                                    "none";
+                                }}
                               />
                             )}
 
@@ -836,13 +855,16 @@ function Recherche() {
 
                               {publication.description && (
                                 <p>
-                                  {publication.description.slice(
+                                  {String(
+                                    publication.description
+                                  ).slice(
                                     0,
                                     140
                                   )}
-                                  {publication
-                                    .description
-                                    .length > 140
+
+                                  {String(
+                                    publication.description
+                                  ).length > 140
                                     ? "..."
                                     : ""}
                                 </p>
@@ -871,14 +893,12 @@ function Recherche() {
                               </Link>
 
                             </div>
-
                           </article>
                         );
                       }
                     )}
 
                   </div>
-
                 </section>
               )}
 
@@ -886,7 +906,6 @@ function Recherche() {
           )}
 
       </div>
-
     </main>
   );
 }
