@@ -16,6 +16,18 @@ const contacts = [
 function Footer() {
   const currentYear = new Date().getFullYear();
 
+  // ==================================================
+  // REMONTE PAJ LA ANLÈ
+  // ==================================================
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
+  };
+
   return (
     <footer className="site-footer">
 
@@ -29,7 +41,11 @@ function Footer() {
           {/* BRAND */}
           <div className="footer-column footer-brand">
 
-            <Link to="/" className="footer-logo">
+            <Link
+              to="/"
+              className="footer-logo"
+              onClick={scrollToTop}
+            >
               <img
                 src={logo}
                 alt="Mikwo Pèp La"
@@ -74,42 +90,69 @@ function Footer() {
 
           </div>
 
-          {/* NAVIGATION */}
+          {/* ==================================================
+              NAVIGATION
+          ================================================== */}
+
           <div className="footer-column">
 
             <h3>Navigation</h3>
 
             <nav className="footer-links">
 
-              <Link to="/">
+              <Link
+                to="/"
+                onClick={scrollToTop}
+              >
                 Accueil
               </Link>
 
-              <Link to="/direct">
+              <Link
+                to="/direct"
+                onClick={scrollToTop}
+              >
                 Direct
               </Link>
 
-              <Link to="/actualites">
+              <Link
+                to="/actualites"
+                onClick={scrollToTop}
+              >
                 Actualités
               </Link>
 
-              <Link to="/photos">
+              <Link
+                to="/photos"
+                onClick={scrollToTop}
+              >
                 Photos
               </Link>
 
-              <Link to="/videos">
+              <Link
+                to="/videos"
+                onClick={scrollToTop}
+              >
                 Vidéos
               </Link>
 
-              <Link to="/recherche">
+              <Link
+                to="/recherche"
+                onClick={scrollToTop}
+              >
                 Recherche
               </Link>
 
-              <Link to="/a-propos">
+              <Link
+                to="/a-propos"
+                onClick={scrollToTop}
+              >
                 À propos
               </Link>
 
-              <Link to="/contact">
+              <Link
+                to="/contact"
+                onClick={scrollToTop}
+              >
                 Contact
               </Link>
 
@@ -117,7 +160,10 @@ function Footer() {
 
           </div>
 
-          {/* CONTACT */}
+          {/* ==================================================
+              CONTACT
+          ================================================== */}
+
           <div className="footer-column">
 
             <h3>Contactez-nous</h3>
