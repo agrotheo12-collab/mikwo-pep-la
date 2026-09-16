@@ -1,85 +1,89 @@
-/* =========================================================
-   ACCUEIL — MIKWO PÈP LA TV
-   Full width + responsive
-========================================================= */
+/* =====================================================
+   ACCUEIL — MIKWO PÈP LA
+===================================================== */
 
 .accueil {
   width: 100%;
   min-height: 100vh;
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
+  background: #ffffff;
+  color: #111111;
+  overflow: hidden;
 }
 
-/* =========================================================
-   CONTAINER — FULL WIDTH
-========================================================= */
+/* =====================================================
+   CONTAINER
+===================================================== */
 
 .accueil .container {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  padding-left: 0;
-  padding-right: 0;
+  width: min(1500px, calc(100% - 32px));
+  margin: 0 auto;
 }
 
-/* =========================================================
-   BREAKING NEWS
-========================================================= */
+/* =====================================================
+   FLASH INFO
+===================================================== */
 
 .breaking-news {
   width: 100%;
-  background: #000;
-  color: #fff;
+  background: #071f4a;
+  color: #ffffff;
   overflow: hidden;
-  border-bottom: 3px solid #e30613;
 }
 
 .breaking-news-inner {
-  width: 100%;
-  min-height: 42px;
+  min-height: 52px;
   display: flex;
   align-items: center;
-  overflow: hidden;
+  min-width: 0;
 }
 
 .breaking-label {
-  flex: 0 0 auto;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 0 18px;
-  height: 42px;
-  background: #e30613;
-  color: #fff;
-  font-size: 0.78rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+  gap: 9px;
+  padding-right: 24px;
+  font-size: 13px;
+  letter-spacing: 0.8px;
   white-space: nowrap;
 }
 
 .breaking-dot {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
   border-radius: 50%;
-  background: #fff;
-  animation: breakingPulse 1.2s ease-in-out infinite;
+  background: #e30613;
+  animation: breakingPulse 1.4s infinite;
 }
 
 .breaking-track {
   flex: 1;
   min-width: 0;
   overflow: hidden;
+  white-space: nowrap;
 }
 
 .breaking-content {
   display: inline-flex;
-  align-items: center;
-  gap: 40px;
+  gap: 70px;
   padding-left: 30px;
-  white-space: nowrap;
   animation: breakingMove 28s linear infinite;
+}
+
+.breaking-content span {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+@keyframes breakingMove {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-100%);
+  }
 }
 
 @keyframes breakingPulse {
@@ -93,118 +97,101 @@
   }
 }
 
-@keyframes breakingMove {
-  from {
-    transform: translateX(100%);
-  }
-
-  to {
-    transform: translateX(-100%);
-  }
-}
-
-/* =========================================================
-   LIVE SECTION
-========================================================= */
+/* =====================================================
+   LIVE
+===================================================== */
 
 .live-section {
   width: 100%;
-  margin: 0;
+  background: #000000;
   padding: 0;
-  background: #000;
 }
 
 .live-full-container {
   width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 0;
+  max-width: 1800px;
+  margin: 0 auto;
 }
 
 .live-section-header {
-  width: 100%;
-  min-height: 64px;
+  min-height: 76px;
+  padding: 0 30px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  padding: 12px 24px;
-  background: #000;
-  color: #fff;
-  box-sizing: border-box;
+  background: #ffffff;
+  border-bottom: 4px solid #e30613;
 }
 
 .live-title-wrapper {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 12px;
-  min-width: 0;
+}
+
+.live-title-wrapper h1 {
+  margin: 0;
+  font-size: clamp(20px, 2vw, 26px);
+  font-weight: 900;
+  letter-spacing: 0.5px;
 }
 
 .live-dot {
-  width: 12px;
-  height: 12px;
-  flex: 0 0 12px;
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: #e30613;
-  box-shadow: 0 0 0 5px rgba(227, 6, 19, 0.16);
-  animation: livePulse 1.5s ease-in-out infinite;
+  animation: livePulse 1.3s infinite;
 }
 
 @keyframes livePulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 1;
+  0% {
+    box-shadow: 0 0 0 0 rgba(227, 6, 19, 0.55);
   }
 
-  50% {
-    transform: scale(0.75);
-    opacity: 0.65;
+  70% {
+    box-shadow: 0 0 0 10px rgba(227, 6, 19, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(227, 6, 19, 0);
   }
 }
 
 .live-now-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 7px 12px;
-  border-radius: 4px;
+  flex-shrink: 0;
   background: #e30613;
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  color: #ffffff;
+  padding: 10px 16px;
+  border-radius: 5px;
+  font-size: 13px;
+  font-weight: 900;
   white-space: nowrap;
 }
 
-/* =========================================================
-   LIVE PLAYER
-========================================================= */
+/* =====================================================
+   PLAYER LIVE — RAPÒ 16:9
+===================================================== */
 
 .accueil-live-player {
-  position: relative;
   width: 100%;
-  max-width: none;
   aspect-ratio: 16 / 9;
   min-height: 0;
-  margin: 0;
-  padding: 0;
+  background: #000000;
   overflow: hidden;
-  background: #050505;
-}
-
-.accueil-live-player > div {
-  width: 100%;
-  height: 100%;
+  position: relative;
 }
 
 .accueil-live-media {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
+  background: #000000;
+  overflow: hidden;
 }
 
 .accueil-live-video,
@@ -212,37 +199,57 @@
   display: block;
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
   border: 0;
-  object-fit: cover;
+  object-fit: contain;
+  background: #000000;
 }
 
 .accueil-live-iframe {
-  background: #000;
+  aspect-ratio: 16 / 9;
 }
 
-/* =========================================================
+/* Si gen yon wrapper div anndan player la */
+.accueil-live-player > div {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+/* =====================================================
    LIVE LOADING
-========================================================= */
+===================================================== */
 
 .accueil-live-loading {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: 16 / 9;
+  padding: 30px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 15px;
-  background: #000;
-  color: #fff;
+  gap: 20px;
+  background: #101010;
+  color: #ffffff;
   text-align: center;
 }
 
+.accueil-live-loading p {
+  margin: 0;
+  font-size: clamp(15px, 2vw, 18px);
+  font-weight: 600;
+}
+
 .accueil-live-spinner {
-  width: 42px;
-  height: 42px;
-  border: 4px solid rgba(255, 255, 255, 0.2);
-  border-top-color: #e30613;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border: 5px solid rgba(255, 255, 255, 0.25);
+  border-top-color: #ffffff;
   border-radius: 50%;
   animation: liveSpinner 0.8s linear infinite;
 }
@@ -253,159 +260,210 @@
   }
 }
 
-/* =========================================================
+/* =====================================================
    LIVE OFFLINE
-========================================================= */
+===================================================== */
 
 .accueil-live-offline {
-  position: absolute;
-  inset: 0;
-  z-index: 4;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  aspect-ratio: 16 / 9;
+  padding: 50px 25px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 30px;
-  background: #111;
-  color: #fff;
   text-align: center;
+  background-size: cover;
+  background-position: center;
+  color: #ffffff;
+  position: relative;
+  overflow: hidden;
 }
 
-.accueil-live-offline h2,
-.accueil-live-offline h3,
-.accueil-live-offline p {
-  margin: 0;
+.accueil-live-offline::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.accueil-live-offline > * {
+  position: relative;
+  z-index: 1;
+}
+
+.accueil-live-offline-icon {
+  font-size: clamp(36px, 5vw, 52px);
+  margin-bottom: 12px;
 }
 
 .accueil-live-offline h2 {
-  font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+  margin: 0 0 10px;
+  font-size: clamp(23px, 3vw, 34px);
+  font-weight: 900;
 }
 
 .accueil-live-offline p {
   max-width: 650px;
-  color: #cfcfcf;
+  margin: 0 0 25px;
+  font-size: clamp(14px, 1.6vw, 18px);
+  line-height: 1.6;
 }
 
-/* =========================================================
-   LIVE INFO
-========================================================= */
+.accueil-live-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 24px;
+  background: #e30613;
+  color: #ffffff;
+  text-decoration: none;
+  border-radius: 5px;
+  font-weight: 800;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.accueil-live-button:hover {
+  background: #b9000d;
+  transform: translateY(-1px);
+}
+
+/* =====================================================
+   INFO LIVE
+===================================================== */
 
 .accueil-live-info {
-  width: 100%;
+  padding: 22px 30px;
+  background: #ffffff;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  padding: 16px 24px;
-  box-sizing: border-box;
-  background: #111;
-  color: #fff;
+  gap: 25px;
+  border-bottom: 1px solid #dddddd;
+}
+
+.accueil-live-info > div {
+  min-width: 0;
+}
+
+.accueil-live-info span {
+  display: inline-block;
+  margin-bottom: 7px;
+  color: #e30613;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.accueil-live-info h2 {
+  margin: 0 0 6px;
+  font-size: clamp(20px, 2.2vw, 25px);
+  font-weight: 900;
+  overflow-wrap: anywhere;
 }
 
 .accueil-live-info p {
   margin: 0;
+  color: #555555;
+  line-height: 1.6;
 }
 
 .accueil-live-full-button {
-  flex: 0 0 auto;
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 42px;
-  padding: 10px 18px;
-  border: 0;
-  border-radius: 4px;
-  background: #e30613;
-  color: #fff;
-  font-weight: 700;
+  min-height: 46px;
+  padding: 0 20px;
+  background: #071f4a;
+  color: #ffffff;
   text-decoration: none;
-  cursor: pointer;
-  transition:
-    background 0.2s ease,
-    transform 0.2s ease;
+  border-radius: 5px;
+  font-weight: 800;
+  transition: background 0.2s ease;
 }
 
 .accueil-live-full-button:hover {
-  background: #b80510;
-  transform: translateY(-1px);
+  background: #e30613;
 }
 
-/* =========================================================
-   NEWS SECTION
-========================================================= */
+/* =====================================================
+   NEWS
+===================================================== */
 
 .news-section {
-  width: 100%;
-  margin: 0;
-  padding: clamp(45px, 6vw, 80px) 0;
-  background: #f3ead8;
-}
-
-.news-section .container {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 0 24px;
-  box-sizing: border-box;
+  padding: clamp(48px, 5vw, 70px) 0;
+  background: #ffffff;
 }
 
 .section-heading {
-  width: 100%;
   margin-bottom: 30px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 25px;
+}
+
+.section-heading a {
+  flex-shrink: 0;
+  color: #071f4a;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.section-heading a:hover {
+  color: #e30613;
 }
 
 .section-kicker {
   display: block;
-  margin-bottom: 8px;
+  margin-bottom: 7px;
   color: #e30613;
-  font-size: 0.8rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
 }
 
 .section-heading h2 {
   margin: 0;
-  color: #111;
-  font-size: clamp(1.8rem, 3vw, 3rem);
-  line-height: 1.05;
+  font-size: clamp(26px, 3vw, 34px);
   font-weight: 900;
+  line-height: 1.15;
 }
 
 .section-message {
-  width: 100%;
-  padding: 35px 20px;
-  text-align: center;
-  color: #555;
-  box-sizing: border-box;
+  margin: 20px 0;
+  padding: 20px;
+  background: #f5f5f5;
+  border-left: 4px solid #071f4a;
+  font-weight: 600;
 }
 
-/* =========================================================
-   NEWS GRID
-========================================================= */
+.section-message.error {
+  border-left-color: #e30613;
+}
 
 .news-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 24px;
-  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(18px, 2vw, 25px);
 }
 
 .news-card {
   min-width: 0;
-  background: #fff;
-  border-radius: 0;
+  background: #ffffff;
+  border: 1px solid #dddddd;
+  border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.08);
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .news-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.14);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
 }
 
 .news-card-link {
@@ -415,23 +473,18 @@
 }
 
 .news-image {
-  position: relative;
   width: 100%;
-  aspect-ratio: 16 / 10;
+  height: clamp(190px, 18vw, 280px);
+  position: relative;
+  background: #eeeeee;
   overflow: hidden;
-  background: #ddd;
 }
 
 .news-image img {
-  display: block;
   width: 100%;
   height: 100%;
+  display: block;
   object-fit: cover;
-  transition: transform 0.35s ease;
-}
-
-.news-card:hover .news-image img {
-  transform: scale(1.04);
 }
 
 .image-placeholder {
@@ -440,82 +493,75 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #ddd;
-  color: #777;
-  text-align: center;
+  font-size: 45px;
 }
 
 .photo-count {
   position: absolute;
-  right: 10px;
-  bottom: 10px;
-  z-index: 2;
-  padding: 6px 9px;
+  right: 12px;
+  bottom: 12px;
+  padding: 7px 10px;
   border-radius: 4px;
   background: rgba(0, 0, 0, 0.78);
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.news-content {
-  padding: 18px;
-}
-
-.news-content h3 {
-  margin: 0 0 10px;
-  color: #111;
-  font-size: clamp(1rem, 1.5vw, 1.3rem);
-  line-height: 1.3;
+  color: #ffffff;
+  font-size: 12px;
   font-weight: 800;
 }
 
-.news-content p {
+.news-content {
+  padding: clamp(16px, 1.8vw, 20px);
+}
+
+.news-content > span,
+.video-content > span {
+  color: #e30613;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.news-content h3,
+.video-content h3 {
+  margin: 9px 0;
+  font-size: clamp(18px, 1.7vw, 20px);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.news-content p,
+.video-content p {
   margin: 0;
-  color: #666;
-  font-size: 0.92rem;
+  color: #666666;
   line-height: 1.6;
 }
 
-/* =========================================================
-   VIDEOS SECTION
-========================================================= */
+/* =====================================================
+   VIDEOS
+===================================================== */
 
 .videos-section {
-  width: 100%;
-  margin: 0;
-  padding: clamp(45px, 6vw, 80px) 0;
-  background: #fff;
-}
-
-.videos-section .container {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 0 24px;
-  box-sizing: border-box;
+  padding: clamp(48px, 5vw, 70px) 0;
+  background: #f5f5f5;
 }
 
 .videos-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 24px;
-  width: 100%;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(18px, 2vw, 25px);
 }
 
 .video-card {
   min-width: 0;
-  background: #fff;
-  border: 1px solid #e5e5e5;
+  background: #ffffff;
+  border-radius: 8px;
   overflow: hidden;
-  transition:
-    transform 0.25s ease,
-    box-shadow 0.25s ease;
+  border: 1px solid #dddddd;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .video-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
 }
 
 .video-card-link {
@@ -525,35 +571,35 @@
 }
 
 .video-thumbnail {
-  position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
+  height: clamp(180px, 17vw, 260px);
+  position: relative;
   overflow: hidden;
-  background: #111;
+  background: #111111;
 }
 
-.video-thumbnail img {
-  display: block;
+.video-thumbnail img,
+.video-thumbnail video {
   width: 100%;
   height: 100%;
+  display: block;
   object-fit: cover;
 }
 
 .video-play {
   position: absolute;
-  top: 50%;
   left: 50%;
-  z-index: 2;
-  width: 54px;
-  height: 54px;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 55px;
+  height: 55px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transform: translate(-50%, -50%);
   border-radius: 50%;
-  background: rgba(227, 6, 19, 0.95);
-  color: #fff;
-  font-size: 1.25rem;
+  background: #e30613;
+  color: #ffffff;
+  font-size: 20px;
 }
 
 .video-placeholder {
@@ -562,194 +608,294 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #151515;
-  color: #aaa;
+  font-size: 50px;
 }
 
 .video-content {
-  padding: 17px;
+  padding: clamp(16px, 1.8vw, 20px);
 }
 
-.video-content h3 {
-  margin: 0;
-  color: #111;
-  font-size: clamp(1rem, 1.4vw, 1.2rem);
-  line-height: 1.35;
-  font-weight: 800;
+/* =====================================================
+   LAPTOP / LARGE DESKTOP
+===================================================== */
+
+@media (min-width: 1200px) {
+  .accueil .container {
+    width: min(1600px, calc(100% - 48px));
+  }
+
+  .live-full-container,
+  .news-section .container,
+  .videos-section .container,
+  .social-section .container {
+    width: 100%;
+  }
 }
 
-/* =========================================================
-   SOCIAL SECTION
-========================================================= */
+@media (min-width: 1440px) {
+  .accueil .container {
+    width: min(1700px, calc(100% - 64px));
+  }
+}
+
+/* =====================================================
+   SOCIAL
+===================================================== */
 
 .social-section {
-  width: 100%;
-  margin: 0;
-  padding: clamp(45px, 6vw, 80px) 0;
-  background: #000;
-  color: #fff;
-}
-
-.social-section .container {
-  width: 100%;
-  max-width: none;
-  margin: 0;
-  padding: 0 24px;
-  box-sizing: border-box;
+  padding: clamp(55px, 6vw, 80px) 0;
+  background: #071f4a;
+  color: #ffffff;
+  text-align: center;
 }
 
 .social-kicker {
-  margin-bottom: 10px;
-  color: #e30613;
-  font-size: 0.8rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  color: #ffffff;
 }
 
 .social-section h2 {
-  margin: 0 0 25px;
-  font-size: clamp(1.8rem, 3vw, 3rem);
-  line-height: 1.1;
+  margin: 0 0 12px;
+  font-size: clamp(27px, 3.2vw, 36px);
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.social-section p {
+  max-width: 700px;
+  margin: 0 auto 28px;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.6;
 }
 
 .social-buttons {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .social-buttons a {
+  min-width: 130px;
+  min-height: 46px;
+  padding: 0 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  padding: 10px 18px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 5px;
+  color: #ffffff;
   text-decoration: none;
-  font-weight: 700;
-  transition:
-    background 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease;
+  font-weight: 800;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .social-buttons a:hover {
-  background: #e30613;
-  border-color: #e30613;
-  transform: translateY(-2px);
+  background: #ffffff;
+  color: #071f4a;
 }
 
-/* =========================================================
-   ACCESSIBILITY
-========================================================= */
+/* =====================================================
+   ACCESSIBILITÉ
+===================================================== */
 
-.accueil a:focus-visible,
-.accueil button:focus-visible {
-  outline: 3px solid #e30613;
+a:focus-visible,
+button:focus-visible,
+video:focus-visible,
+iframe:focus-visible {
+  outline: 4px solid #f5c400;
   outline-offset: 3px;
 }
 
-/* =========================================================
-   LARGE LAPTOP / DESKTOP
-========================================================= */
+/* =====================================================
+   LAPTOP
+===================================================== */
 
-@media (min-width: 1200px) {
-  .news-section .container,
-  .videos-section .container,
-  .social-section .container {
-    padding-left: 30px;
-    padding-right: 30px;
+@media (min-width: 901px) and (max-width: 1280px) {
+  .accueil .container {
+    width: min(100% - 40px, 1180px);
   }
 
-  .news-grid,
-  .videos-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-  }
-}
-
-/* =========================================================
-   TABLET
-========================================================= */
-
-@media (max-width: 1100px) {
-  .news-grid,
-  .videos-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-/* =========================================================
-   TABLET / SMALL LAPTOP
-========================================================= */
-
-@media (max-width: 900px) {
   .live-section-header {
-    padding: 12px 18px;
+    padding: 0 24px;
   }
 
   .accueil-live-info {
-    padding: 15px 18px;
+    padding: 20px 24px;
   }
 
-  .news-section .container,
-  .videos-section .container,
-  .social-section .container {
-    padding-left: 18px;
-    padding-right: 18px;
+  .news-grid,
+  .videos-grid {
+    gap: 20px;
   }
 
+  .news-image {
+    height: clamp(180px, 18vw, 240px);
+  }
+
+  .video-thumbnail {
+    height: clamp(170px, 17vw, 230px);
+  }
+
+  .news-content,
+  .video-content {
+    padding: 18px;
+  }
+}
+
+/* =====================================================
+   GWO EKRAN
+===================================================== */
+
+@media (min-width: 1600px) {
+  .accueil .container {
+    width: min(1500px, calc(100% - 80px));
+  }
+
+  .news-grid,
+  .videos-grid {
+    gap: 30px;
+  }
+
+  .news-image {
+    height: 280px;
+  }
+
+  .video-thumbnail {
+    height: 260px;
+  }
+}
+
+/* =====================================================
+   TABLETTE
+===================================================== */
+
+@media (max-width: 900px) {
   .news-grid,
   .videos-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media (max-width: 650px) {
-  .breaking-label {
-    padding: 0 12px;
-    font-size: 0.7rem;
-  }
-
-  .breaking-content {
-    gap: 25px;
-    padding-left: 20px;
-  }
-
-  .live-section-header {
-    min-height: 58px;
-    padding: 10px 14px;
-  }
-
-  .live-title-wrapper {
-    gap: 9px;
-  }
-
-  .live-dot {
-    width: 9px;
-    height: 9px;
-    flex-basis: 9px;
-  }
-
-  .live-now-badge {
-    padding: 6px 9px;
-    font-size: 0.68rem;
-  }
 
   .accueil-live-player {
+    min-height: 0;
     aspect-ratio: 16 / 9;
   }
 
+  .accueil-live-loading,
+  .accueil-live-offline {
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  .live-section-header {
+    padding: 0 20px;
+  }
+
   .accueil-live-info {
+    padding: 20px;
+  }
+}
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media (max-width: 650px) {
+  .accueil .container {
+    width: min(calc(100% - 24px), 1440px);
+  }
+
+  .breaking-news-inner {
+    min-height: 46px;
+  }
+
+  .breaking-label {
+    padding-right: 12px;
+    font-size: 10px;
+  }
+
+  .breaking-content {
+    gap: 40px;
+    padding-left: 20px;
+  }
+
+  .breaking-content span {
+    font-size: 12px;
+  }
+
+  .live-section-header {
+    min-height: 62px;
+    padding: 0 14px;
+    gap: 12px;
+  }
+
+  .live-title-wrapper {
+    gap: 8px;
+  }
+
+  .live-title-wrapper h1 {
+    font-size: 20px;
+  }
+
+  .live-dot {
+    width: 10px;
+    height: 10px;
+  }
+
+  .live-now-badge {
+    padding: 7px 9px;
+    font-size: 10px;
+  }
+
+  .accueil-live-player {
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  .accueil-live-loading,
+  .accueil-live-offline {
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  .accueil-live-loading {
+    padding: 24px 16px;
+  }
+
+  .accueil-live-offline {
+    padding: 24px 16px;
+  }
+
+  .accueil-live-offline-icon {
+    font-size: 42px;
+  }
+
+  .accueil-live-offline h2 {
+    font-size: 25px;
+  }
+
+  .accueil-live-offline p {
+    font-size: 15px;
+  }
+
+  .accueil-live-button {
+    min-height: 44px;
+    padding: 0 18px;
+  }
+
+  .accueil-live-info {
+    padding: 18px 14px;
     flex-direction: column;
-    align-items: stretch;
-    padding: 14px;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  .accueil-live-info h2 {
+    font-size: 20px;
+  }
+
+  .accueil-live-info p {
+    font-size: 14px;
   }
 
   .accueil-live-full-button {
@@ -757,56 +903,186 @@
   }
 
   .news-section,
-  .videos-section,
-  .social-section {
-    padding-top: 45px;
-    padding-bottom: 45px;
+  .videos-section {
+    padding: 50px 0;
   }
 
-  .news-section .container,
-  .videos-section .container,
-  .social-section .container {
-    padding-left: 14px;
-    padding-right: 14px;
+  .section-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .section-heading h2 {
+    font-size: 28px;
   }
 
   .news-grid,
   .videos-grid {
     grid-template-columns: 1fr;
-    gap: 18px;
+  }
+
+  .news-image,
+  .video-thumbnail {
+    height: 220px;
   }
 
   .news-content,
   .video-content {
-    padding: 15px;
+    padding: 18px;
+  }
+
+  .news-content h3,
+  .video-content h3 {
+    font-size: 19px;
+  }
+
+  .social-section {
+    padding: 60px 0;
+  }
+
+  .social-section h2 {
+    font-size: 28px;
   }
 
   .social-buttons {
     flex-direction: column;
-    align-items: stretch;
   }
 
   .social-buttons a {
     width: 100%;
-    box-sizing: border-box;
+    max-width: 300px;
   }
 }
 
-/* =========================================================
-   REDUCED MOTION
-========================================================= */
+/* =====================================================
+   PETIT MOBILE
+===================================================== */
+
+@media (max-width: 480px) {
+  .accueil .container {
+    width: calc(100% - 24px);
+  }
+
+  .breaking-label {
+    gap: 6px;
+    padding-right: 8px;
+    font-size: 9px;
+    letter-spacing: 0.4px;
+  }
+
+  .breaking-dot {
+    width: 7px;
+    height: 7px;
+  }
+
+  .breaking-content {
+    gap: 28px;
+    padding-left: 14px;
+  }
+
+  .breaking-content span {
+    font-size: 11px;
+  }
+
+  .live-section-header {
+    min-height: 58px;
+    padding: 0 12px;
+  }
+
+  .live-title-wrapper h1 {
+    font-size: 17px;
+    letter-spacing: 0;
+  }
+
+  .live-now-badge {
+    padding: 6px 8px;
+    font-size: 9px;
+  }
+
+  .accueil-live-offline h2 {
+    font-size: 22px;
+  }
+
+  .accueil-live-offline p {
+    font-size: 14px;
+  }
+
+  .accueil-live-offline-icon {
+    font-size: 36px;
+  }
+
+  .section-heading h2 {
+    font-size: 25px;
+  }
+
+  .section-heading a {
+    font-size: 14px;
+  }
+
+  .news-image,
+  .video-thumbnail {
+    height: 200px;
+  }
+
+  .news-content,
+  .video-content {
+    padding: 16px;
+  }
+
+  .social-section h2 {
+    font-size: 25px;
+  }
+
+  .social-buttons a {
+    min-height: 44px;
+  }
+}
+
+/* =====================================================
+   TRÈ TI EKRAN
+===================================================== */
+
+@media (max-width: 360px) {
+  .accueil .container {
+    width: calc(100% - 18px);
+  }
+
+  .live-section-header {
+    padding: 0 9px;
+    gap: 8px;
+  }
+
+  .live-title-wrapper {
+    gap: 6px;
+  }
+
+  .live-title-wrapper h1 {
+    font-size: 15px;
+  }
+
+  .live-now-badge {
+    padding: 5px 6px;
+    font-size: 8px;
+  }
+
+  .news-image,
+  .video-thumbnail {
+    height: 180px;
+  }
+}
+
+/* =====================================================
+   REDUIRE ANIMATIONS
+===================================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  .breaking-content,
-  .breaking-dot,
-  .live-dot,
-  .accueil-live-spinner,
-  .news-card,
-  .news-image img,
-  .video-card,
-  .accueil-live-full-button,
-  .social-buttons a {
-    animation: none;
-    transition: none;
+  .accueil *,
+  .accueil *::before,
+  .accueil *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }
