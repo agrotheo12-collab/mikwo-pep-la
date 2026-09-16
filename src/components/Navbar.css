@@ -8,6 +8,7 @@
   z-index: 2000;
 
   width: 100%;
+
   background: #0057a8;
 
   border-bottom: 4px solid #d71920;
@@ -17,7 +18,7 @@
 
 
 /* =====================================================
-   CONTAINER — FULL WIDTH
+   CONTAINER
 ===================================================== */
 
 .navbar-container {
@@ -33,7 +34,7 @@
   align-items: center;
   justify-content: space-between;
 
-  gap: 30px;
+  gap: 25px;
 
   box-sizing: border-box;
 }
@@ -172,7 +173,7 @@
 @media (max-width: 1200px) {
   .navbar-container {
     padding: 0 20px;
-    gap: 20px;
+    gap: 18px;
   }
 
   .navbar-logo img {
@@ -213,22 +214,38 @@
 
 /* =====================================================
    MOBILE
+   LOGO + MENU SOU MENM LIY
 ===================================================== */
 
 @media (max-width: 768px) {
+
   .navbar {
     position: relative;
+
+    width: 100%;
   }
 
   .navbar-container {
     width: 100%;
-    min-height: auto;
 
-    padding: 12px 14px;
+    min-height: 64px;
 
-    flex-direction: column;
+    height: 64px;
 
-    gap: 10px;
+    margin: 0;
+
+    padding: 0 10px;
+
+    display: flex;
+    flex-direction: row;
+
+    align-items: center;
+
+    justify-content: flex-start;
+
+    gap: 12px;
+
+    overflow: hidden;
   }
 
 
@@ -237,12 +254,20 @@
   ================================================== */
 
   .navbar-logo {
-    width: 100%;
+    flex: 0 0 auto;
+
+    width: auto;
+
+    display: flex;
+    align-items: center;
     justify-content: center;
   }
 
   .navbar-logo img {
-    width: 105px;
+    width: 78px;
+    height: auto;
+
+    display: block;
   }
 
 
@@ -251,20 +276,27 @@
   ================================================== */
 
   .navbar-menu {
-    width: 100%;
+    flex: 1 1 auto;
 
-    flex: none;
+    width: auto;
+    min-width: 0;
 
-    margin-left: 0;
+    margin: 0;
+
+    display: flex;
+
+    flex-direction: row;
+
+    align-items: center;
 
     justify-content: flex-start;
+
+    gap: 0;
 
     overflow-x: auto;
     overflow-y: hidden;
 
-    padding-bottom: 3px;
-
-    gap: 0;
+    padding: 0;
 
     scrollbar-width: none;
 
@@ -277,22 +309,36 @@
 
 
   /* ==================================================
-     MOBILE LINKS
+     LINKS MOBILE
   ================================================== */
 
   .navbar-link {
     flex: 0 0 auto;
 
-    min-height: 44px;
+    min-height: 64px;
+    height: 64px;
 
-    padding: 0 14px;
+    padding: 0 12px;
 
-    font-size: 11px;
+    font-size: 10px;
+
+    letter-spacing: 0;
+
+    white-space: nowrap;
+  }
+
+
+  /* ==================================================
+     ACTIVE MOBILE
+  ================================================== */
+
+  .navbar-link.active {
+    background: rgba(255, 255, 255, 0.08);
   }
 
   .navbar-link.active::after {
-    left: 9px;
-    right: 9px;
+    left: 8px;
+    right: 8px;
 
     bottom: 0;
 
@@ -306,20 +352,34 @@
 ===================================================== */
 
 @media (max-width: 480px) {
+
   .navbar-container {
-    padding: 10px 10px;
+    min-height: 60px;
+    height: 60px;
+
+    padding: 0 8px;
+
+    gap: 9px;
   }
 
   .navbar-logo img {
-    width: 92px;
+    width: 70px;
   }
 
   .navbar-link {
-    min-height: 42px;
+    min-height: 60px;
+    height: 60px;
 
-    padding: 0 12px;
+    padding: 0 10px;
 
-    font-size: 10.5px;
+    font-size: 9px;
+  }
+
+  .navbar-link.active::after {
+    left: 7px;
+    right: 7px;
+
+    height: 3px;
   }
 }
 
@@ -329,14 +389,21 @@
 ===================================================== */
 
 @media (max-width: 360px) {
+
+  .navbar-container {
+    padding: 0 6px;
+
+    gap: 7px;
+  }
+
   .navbar-logo img {
-    width: 85px;
+    width: 64px;
   }
 
   .navbar-link {
-    padding: 0 10px;
+    padding: 0 8px;
 
-    font-size: 10px;
+    font-size: 8.5px;
   }
 }
 
@@ -347,5 +414,6 @@
 
 .navbar-link:focus-visible {
   outline: 3px solid #f3ead8;
+
   outline-offset: -3px;
 }
