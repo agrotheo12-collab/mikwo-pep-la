@@ -15,7 +15,7 @@
 ===================================================== */
 
 .accueil .container {
-  width: min(1440px, calc(100% - 48px));
+  width: min(1500px, calc(100% - 32px));
   margin: 0 auto;
 }
 
@@ -613,6 +613,29 @@
 
 .video-content {
   padding: clamp(16px, 1.8vw, 20px);
+}
+
+/* =====================================================
+   LAPTOP / LARGE DESKTOP
+===================================================== */
+
+@media (min-width: 1200px) {
+  .accueil .container {
+    width: min(1600px, calc(100% - 48px));
+  }
+
+  .live-full-container,
+  .news-section .container,
+  .videos-section .container,
+  .social-section .container {
+    width: 100%;
+  }
+}
+
+@media (min-width: 1440px) {
+  .accueil .container {
+    width: min(1700px, calc(100% - 64px));
+  }
 }
 
 /* =====================================================
