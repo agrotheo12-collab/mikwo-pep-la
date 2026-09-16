@@ -7,10 +7,15 @@
   min-height: 100vh;
   background: #ffffff;
   color: #111111;
+  overflow: hidden;
 }
 
-.container {
-  width: min(1200px, calc(100% - 40px));
+/* =====================================================
+   CONTAINER
+===================================================== */
+
+.accueil .container {
+  width: min(1440px, calc(100% - 48px));
   margin: 0 auto;
 }
 
@@ -29,6 +34,7 @@
   min-height: 52px;
   display: flex;
   align-items: center;
+  min-width: 0;
 }
 
 .breaking-label {
@@ -39,11 +45,13 @@
   padding-right: 24px;
   font-size: 13px;
   letter-spacing: 0.8px;
+  white-space: nowrap;
 }
 
 .breaking-dot {
   width: 9px;
   height: 9px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: #e30613;
   animation: breakingPulse 1.4s infinite;
@@ -51,6 +59,7 @@
 
 .breaking-track {
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   white-space: nowrap;
 }
@@ -110,11 +119,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 20px;
   background: #ffffff;
   border-bottom: 4px solid #e30613;
 }
 
 .live-title-wrapper {
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -122,7 +133,7 @@
 
 .live-title-wrapper h1 {
   margin: 0;
-  font-size: 26px;
+  font-size: clamp(20px, 2vw, 26px);
   font-weight: 900;
   letter-spacing: 0.5px;
 }
@@ -130,6 +141,7 @@
 .live-dot {
   width: 13px;
   height: 13px;
+  flex-shrink: 0;
   border-radius: 50%;
   background: #e30613;
   animation: livePulse 1.3s infinite;
@@ -150,22 +162,24 @@
 }
 
 .live-now-badge {
+  flex-shrink: 0;
   background: #e30613;
   color: #ffffff;
   padding: 10px 16px;
   border-radius: 5px;
   font-size: 13px;
   font-weight: 900;
+  white-space: nowrap;
 }
 
 /* =====================================================
-   PLAYER
+   PLAYER LIVE — RAPÒ 16:9
 ===================================================== */
 
 .accueil-live-player {
   width: 100%;
   aspect-ratio: 16 / 9;
-  min-height: 500px;
+  min-height: 0;
   background: #000000;
   overflow: hidden;
   position: relative;
@@ -174,7 +188,10 @@
 .accueil-live-media {
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
   background: #000000;
+  overflow: hidden;
 }
 
 .accueil-live-video,
@@ -182,6 +199,8 @@
   display: block;
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
   border: 0;
   object-fit: contain;
   background: #000000;
@@ -191,6 +210,14 @@
   aspect-ratio: 16 / 9;
 }
 
+/* Si gen yon wrapper div anndan player la */
+.accueil-live-player > div {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
 /* =====================================================
    LIVE LOADING
 ===================================================== */
@@ -198,7 +225,9 @@
 .accueil-live-loading {
   width: 100%;
   height: 100%;
-  min-height: 500px;
+  min-height: 0;
+  aspect-ratio: 16 / 9;
+  padding: 30px 20px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -206,17 +235,19 @@
   gap: 20px;
   background: #101010;
   color: #ffffff;
+  text-align: center;
 }
 
 .accueil-live-loading p {
   margin: 0;
-  font-size: 18px;
+  font-size: clamp(15px, 2vw, 18px);
   font-weight: 600;
 }
 
 .accueil-live-spinner {
   width: 48px;
   height: 48px;
+  flex-shrink: 0;
   border: 5px solid rgba(255, 255, 255, 0.25);
   border-top-color: #ffffff;
   border-radius: 50%;
@@ -236,7 +267,8 @@
 .accueil-live-offline {
   width: 100%;
   height: 100%;
-  min-height: 500px;
+  min-height: 0;
+  aspect-ratio: 16 / 9;
   padding: 50px 25px;
   display: flex;
   flex-direction: column;
@@ -247,6 +279,7 @@
   background-position: center;
   color: #ffffff;
   position: relative;
+  overflow: hidden;
 }
 
 .accueil-live-offline::before {
@@ -262,20 +295,20 @@
 }
 
 .accueil-live-offline-icon {
-  font-size: 52px;
+  font-size: clamp(36px, 5vw, 52px);
   margin-bottom: 12px;
 }
 
 .accueil-live-offline h2 {
   margin: 0 0 10px;
-  font-size: 34px;
+  font-size: clamp(23px, 3vw, 34px);
   font-weight: 900;
 }
 
 .accueil-live-offline p {
   max-width: 650px;
   margin: 0 0 25px;
-  font-size: 18px;
+  font-size: clamp(14px, 1.6vw, 18px);
   line-height: 1.6;
 }
 
@@ -290,7 +323,7 @@
   text-decoration: none;
   border-radius: 5px;
   font-weight: 800;
-  transition: 0.2s ease;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .accueil-live-button:hover {
@@ -327,8 +360,9 @@
 
 .accueil-live-info h2 {
   margin: 0 0 6px;
-  font-size: 25px;
+  font-size: clamp(20px, 2.2vw, 25px);
   font-weight: 900;
+  overflow-wrap: anywhere;
 }
 
 .accueil-live-info p {
@@ -349,7 +383,7 @@
   text-decoration: none;
   border-radius: 5px;
   font-weight: 800;
-  transition: 0.2s ease;
+  transition: background 0.2s ease;
 }
 
 .accueil-live-full-button:hover {
@@ -361,7 +395,7 @@
 ===================================================== */
 
 .news-section {
-  padding: 70px 0;
+  padding: clamp(48px, 5vw, 70px) 0;
   background: #ffffff;
 }
 
@@ -374,6 +408,7 @@
 }
 
 .section-heading a {
+  flex-shrink: 0;
   color: #071f4a;
   font-weight: 800;
   text-decoration: none;
@@ -394,8 +429,9 @@
 
 .section-heading h2 {
   margin: 0;
-  font-size: 34px;
+  font-size: clamp(26px, 3vw, 34px);
   font-weight: 900;
+  line-height: 1.15;
 }
 
 .section-message {
@@ -412,11 +448,12 @@
 
 .news-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(18px, 2vw, 25px);
 }
 
 .news-card {
+  min-width: 0;
   background: #ffffff;
   border: 1px solid #dddddd;
   border-radius: 8px;
@@ -430,12 +467,14 @@
 }
 
 .news-card-link {
+  display: block;
   color: inherit;
   text-decoration: none;
 }
 
 .news-image {
-  height: 240px;
+  width: 100%;
+  height: clamp(190px, 18vw, 280px);
   position: relative;
   background: #eeeeee;
   overflow: hidden;
@@ -470,7 +509,7 @@
 }
 
 .news-content {
-  padding: 20px;
+  padding: clamp(16px, 1.8vw, 20px);
 }
 
 .news-content > span,
@@ -484,8 +523,9 @@
 .news-content h3,
 .video-content h3 {
   margin: 9px 0;
-  font-size: 20px;
+  font-size: clamp(18px, 1.7vw, 20px);
   line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
 .news-content p,
@@ -500,17 +540,18 @@
 ===================================================== */
 
 .videos-section {
-  padding: 70px 0;
+  padding: clamp(48px, 5vw, 70px) 0;
   background: #f5f5f5;
 }
 
 .videos-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(18px, 2vw, 25px);
 }
 
 .video-card {
+  min-width: 0;
   background: #ffffff;
   border-radius: 8px;
   overflow: hidden;
@@ -524,12 +565,14 @@
 }
 
 .video-card-link {
+  display: block;
   color: inherit;
   text-decoration: none;
 }
 
 .video-thumbnail {
-  height: 230px;
+  width: 100%;
+  height: clamp(180px, 17vw, 260px);
   position: relative;
   overflow: hidden;
   background: #111111;
@@ -569,7 +612,7 @@
 }
 
 .video-content {
-  padding: 20px;
+  padding: clamp(16px, 1.8vw, 20px);
 }
 
 /* =====================================================
@@ -577,7 +620,7 @@
 ===================================================== */
 
 .social-section {
-  padding: 80px 0;
+  padding: clamp(55px, 6vw, 80px) 0;
   background: #071f4a;
   color: #ffffff;
   text-align: center;
@@ -589,13 +632,16 @@
 
 .social-section h2 {
   margin: 0 0 12px;
-  font-size: 36px;
+  font-size: clamp(27px, 3.2vw, 36px);
   font-weight: 900;
+  line-height: 1.2;
 }
 
 .social-section p {
-  margin: 0 0 28px;
-  color: rgba(255, 255, 255, 0.8);
+  max-width: 700px;
+  margin: 0 auto 28px;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.6;
 }
 
 .social-buttons {
@@ -618,7 +664,7 @@
   color: #ffffff;
   text-decoration: none;
   font-weight: 800;
-  transition: 0.2s ease;
+  transition: background 0.2s ease, color 0.2s ease;
 }
 
 .social-buttons a:hover {
@@ -639,22 +685,91 @@ iframe:focus-visible {
 }
 
 /* =====================================================
+   LAPTOP
+===================================================== */
+
+@media (min-width: 901px) and (max-width: 1280px) {
+  .accueil .container {
+    width: min(100% - 40px, 1180px);
+  }
+
+  .live-section-header {
+    padding: 0 24px;
+  }
+
+  .accueil-live-info {
+    padding: 20px 24px;
+  }
+
+  .news-grid,
+  .videos-grid {
+    gap: 20px;
+  }
+
+  .news-image {
+    height: clamp(180px, 18vw, 240px);
+  }
+
+  .video-thumbnail {
+    height: clamp(170px, 17vw, 230px);
+  }
+
+  .news-content,
+  .video-content {
+    padding: 18px;
+  }
+}
+
+/* =====================================================
+   GWO EKRAN
+===================================================== */
+
+@media (min-width: 1600px) {
+  .accueil .container {
+    width: min(1500px, calc(100% - 80px));
+  }
+
+  .news-grid,
+  .videos-grid {
+    gap: 30px;
+  }
+
+  .news-image {
+    height: 280px;
+  }
+
+  .video-thumbnail {
+    height: 260px;
+  }
+}
+
+/* =====================================================
    TABLETTE
 ===================================================== */
 
 @media (max-width: 900px) {
   .news-grid,
   .videos-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .accueil-live-player {
-    min-height: 400px;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
   }
 
   .accueil-live-loading,
   .accueil-live-offline {
-    min-height: 400px;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  .live-section-header {
+    padding: 0 20px;
+  }
+
+  .accueil-live-info {
+    padding: 20px;
   }
 }
 
@@ -663,8 +778,8 @@ iframe:focus-visible {
 ===================================================== */
 
 @media (max-width: 650px) {
-  .container {
-    width: min(100% - 24px, 1200px);
+  .accueil .container {
+    width: min(calc(100% - 24px), 1440px);
   }
 
   .breaking-news-inner {
@@ -678,6 +793,7 @@ iframe:focus-visible {
 
   .breaking-content {
     gap: 40px;
+    padding-left: 20px;
   }
 
   .breaking-content span {
@@ -687,6 +803,11 @@ iframe:focus-visible {
   .live-section-header {
     min-height: 62px;
     padding: 0 14px;
+    gap: 12px;
+  }
+
+  .live-title-wrapper {
+    gap: 8px;
   }
 
   .live-title-wrapper h1 {
@@ -710,11 +831,20 @@ iframe:focus-visible {
 
   .accueil-live-loading,
   .accueil-live-offline {
-    min-height: 300px;
+    min-height: 0;
+    aspect-ratio: 16 / 9;
+  }
+
+  .accueil-live-loading {
+    padding: 24px 16px;
   }
 
   .accueil-live-offline {
-    padding: 30px 18px;
+    padding: 24px 16px;
+  }
+
+  .accueil-live-offline-icon {
+    font-size: 42px;
   }
 
   .accueil-live-offline h2 {
@@ -725,14 +855,24 @@ iframe:focus-visible {
     font-size: 15px;
   }
 
+  .accueil-live-button {
+    min-height: 44px;
+    padding: 0 18px;
+  }
+
   .accueil-live-info {
     padding: 18px 14px;
     flex-direction: column;
     align-items: flex-start;
+    gap: 18px;
   }
 
   .accueil-live-info h2 {
     font-size: 20px;
+  }
+
+  .accueil-live-info p {
+    font-size: 14px;
   }
 
   .accueil-live-full-button {
@@ -764,6 +904,16 @@ iframe:focus-visible {
     height: 220px;
   }
 
+  .news-content,
+  .video-content {
+    padding: 18px;
+  }
+
+  .news-content h3,
+  .video-content h3 {
+    font-size: 19px;
+  }
+
   .social-section {
     padding: 60px 0;
   }
@@ -783,15 +933,133 @@ iframe:focus-visible {
 }
 
 /* =====================================================
-   REDUIRE LES ANIMATIONS SI UTILISATEUR LE DEMANDE
+   PETIT MOBILE
+===================================================== */
+
+@media (max-width: 480px) {
+  .accueil .container {
+    width: calc(100% - 24px);
+  }
+
+  .breaking-label {
+    gap: 6px;
+    padding-right: 8px;
+    font-size: 9px;
+    letter-spacing: 0.4px;
+  }
+
+  .breaking-dot {
+    width: 7px;
+    height: 7px;
+  }
+
+  .breaking-content {
+    gap: 28px;
+    padding-left: 14px;
+  }
+
+  .breaking-content span {
+    font-size: 11px;
+  }
+
+  .live-section-header {
+    min-height: 58px;
+    padding: 0 12px;
+  }
+
+  .live-title-wrapper h1 {
+    font-size: 17px;
+    letter-spacing: 0;
+  }
+
+  .live-now-badge {
+    padding: 6px 8px;
+    font-size: 9px;
+  }
+
+  .accueil-live-offline h2 {
+    font-size: 22px;
+  }
+
+  .accueil-live-offline p {
+    font-size: 14px;
+  }
+
+  .accueil-live-offline-icon {
+    font-size: 36px;
+  }
+
+  .section-heading h2 {
+    font-size: 25px;
+  }
+
+  .section-heading a {
+    font-size: 14px;
+  }
+
+  .news-image,
+  .video-thumbnail {
+    height: 200px;
+  }
+
+  .news-content,
+  .video-content {
+    padding: 16px;
+  }
+
+  .social-section h2 {
+    font-size: 25px;
+  }
+
+  .social-buttons a {
+    min-height: 44px;
+  }
+}
+
+/* =====================================================
+   TRÈ TI EKRAN
+===================================================== */
+
+@media (max-width: 360px) {
+  .accueil .container {
+    width: calc(100% - 18px);
+  }
+
+  .live-section-header {
+    padding: 0 9px;
+    gap: 8px;
+  }
+
+  .live-title-wrapper {
+    gap: 6px;
+  }
+
+  .live-title-wrapper h1 {
+    font-size: 15px;
+  }
+
+  .live-now-badge {
+    padding: 5px 6px;
+    font-size: 8px;
+  }
+
+  .news-image,
+  .video-thumbnail {
+    height: 180px;
+  }
+}
+
+/* =====================================================
+   REDUIRE ANIMATIONS
 ===================================================== */
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
+  .accueil *,
+  .accueil *::before,
+  .accueil *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
   }
 }
