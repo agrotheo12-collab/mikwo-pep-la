@@ -6064,7 +6064,7 @@ app.post(
           $1,$2,NOW()
 
         )
-          
+
         ON CONFLICT (session_id)
         DO UPDATE SET
           id_live = EXCLUDED.id_live,
@@ -6145,6 +6145,53 @@ app.post(
 
   }
 
+);
+
+// ======================================================
+// ADMIN — NOMBRE DE SPECTATEURS ACTIFS
+// ======================================================
+
+app.get(
+  "/api/live/:id/viewers",
+  verifierToken,
+  async (req, res) => {
+    try {
+      const idLive = Number(req.params.id);
+
+      if (!Number.isInteger(idLive) || idLive <= 0) {
+        return res.status(400).json({
+          success: false,
+          message: "ID du direct invalide.",
+        });
+      }
+
+      const result = await pool.query(
+        `
+        SELECT COUNT(*)::int AS viewers
+        FROM live_viewers
+        WHERE id_live = $1
+          AND last_seen > NOW() - INTERVAL '2 minutes'
+        `,
+        [idLive]
+      );
+
+      return res.json({
+        success: true,
+        viewers: result.rows[0]?.viewers || 0,
+      });
+    } catch (error) {
+      console.error(
+        "Erreur récupération spectateurs :",
+        error
+      );
+
+      return res.status(500).json({
+        success: false,
+        message:
+          "Impossible de récupérer le nombre de spectateurs.",
+      });
+    }
+  }
 );
 
 // ======================================================

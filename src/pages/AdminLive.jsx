@@ -8,6 +8,7 @@ function AdminLive() {
   const navigate = useNavigate();
 
   const [lives, setLives] = useState([]);
+  const [viewers, setViewers] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -27,7 +28,9 @@ function AdminLive() {
   // =====================================================
 
   const getToken = () => {
-    return localStorage.getItem("mikwo_pep_la_token");
+    return localStorage.getItem(
+      "mikwo_pep_la_token"
+    );
   };
 
   // =====================================================
@@ -193,10 +196,19 @@ function AdminLive() {
         );
       }
 
-      setLives(
-        Array.isArray(data)
-          ? data
-          : []
+      const listeLives = Array.isArray(data)
+        ? data
+        : [];
+
+      setLives(listeLives);
+
+      /*
+       * Charger immédiatement les spectateurs
+       * après avoir récupéré les lives.
+       */
+      await chargerTousLesViewers(
+        listeLives,
+        token
       );
     } catch (err) {
       console.error(err);
@@ -211,12 +223,99 @@ function AdminLive() {
   };
 
   // =====================================================
-  // CHARGEMENT
+  // CHARGER LE NOMBRE DE SPECTATEURS
+  // =====================================================
+
+  const chargerViewers = async (
+    idLive,
+    token = getToken()
+  ) => {
+    if (!idLive || !token) {
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `${API_URL}/api/live/${idLive}/viewers`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Impossible de récupérer les spectateurs."
+        );
+      }
+
+      if (data.success) {
+        setViewers((ancien) => ({
+          ...ancien,
+          [idLive]:
+            Number(data.viewers) || 0,
+        }));
+      }
+    } catch (err) {
+      console.error(
+        `Erreur spectateurs live ${idLive} :`,
+        err
+      );
+    }
+  };
+
+  // =====================================================
+  // CHARGER TOUS LES VIEWERS
+  // =====================================================
+
+  const chargerTousLesViewers = async (
+    listeLives = lives,
+    token = getToken()
+  ) => {
+    if (!token || !Array.isArray(listeLives)) {
+      return;
+    }
+
+    await Promise.all(
+      listeLives.map((live) =>
+        chargerViewers(
+          live.id_live,
+          token
+        )
+      )
+    );
+  };
+
+  // =====================================================
+  // CHARGEMENT INITIAL
   // =====================================================
 
   useEffect(() => {
     chargerLives();
   }, []);
+
+  // =====================================================
+  // RAFRAÎCHIR LES SPECTATEURS
+  // TOUTES LES 10 SECONDES
+  // =====================================================
+
+  useEffect(() => {
+    if (!lives.length) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      chargerTousLesViewers();
+    }, 10000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [lives]);
 
   // =====================================================
   // RESET
@@ -300,10 +399,6 @@ function AdminLive() {
       return "Veuillez entrer une URL valide.";
     }
 
-    // ---------------------------------------------------
-    // YOUTUBE
-    // ---------------------------------------------------
-
     if (sourceType === "youtube") {
       if (
         !url.includes("youtube.com") &&
@@ -312,10 +407,6 @@ function AdminLive() {
         return "Veuillez entrer un lien YouTube valide.";
       }
     }
-
-    // ---------------------------------------------------
-    // FACEBOOK
-    // ---------------------------------------------------
 
     if (sourceType === "facebook") {
       if (
@@ -326,29 +417,17 @@ function AdminLive() {
       }
     }
 
-    // ---------------------------------------------------
-    // ZOOM
-    // ---------------------------------------------------
-
     if (sourceType === "zoom") {
       if (!url.includes("zoom.us")) {
         return "Veuillez entrer un lien Zoom valide.";
       }
     }
 
-    // ---------------------------------------------------
-    // TIKTOK
-    // ---------------------------------------------------
-
     if (sourceType === "tiktok") {
       if (!url.includes("tiktok.com")) {
         return "Veuillez entrer un lien TikTok valide.";
       }
     }
-
-    // ---------------------------------------------------
-    // HLS
-    // ---------------------------------------------------
 
     if (sourceType === "hls") {
       if (
@@ -378,7 +457,8 @@ function AdminLive() {
       return;
     }
 
-    const urlError = validateStreamUrl();
+    const urlError =
+      validateStreamUrl();
 
     if (urlError) {
       setError(urlError);
@@ -695,8 +775,6 @@ function AdminLive() {
             className="admin-live-form"
           >
 
-            {/* TITRE */}
-
             <div className="admin-live-field">
 
               <label htmlFor="live-titre">
@@ -715,8 +793,6 @@ function AdminLive() {
 
             </div>
 
-            {/* DESCRIPTION */}
-
             <div className="admin-live-field">
 
               <label htmlFor="live-description">
@@ -727,15 +803,15 @@ function AdminLive() {
                 id="live-description"
                 value={description}
                 onChange={(e) =>
-                  setDescription(e.target.value)
+                  setDescription(
+                    e.target.value
+                  )
                 }
                 placeholder="Description du direct..."
                 rows="4"
               />
 
             </div>
-
-            {/* SOURCE */}
 
             <div className="admin-live-field">
 
@@ -747,7 +823,9 @@ function AdminLive() {
                 id="live-source"
                 value={sourceType}
                 onChange={(e) =>
-                  setSourceType(e.target.value)
+                  setSourceType(
+                    e.target.value
+                  )
                 }
               >
 
@@ -796,8 +874,6 @@ function AdminLive() {
 
             </div>
 
-            {/* URL */}
-
             <div className="admin-live-field">
 
               <label htmlFor="live-stream-url">
@@ -809,7 +885,9 @@ function AdminLive() {
                 type="text"
                 value={streamUrl}
                 onChange={(e) =>
-                  setStreamUrl(e.target.value)
+                  setStreamUrl(
+                    e.target.value
+                  )
                 }
                 placeholder={getUrlPlaceholder()}
               />
@@ -847,8 +925,6 @@ function AdminLive() {
 
             </div>
 
-            {/* STATUT */}
-
             <div className="admin-live-field">
 
               <label htmlFor="live-status">
@@ -859,7 +935,9 @@ function AdminLive() {
                 id="live-status"
                 value={statut}
                 onChange={(e) =>
-                  setStatut(e.target.value)
+                  setStatut(
+                    e.target.value
+                  )
                 }
               >
 
@@ -874,8 +952,6 @@ function AdminLive() {
               </select>
 
             </div>
-
-            {/* BOUTON */}
 
             <button
               type="submit"
@@ -896,7 +972,7 @@ function AdminLive() {
       </section>
 
       {/* =================================================
-          LISTE
+          LISTE DES DIRECTS
       ================================================= */}
 
       <section className="admin-live-list-section">
@@ -950,153 +1026,156 @@ function AdminLive() {
 
           <div className="admin-live-grid">
 
-            {lives.map((live) => (
+            {lives.map((live) => {
 
-              <article
-                key={live.id_live}
-                className="admin-live-item"
-              >
+              const nombreViewers =
+                Number(
+                  viewers[live.id_live]
+                ) || 0;
 
-                {/* TOP */}
+              return (
+                <article
+                  key={live.id_live}
+                  className="admin-live-item"
+                >
 
-                <div className="admin-live-item-top">
+                  <div className="admin-live-item-top">
 
-                  <span
-                    className={
-                      live.statut === "live"
-                        ? "status-live"
-                        : "status-offline"
-                    }
+                    <span
+                      className={
+                        live.statut === "live"
+                          ? "status-live"
+                          : "status-offline"
+                      }
+                    >
+
+                      <span></span>
+
+                      {live.statut === "live"
+                        ? "EN DIRECT"
+                        : "HORS LIGNE"}
+
+                    </span>
+
+                    <span className="admin-live-id">
+                      #{live.id_live}
+                    </span>
+
+                  </div>
+
+                  <div className="admin-live-source">
+
+                    <span>
+                      {getSourceIcon(
+                        live.source_type
+                      )}
+                    </span>
+
+                    <strong>
+                      {getSourceLabel(
+                        live.source_type
+                      )}
+                    </strong>
+
+                  </div>
+
+                  <h3>
+                    {live.titre}
+                  </h3>
+
+                  {live.description && (
+                    <p>
+                      {live.description}
+                    </p>
+                  )}
+
+                  <div className="admin-live-url">
+
+                    <strong>
+                      Source :
+                    </strong>
+
+                    <span>
+                      {live.stream_url}
+                    </span>
+
+                  </div>
+
+                  {/* =================================================
+                      NOMBRE DE SPECTATEURS — ADMIN SEULEMENT
+                  ================================================= */}
+
+                  <div
+                    className="admin-live-viewers"
+                    title="Spectateurs actifs durant les 2 dernières minutes"
                   >
 
-                    <span></span>
+                    <span>
+                      👁️
+                    </span>
 
-                    {live.statut === "live"
-                      ? "EN DIRECT"
-                      : "HORS LIGNE"}
+                    <strong>
+                      {nombreViewers}
+                    </strong>
 
-                  </span>
+                    <span>
+                      spectateur
+                      {nombreViewers !== 1
+                        ? "s"
+                        : ""}
+                    </span>
 
-                  <span className="admin-live-id">
-                    #{live.id_live}
-                  </span>
+                  </div>
 
-                </div>
+                  <div className="admin-live-actions">
 
-                {/* SOURCE */}
+                    <button
+                      type="button"
+                      className={
+                        live.statut === "live"
+                          ? "button-offline"
+                          : "button-live"
+                      }
+                      onClick={() =>
+                        changerStatut(
+                          live
+                        )
+                      }
+                    >
+                      {live.statut === "live"
+                        ? "⏹ Arrêter"
+                        : "🔴 Démarrer"}
+                    </button>
 
-                <div className="admin-live-source">
+                    <button
+                      type="button"
+                      className="button-edit"
+                      onClick={() =>
+                        modifierLive(
+                          live
+                        )
+                      }
+                    >
+                      ✏️ Modifier
+                    </button>
 
-                  <span>
-                    {getSourceIcon(
-                      live.source_type
-                    )}
-                  </span>
+                    <button
+                      type="button"
+                      className="button-delete"
+                      onClick={() =>
+                        supprimerLive(
+                          live.id_live
+                        )
+                      }
+                    >
+                      🗑️
+                    </button>
 
-                  <strong>
-                    {getSourceLabel(
-                      live.source_type
-                    )}
-                  </strong>
+                  </div>
 
-                </div>
-
-                {/* TITRE */}
-
-                <h3>
-                  {live.titre}
-                </h3>
-
-                {/* DESCRIPTION */}
-
-                {live.description && (
-                  <p>
-                    {live.description}
-                  </p>
-                )}
-
-                {/* URL */}
-
-                <div className="admin-live-url">
-
-                  <strong>
-                    Source :
-                  </strong>
-
-                  <span>
-                    {live.stream_url}
-                  </span>
-
-                </div>
-
-                {/* VIEWERS */}
-
-                <div className="admin-live-viewers">
-
-                  <span>👁️</span>
-
-                  <strong>
-                    {live.viewer_count || 0}
-                  </strong>
-
-                  <span>
-                    spectateur
-                    {Number(
-                      live.viewer_count
-                    ) > 1
-                      ? "s"
-                      : ""}
-                  </span>
-
-                </div>
-
-                {/* ACTIONS */}
-
-                <div className="admin-live-actions">
-
-                  <button
-                    type="button"
-                    className={
-                      live.statut === "live"
-                        ? "button-offline"
-                        : "button-live"
-                    }
-                    onClick={() =>
-                      changerStatut(live)
-                    }
-                  >
-                    {live.statut === "live"
-                      ? "⏹ Arrêter"
-                      : "🔴 Démarrer"}
-                  </button>
-
-                  <button
-                    type="button"
-                    className="button-edit"
-                    onClick={() =>
-                      modifierLive(live)
-                    }
-                  >
-                    ✏️ Modifier
-                  </button>
-
-                  <button
-                    type="button"
-                    className="button-delete"
-                    onClick={() =>
-                      supprimerLive(
-                        live.id_live
-                      )
-                    }
-                  >
-                    🗑️
-                  </button>
-
-                </div>
-
-              </article>
-
-            ))}
+                </article>
+              );
+            })}
 
           </div>
 
