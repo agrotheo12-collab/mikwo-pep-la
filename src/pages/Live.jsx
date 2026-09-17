@@ -9,59 +9,47 @@ function Live() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [playerError, setPlayerError] = useState("");
-
-  const [quality, setQuality] = useState("auto");
-  const [availableQualities, setAvailableQualities] = useState([]);
-
   const videoRef = useRef(null);
   const hlsRef = useRef(null);
-  const sessionIdRef = useRef(null);
 
-  /* ======================================================
-     SESSION SPECTATEUR
-  ====================================================== */
+  // ======================================================
+  // SESSION ID — SPECTATEUR
+  // ======================================================
 
   const getSessionId = () => {
-    if (sessionIdRef.current) {
-      return sessionIdRef.current;
-    }
+    const key = "mikwo_pep_la_live_session";
 
-    let sessionId = localStorage.getItem(
-      "mikwo_live_session_id"
-    );
+    let sessionId = localStorage.getItem(key);
 
     if (!sessionId) {
       sessionId =
         "viewer-" +
         Date.now() +
         "-" +
-        Math.random().toString(36).substring(2, 12);
+        Math.random()
+          .toString(36)
+          .substring(2, 12);
 
-      localStorage.setItem(
-        "mikwo_live_session_id",
-        sessionId
-      );
+      localStorage.setItem(key, sessionId);
     }
-
-    sessionIdRef.current = sessionId;
 
     return sessionId;
   };
 
-  /* ======================================================
-     CHARGER LE LIVE
-  ====================================================== */
+  // ======================================================
+  // CHARGER LE DIRECT
+  // ======================================================
 
   useEffect(() => {
+    let actif = true;
+
     const chargerLive = async () => {
       try {
         setLoading(true);
         setError("");
 
         const response = await fetch(
-          `${API_URL}/api/live/public`
+          `${API_URL}/api/live`
         );
 
         const data = await response.json();
@@ -73,44 +61,60 @@ function Live() {
           );
         }
 
-        let liveData = null;
-
-        if (data?.live) {
-          liveData = data.live;
-        } else if (Array.isArray(data)) {
-          liveData = data[0] || null;
-        } else if (data?.id_live) {
-          liveData = data;
+        if (!actif) {
+          return;
         }
+
+        /*
+          Le backend retourne :
+
+          {
+            success: true,
+            live: {
+              id_live,
+              titre,
+              description,
+              stream_url,
+              statut,
+              source_type
+            }
+          }
+        */
+
+        const liveData = data?.live || null;
 
         setLive(liveData);
       } catch (err) {
         console.error(
-          "Erreur chargement live :",
+          "Erreur chargement direct :",
           err
         );
 
-        setError(
-          err.message ||
-            "Impossible de charger le direct."
-        );
+        if (actif) {
+          setError(
+            err.message ||
+              "Impossible de charger le direct."
+          );
 
-        setLive(null);
+          setLive(null);
+        }
       } finally {
-        setLoading(false);
+        if (actif) {
+          setLoading(false);
+        }
       }
     };
 
     chargerLive();
+
+    return () => {
+      actif = false;
+    };
   }, []);
 
-  /* ======================================================
-     ENREGISTRER LA PRÉSENCE DU SPECTATEUR
-     
-     IMPORTANT :
-     Le nombre de spectateurs n'est PAS affiché ici.
-     Cette information est réservée à l'Admin.
-  ====================================================== */
+  // ======================================================
+  // ENREGISTRER LA PRÉSENCE DU SPECTATEUR
+  // ======================================================
 
   useEffect(() => {
     if (!live?.id_live) {
@@ -119,8 +123,6 @@ function Live() {
 
     const sessionId = getSessionId();
 
-    let actif = true;
-
     const envoyerPresence = async () => {
       try {
         const response = await fetch(
@@ -128,7 +130,8 @@ function Live() {
           {
             method: "POST",
             headers: {
-              "Content-Type": "application/json",
+              "Content-Type":
+                "application/json",
             },
             body: JSON.stringify({
               id_live: live.id_live,
@@ -137,7 +140,8 @@ function Live() {
           }
         );
 
-        const data = await response.json();
+        const data =
+          await response.json();
 
         if (!response.ok) {
           throw new Error(
@@ -147,17 +151,14 @@ function Live() {
         }
 
         /*
-         * Le backend retourne toujours le nombre
-         * de spectateurs, mais nous ne l'affichons
-         * jamais sur la partie publique.
-         *
-         * AdminLive pourra utiliser cette API
-         * pour afficher le nombre.
-         */
+          Important :
 
-        if (actif && data.success) {
-          // Présence enregistrée avec succès.
-        }
+          Le nombre de spectateurs n'est PAS affiché
+          publiquement ici.
+
+          L'Admin le récupère avec :
+          GET /api/live/:id/viewers
+        */
       } catch (err) {
         console.error(
           "Erreur présence spectateur :",
@@ -174,14 +175,13 @@ function Live() {
     );
 
     return () => {
-      actif = false;
       clearInterval(interval);
     };
   }, [live]);
 
-  /* ======================================================
-     NETTOYAGE HLS
-  ====================================================== */
+  // ======================================================
+  // NETTOYAGE HLS
+  // ======================================================
 
   useEffect(() => {
     return () => {
@@ -192,133 +192,140 @@ function Live() {
     };
   }, []);
 
-  /* ======================================================
-     DÉTECTER URL HLS
-  ====================================================== */
+  // ======================================================
+  // EXTRAIRE ID YOUTUBE
+  // ======================================================
 
-  const isHlsUrl = (url) => {
-    if (!url) return false;
-
-    return (
-      url.includes(".m3u8") ||
-      url.includes("application/vnd.apple.mpegurl")
-    );
-  };
-
-  /* ======================================================
-     DÉTECTER YOUTUBE
-  ====================================================== */
-
-  const getYouTubeEmbedUrl = (url) => {
-    if (!url) return null;
+  const getYouTubeId = (url) => {
+    if (!url) {
+      return null;
+    }
 
     try {
-      const parsed = new URL(url);
+      const parsedUrl = new URL(url);
 
       if (
-        parsed.hostname.includes("youtube.com") ||
-        parsed.hostname.includes("youtube-nocookie.com")
+        parsedUrl.hostname.includes(
+          "youtu.be"
+        )
       ) {
-        if (parsed.pathname === "/watch") {
-          const videoId = parsed.searchParams.get("v");
-
-          if (videoId) {
-            return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0`;
-          }
-        }
-
-        if (parsed.pathname.startsWith("/live/")) {
-          const videoId =
-            parsed.pathname.split("/live/")[1];
-
-          if (videoId) {
-            return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0`;
-          }
-        }
-
-        if (parsed.pathname.startsWith("/embed/")) {
-          return url;
-        }
+        return parsedUrl.pathname
+          .replace("/", "")
+          .trim();
       }
 
-      if (parsed.hostname === "youtu.be") {
+      if (
+        parsedUrl.hostname.includes(
+          "youtube.com"
+        )
+      ) {
         const videoId =
-          parsed.pathname.replace("/", "");
+          parsedUrl.searchParams.get("v");
 
         if (videoId) {
-          return `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0`;
+          return videoId;
+        }
+
+        const paths =
+          parsedUrl.pathname.split(
+            "/"
+          );
+
+        const liveIndex =
+          paths.indexOf("live");
+
+        if (
+          liveIndex !== -1 &&
+          paths[liveIndex + 1]
+        ) {
+          return paths[liveIndex + 1];
+        }
+
+        const embedIndex =
+          paths.indexOf("embed");
+
+        if (
+          embedIndex !== -1 &&
+          paths[embedIndex + 1]
+        ) {
+          return paths[
+            embedIndex + 1
+          ];
         }
       }
-    } catch (error) {
-      console.error(
-        "URL YouTube invalide :",
-        error
-      );
+    } catch {
+      return null;
     }
 
     return null;
   };
 
-  /* ======================================================
-     DÉTECTER FACEBOOK
-  ====================================================== */
+  // ======================================================
+  // FACEBOOK URL
+  // ======================================================
 
-  const getFacebookEmbedUrl = (url) => {
-    if (!url) return null;
+  const isFacebookUrl = (url) => {
+    if (!url) {
+      return false;
+    }
 
-    if (
+    return (
       url.includes("facebook.com") ||
       url.includes("fb.watch")
-    ) {
-      return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(
-        url
-      )}&show_text=false`;
-    }
-
-    return null;
+    );
   };
 
-  /* ======================================================
-     DÉTECTER TIKTOK
-  ====================================================== */
+  // ======================================================
+  // TIKTOK URL
+  // ======================================================
 
   const isTikTokUrl = (url) => {
-    if (!url) return false;
+    if (!url) {
+      return false;
+    }
 
-    return (
-      url.includes("tiktok.com") ||
-      url.includes("vm.tiktok.com")
-    );
+    return url.includes("tiktok.com");
   };
 
-  /* ======================================================
-     DÉTECTER ZOOM
-  ====================================================== */
+  // ======================================================
+  // ZOOM URL
+  // ======================================================
 
   const isZoomUrl = (url) => {
-    if (!url) return false;
+    if (!url) {
+      return false;
+    }
+
+    return url.includes("zoom.us");
+  };
+
+  // ======================================================
+  // HLS
+  // ======================================================
+
+  const isHlsUrl = (url) => {
+    if (!url) {
+      return false;
+    }
 
     return (
-      url.includes("zoom.us") ||
-      url.includes("zoom.com")
+      url.toLowerCase().includes(".m3u8")
     );
   };
 
-  /* ======================================================
-     INITIALISER HLS
-  ====================================================== */
+  // ======================================================
+  // INITIALISER HLS
+  // ======================================================
 
   useEffect(() => {
-    if (!live) return;
+    if (!live) {
+      return;
+    }
 
-    const videoUrl =
-      live.video_url ||
-      live.stream_url ||
-      live.url ||
-      live.source_url ||
-      "";
-
-    if (!videoUrl || !isHlsUrl(videoUrl)) {
+    if (
+      live.source_type !== "hls" &&
+      !isHlsUrl(live.stream_url)
+    ) {
       return;
     }
 
@@ -328,13 +335,43 @@ function Live() {
       return;
     }
 
-    setPlayerError("");
-    setAvailableQualities([]);
-    setQuality("auto");
+    const streamUrl = live.stream_url;
+
+    if (!streamUrl) {
+      return;
+    }
 
     if (hlsRef.current) {
       hlsRef.current.destroy();
       hlsRef.current = null;
+    }
+
+    if (
+      video.canPlayType(
+        "application/vnd.apple.mpegurl"
+      )
+    ) {
+      video.src = streamUrl;
+
+      const handleLoadedMetadata =
+        () => {
+          video.play().catch(() => {});
+        };
+
+      video.addEventListener(
+        "loadedmetadata",
+        handleLoadedMetadata
+      );
+
+      return () => {
+        video.removeEventListener(
+          "loadedmetadata",
+          handleLoadedMetadata
+        );
+
+        video.removeAttribute("src");
+        video.load();
+      };
     }
 
     if (Hls.isSupported()) {
@@ -345,153 +382,79 @@ function Live() {
 
       hlsRef.current = hls;
 
-      hls.loadSource(videoUrl);
+      hls.loadSource(streamUrl);
       hls.attachMedia(video);
 
-      hls.on(Hls.Events.MANIFEST_PARSED, () => {
-        const levels = hls.levels || [];
-
-        const qualities = levels
-          .map((level, index) => ({
-            index,
-            height: level.height,
-            bitrate: level.bitrate,
-          }))
-          .filter(
-            (item) =>
-              item.height ||
-              item.bitrate
-          );
-
-        setAvailableQualities(
-          qualities
-        );
-      });
+      hls.on(
+        Hls.Events.MANIFEST_PARSED,
+        () => {
+          video.play().catch(() => {});
+        }
+      );
 
       hls.on(
         Hls.Events.ERROR,
-        (_event, data) => {
+        (
+          event,
+          data
+        ) => {
           console.error(
             "Erreur HLS :",
             data
           );
-
-          if (
-            data?.fatal
-          ) {
-            setPlayerError(
-              "Impossible de lire le direct pour le moment."
-            );
-          }
         }
       );
-    } else if (
-      video.canPlayType(
-        "application/vnd.apple.mpegurl"
-      )
-    ) {
-      video.src = videoUrl;
-    } else {
-      setPlayerError(
-        "Votre navigateur ne supporte pas la lecture du direct."
-      );
+
+      return () => {
+        hls.destroy();
+        hlsRef.current = null;
+      };
     }
 
-    return () => {
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-        hlsRef.current = null;
-      }
-    };
+    return undefined;
   }, [live]);
 
-  /* ======================================================
-     CHANGER QUALITÉ
-  ====================================================== */
-
-  const handleQualityChange = (event) => {
-    const value = event.target.value;
-
-    setQuality(value);
-
-    if (!hlsRef.current) {
-      return;
-    }
-
-    if (value === "auto") {
-      hlsRef.current.currentLevel = -1;
-      return;
-    }
-
-    hlsRef.current.currentLevel =
-      Number(value);
-  };
-
-  /* ======================================================
-     PLAY / PAUSE
-  ====================================================== */
-
-  const handlePlay = async () => {
-    const video = videoRef.current;
-
-    if (!video) return;
-
-    try {
-      await video.play();
-      setIsPlaying(true);
-      setPlayerError("");
-    } catch (error) {
-      console.error(
-        "Erreur lecture :",
-        error
-      );
-
-      setPlayerError(
-        "Impossible de démarrer la lecture."
-      );
-    }
-  };
-
-  const handlePause = () => {
-    const video = videoRef.current;
-
-    if (!video) return;
-
-    video.pause();
-    setIsPlaying(false);
-  };
-
-  /* ======================================================
-     ÉTATS DE CHARGEMENT
-  ====================================================== */
+  // ======================================================
+  // CHARGEMENT
+  // ======================================================
 
   if (loading) {
     return (
       <main className="live-page">
-        <div className="live-loading">
+        <section className="live-loading">
           <div className="live-loader"></div>
 
-          <p>
+          <h2>
             Chargement du direct...
+          </h2>
+
+          <p>
+            Veuillez patienter.
           </p>
-        </div>
+        </section>
       </main>
     );
   }
 
-  /* ======================================================
-     ERREUR
-  ====================================================== */
+  // ======================================================
+  // ERREUR
+  // ======================================================
 
   if (error) {
     return (
       <main className="live-page">
         <section className="live-error">
-          <h1>
-            Une erreur est survenue
-          </h1>
+          <div className="live-error-icon">
+            ⚠️
+          </div>
 
-          <p>{error}</p>
+          <h2>
+            Une erreur est survenue
+          </h2>
+
+          <p>
+            {error}
+          </p>
 
           <button
             type="button"
@@ -506,109 +469,159 @@ function Live() {
     );
   }
 
-  /* ======================================================
-     AUCUN LIVE
-  ====================================================== */
+  // ======================================================
+  // AUCUN DIRECT
+  // ======================================================
 
   if (!live) {
     return (
       <main className="live-page">
         <section className="live-offline">
           <div className="live-offline-icon">
-            📺
+            📡
           </div>
 
+          <span className="live-badge">
+            DIRECT
+          </span>
+
           <h1>
-            Aucun direct en cours
+            Aucun direct disponible
           </h1>
 
           <p>
-            Mikwo Pèp La n'est pas actuellement
-            en direct.
+            Mikwo Pèp La TV n'est pas
+            actuellement en direct.
           </p>
         </section>
       </main>
     );
   }
 
-  /* ======================================================
-     INFORMATIONS DU LIVE
-  ====================================================== */
-
-  const title =
-    live.titre ||
-    live.title ||
-    "Mikwo Pèp La — Direct";
-
-  const description =
-    live.description ||
-    live.contenu ||
-    "";
+  // ======================================================
+  // DONNÉES DU DIRECT
+  // ======================================================
 
   const streamUrl =
-    live.video_url ||
-    live.stream_url ||
-    live.url ||
-    live.source_url ||
-    "";
+    live.stream_url || "";
 
-  const youtubeUrl =
-    getYouTubeEmbedUrl(streamUrl);
+  const sourceType =
+    live.source_type || "";
 
-  const facebookUrl =
-    getFacebookEmbedUrl(streamUrl);
+  const youtubeId =
+    getYouTubeId(streamUrl);
+
+  const isYouTube =
+    sourceType === "youtube" ||
+    Boolean(youtubeId);
+
+  const isFacebook =
+    sourceType === "facebook" ||
+    isFacebookUrl(streamUrl);
 
   const isTikTok =
+    sourceType === "tiktok" ||
     isTikTokUrl(streamUrl);
 
   const isZoom =
+    sourceType === "zoom" ||
     isZoomUrl(streamUrl);
 
   const isHls =
+    sourceType === "hls" ||
     isHlsUrl(streamUrl);
 
-  /* ======================================================
-     RENDU PLAYER
-  ====================================================== */
+  const isLive =
+    live.statut === "live";
+
+  // ======================================================
+  // YOUTUBE EMBED
+  // ======================================================
+
+  const youtubeEmbedUrl = youtubeId
+    ? `https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0`
+    : "";
+
+  // ======================================================
+  // FACEBOOK EMBED
+  // ======================================================
+
+  const facebookEmbedUrl =
+    isFacebook && streamUrl
+      ? `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(
+          streamUrl
+        )}&show_text=false&autoplay=true`
+      : "";
+
+  // ======================================================
+  // RENDU DU PLAYER
+  // ======================================================
 
   const renderPlayer = () => {
-    if (youtubeUrl) {
+    // ----------------------------------------------------
+    // YOUTUBE
+    // ----------------------------------------------------
+
+    if (isYouTube && youtubeEmbedUrl) {
       return (
-        <iframe
-          className="live-iframe"
-          src={youtubeUrl}
-          title={title}
-          allow="autoplay; encrypted-media; picture-in-picture"
-          allowFullScreen
-        />
+        <div className="live-player-frame">
+          <iframe
+            src={youtubeEmbedUrl}
+            title={
+              live.titre ||
+              "Mikwo Pèp La TV — Direct"
+            }
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          />
+        </div>
       );
     }
 
-    if (facebookUrl) {
+    // ----------------------------------------------------
+    // FACEBOOK
+    // ----------------------------------------------------
+
+    if (
+      isFacebook &&
+      facebookEmbedUrl
+    ) {
       return (
-        <iframe
-          className="live-iframe"
-          src={facebookUrl}
-          title={title}
-          allow="autoplay; encrypted-media; picture-in-picture"
-          allowFullScreen
-        />
+        <div className="live-player-frame">
+          <iframe
+            src={facebookEmbedUrl}
+            title={
+              live.titre ||
+              "Mikwo Pèp La TV — Facebook Live"
+            }
+            frameBorder="0"
+            scrolling="no"
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            allowFullScreen
+          />
+        </div>
       );
     }
+
+    // ----------------------------------------------------
+    // TIKTOK
+    // ----------------------------------------------------
 
     if (isTikTok) {
       return (
-        <div className="live-external-message">
+        <div className="live-external-player">
           <div className="live-external-icon">
             🎵
           </div>
 
           <h3>
-            Direct TikTok
+            TikTok Live
           </h3>
 
           <p>
-            Le direct est disponible sur TikTok.
+            Le direct est disponible
+            sur TikTok.
           </p>
 
           <a
@@ -617,25 +630,30 @@ function Live() {
             rel="noopener noreferrer"
             className="live-external-button"
           >
-            Ouvrir TikTok
+            Ouvrir TikTok Live
           </a>
         </div>
       );
     }
+
+    // ----------------------------------------------------
+    // ZOOM
+    // ----------------------------------------------------
 
     if (isZoom) {
       return (
-        <div className="live-external-message">
+        <div className="live-external-player">
           <div className="live-external-icon">
-            🎥
+            🟣
           </div>
 
           <h3>
-            Direct Zoom
+            Zoom
           </h3>
 
           <p>
-            Le direct est disponible sur Zoom.
+            Le direct est disponible
+            via Zoom.
           </p>
 
           <a
@@ -644,99 +662,78 @@ function Live() {
             rel="noopener noreferrer"
             className="live-external-button"
           >
-            Ouvrir Zoom
+            Rejoindre le direct
           </a>
         </div>
       );
     }
 
+    // ----------------------------------------------------
+    // HLS / M3U8
+    // ----------------------------------------------------
+
     if (isHls) {
       return (
-        <div className="live-video-wrapper">
+        <div className="live-player-frame live-video-frame">
           <video
             ref={videoRef}
-            className="live-video"
             controls
+            autoPlay
             playsInline
-            onPlay={() =>
-              setIsPlaying(true)
-            }
-            onPause={() =>
-              setIsPlaying(false)
-            }
-            onError={() =>
-              setPlayerError(
-                "Une erreur est survenue pendant la lecture."
-              )
-            }
-          />
-
-          {!isPlaying && (
-            <button
-              type="button"
-              className="live-play-button"
-              onClick={handlePlay}
-              aria-label="Lire le direct"
-            >
-              ▶️
-            </button>
-          )}
-
-          {availableQualities.length >
-            0 && (
-            <div className="live-quality">
-              <label htmlFor="live-quality">
-                Qualité
-              </label>
-
-              <select
-                id="live-quality"
-                value={quality}
-                onChange={
-                  handleQualityChange
-                }
-              >
-                <option value="auto">
-                  Auto
-                </option>
-
-                {availableQualities.map(
-                  (item) => (
-                    <option
-                      key={item.index}
-                      value={item.index}
-                    >
-                      {item.height
-                        ? `${item.height}p`
-                        : `${Math.round(
-                            item.bitrate / 1000
-                          )} kbps`}
-                    </option>
-                  )
-                )}
-              </select>
-            </div>
-          )}
+            muted
+          >
+            Votre navigateur ne supporte
+            pas la lecture vidéo.
+          </video>
         </div>
       );
     }
 
-    if (streamUrl) {
+    // ----------------------------------------------------
+    // MP4
+    // ----------------------------------------------------
+
+    if (
+      sourceType === "mp4" ||
+      streamUrl
+        .toLowerCase()
+        .endsWith(".mp4")
+    ) {
       return (
-        <div className="live-external-message">
-          <div className="live-external-icon">
-            📡
-          </div>
+        <div className="live-player-frame live-video-frame">
+          <video
+            src={streamUrl}
+            controls
+            autoPlay
+            playsInline
+          >
+            Votre navigateur ne supporte
+            pas la lecture vidéo.
+          </video>
+        </div>
+      );
+    }
 
-          <h3>
-            Direct disponible
-          </h3>
+    // ----------------------------------------------------
+    // SOURCE INCONNUE
+    // ----------------------------------------------------
 
-          <p>
-            Cliquez sur le bouton ci-dessous
-            pour accéder au direct.
-          </p>
+    return (
+      <div className="live-external-player">
+        <div className="live-external-icon">
+          📡
+        </div>
 
+        <h3>
+          Source du direct
+        </h3>
+
+        <p>
+          Le direct utilise une source
+          externe.
+        </p>
+
+        {streamUrl && (
           <a
             href={streamUrl}
             target="_blank"
@@ -745,157 +742,210 @@ function Live() {
           >
             Ouvrir le direct
           </a>
-        </div>
-      );
-    }
-
-    return (
-      <div className="live-external-message">
-        <div className="live-external-icon">
-          📺
-        </div>
-
-        <h3>
-          Source indisponible
-        </h3>
-
-        <p>
-          La source du direct n'est pas
-          disponible actuellement.
-        </p>
+        )}
       </div>
     );
   };
 
-  /* ======================================================
-     PAGE
-  ====================================================== */
+  // ======================================================
+  // RENDER
+  // ======================================================
 
   return (
     <main className="live-page">
 
-      {/* ==================================================
+      {/* =================================================
           HERO
-      ================================================== */}
+      ================================================= */}
 
       <section className="live-hero">
-        <div className="live-hero-overlay">
-          <div className="live-hero-content">
 
-            <span className="live-badge">
-              🔴 EN DIRECT
-            </span>
+        <div className="live-hero-content">
 
-            <h1>
-              {title}
-            </h1>
+          <span className="live-hero-label">
+            MIKWO PÈP LA TV
+          </span>
 
-            {description && (
-              <p>
-                {description}
-              </p>
-            )}
+          <h1>
+            Direct
+          </h1>
 
-          </div>
+          <p>
+            Suivez Mikwo Pèp La TV en
+            direct.
+          </p>
+
         </div>
+
       </section>
 
-      {/* ==================================================
-          CONTENU PRINCIPAL
-      ================================================== */}
+      {/* =================================================
+          CONTENU
+      ================================================= */}
 
       <section className="live-content">
 
         <div className="live-main">
 
-          {/* PLAYER */}
+          {/* =============================================
+              TITRE
+          ============================================= */}
 
-          <div className="live-player-card">
+          <div className="live-heading">
 
-            <div className="live-player">
-              {renderPlayer()}
-            </div>
+            <div>
 
-            {playerError && (
-              <div className="live-player-error">
-                {playerError}
+              <div className="live-status-line">
+
+                <span
+                  className={
+                    isLive
+                      ? "live-status live-status-on"
+                      : "live-status live-status-off"
+                  }
+                >
+                  <span></span>
+
+                  {isLive
+                    ? "EN DIRECT"
+                    : "HORS LIGNE"}
+                </span>
+
               </div>
-            )}
+
+              <h2>
+                {live.titre ||
+                  "Mikwo Pèp La TV"}
+              </h2>
+
+            </div>
 
           </div>
 
-          {/* INFORMATIONS */}
+          {/* =============================================
+              PLAYER
+          ============================================= */}
 
-          <div className="live-info">
+          <div className="live-player">
+            {renderPlayer()}
+          </div>
 
-            <div className="live-info-top">
+          {/* =============================================
+              DESCRIPTION
+          ============================================= */}
 
-              <span className="live-status">
-                🔴 EN DIRECT
+          {live.description && (
+            <section className="live-description">
+
+              <h3>
+                À propos de ce direct
+              </h3>
+
+              <p>
+                {live.description}
+              </p>
+
+            </section>
+          )}
+
+          {/* =============================================
+              MESSAGE HORS LIGNE
+          ============================================= */}
+
+          {!isLive && (
+            <div className="live-offline-notice">
+
+              <span>
+                📡
               </span>
 
-              {live.categorie && (
-                <span className="live-category">
-                  {live.categorie}
-                </span>
-              )}
+              <div>
+                <strong>
+                  Le direct est actuellement
+                  hors ligne.
+                </strong>
+
+                <p>
+                  Revenez plus tard pour
+                  suivre notre prochaine
+                  diffusion.
+                </p>
+              </div>
 
             </div>
-
-            <h2>
-              {title}
-            </h2>
-
-            {description && (
-              <p className="live-description">
-                {description}
-              </p>
-            )}
-
-          </div>
+          )}
 
         </div>
 
-        {/* ==================================================
+        {/* =================================================
             SIDEBAR
-        ================================================== */}
+        ================================================= */}
 
         <aside className="live-sidebar">
 
           <div className="live-sidebar-card">
 
+            <span className="live-sidebar-label">
+              MIKWO PÈP LA
+            </span>
+
             <h3>
-              Mikwo Pèp La
+              La voix du peuple
             </h3>
 
             <p>
-              Le média du peuple,
-              la voix du peuple.
+              Retrouvez toute notre
+              actualité, nos émissions et
+              nos diffusions en direct.
             </p>
 
-            <a
-              href="https://www.facebook.com/Mikwo509"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Facebook
-            </a>
+          </div>
 
-            <a
-              href="https://youtube.com/@mikwopepla509?si=L7pCFMmwYVeq7awo"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              YouTube
-            </a>
+          <div className="live-sidebar-card">
 
-            <a
-              href="https://www.tiktok.com/@mikwopepla"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              TikTok
-            </a>
+            <h3>
+              Suivez-nous
+            </h3>
+
+            <div className="live-social-links">
+
+              <a
+                href="https://www.facebook.com/Mikwo509"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>
+                  f
+                </span>
+
+                Facebook
+              </a>
+
+              <a
+                href="https://youtube.com/@mikwopepla509?si=L7pCFMmwYVeq7awo"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>
+                  ▶️
+                </span>
+
+                YouTube
+              </a>
+
+              <a
+                href="https://www.tiktok.com/@mikwopepla"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <span>
+                  ♪
+                </span>
+
+                TikTok
+              </a>
+
+            </div>
 
           </div>
 
