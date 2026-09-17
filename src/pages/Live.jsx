@@ -36,9 +36,7 @@ function getYouTubeEmbedUrl(url) {
         videoId = parsed.searchParams.get("v") || "";
       }
 
-      if (
-        parsed.pathname.includes("/embed/")
-      ) {
+      if (parsed.pathname.includes("/embed/")) {
         videoId =
           parsed.pathname.split("/embed/")[1]?.split("/")[0] || "";
       }
@@ -166,6 +164,12 @@ function Live() {
   const [quality, setQuality] = useState("auto");
   const [availableQualities, setAvailableQualities] = useState([]);
 
+  // =====================================================
+  // NOMBRE SPECTATEURS
+  // =====================================================
+
+  const [viewers, setViewers] = useState(0);
+
   const videoRef = useRef(null);
   const hlsRef = useRef(null);
 
@@ -217,6 +221,10 @@ function Live() {
       }
 
       setLive(data.live || null);
+
+      if (!data.live) {
+        setViewers(0);
+      }
     } catch (err) {
       console.error(err);
 
@@ -224,6 +232,8 @@ function Live() {
         err.message ||
           "Impossible de charger le direct."
       );
+
+      setViewers(0);
     } finally {
       setLoading(false);
     }
@@ -249,22 +259,48 @@ function Live() {
   // =====================================================
 
   useEffect(() => {
-    if (!live) return;
+    if (!live?.id_live) {
+      setViewers(0);
+      return;
+    }
 
     const sessionId = getSessionId();
 
+    let actif = true;
+
     const envoyerPresence = async () => {
       try {
-        await fetch(`${API_URL}/api/live/viewer`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            session_id: sessionId,
-            id_live: live.id_live,
-          }),
-        });
+        const response = await fetch(
+          `${API_URL}/api/live/viewer`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              session_id: sessionId,
+              id_live: live.id_live,
+            }),
+          }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+              "Impossible d'enregistrer la présence."
+          );
+        }
+
+        if (
+          actif &&
+          data.success
+        ) {
+          setViewers(
+            Number(data.viewers) || 0
+          );
+        }
       } catch (err) {
         console.error(
           "Erreur présence spectateur :",
@@ -273,14 +309,17 @@ function Live() {
       }
     };
 
+    // Première présence immédiatement
     envoyerPresence();
 
+    // Actualiser toutes les 30 secondes
     const interval = setInterval(
       envoyerPresence,
       30000
     );
 
     return () => {
+      actif = false;
       clearInterval(interval);
     };
   }, [live]);
@@ -430,60 +469,64 @@ function Live() {
     );
   };
 
-const handlePlay = () => {
-  setPlayerError("");
-
-  // ============================================
-  // PA GEN LIVE
-  // ============================================
-
-  if (!live) {
-    setPlayerError(
-      "La diffusion en direct n'est pas disponible pour le moment."
-    );
-
-    return;
-  }
-
-  // ============================================
-  // LIVE HORS LIGNE
-  // ============================================
-
-  if (
-    String(live.statut || "")
-      .trim()
-      .toLowerCase() !== "live"
-  ) {
-    setPlayerError(
-      "Le direct est actuellement hors ligne."
-    );
-
-    setIsPlaying(false);
-
-    return;
-  }
-
-  // ============================================
-  // URL MANKE
-  // ============================================
-
-  if (
-    !live.stream_url ||
-    !live.stream_url.trim()
-  ) {
-    setPlayerError(
-      "L'URL du direct n'est pas configurée."
-    );
-
-    return;
-  }
-
-  // ============================================
+  // =====================================================
   // LANCER LE LIVE
-  // ============================================
+  // =====================================================
 
-  setIsPlaying(true);
-};
+  const handlePlay = () => {
+    setPlayerError("");
+
+    // ============================================
+    // PA GEN LIVE
+    // ============================================
+
+    if (!live) {
+      setPlayerError(
+        "La diffusion en direct n'est pas disponible pour le moment."
+      );
+
+      return;
+    }
+
+    // ============================================
+    // LIVE HORS LIGNE
+    // ============================================
+
+    if (
+      String(live.statut || "")
+        .trim()
+        .toLowerCase() !== "live"
+    ) {
+      setPlayerError(
+        "Le direct est actuellement hors ligne."
+      );
+
+      setIsPlaying(false);
+
+      return;
+    }
+
+    // ============================================
+    // URL MANKE
+    // ============================================
+
+    if (
+      !live.stream_url ||
+      !live.stream_url.trim()
+    ) {
+      setPlayerError(
+        "L'URL du direct n'est pas configurée."
+      );
+
+      return;
+    }
+
+    // ============================================
+    // LANCER LE LIVE
+    // ============================================
+
+    setIsPlaying(true);
+  };
 
   // =====================================================
   // INITIALISER LE PLAYER
@@ -1018,6 +1061,18 @@ const handlePlay = () => {
 
                     <span className="live-type">
                       Web TV
+                    </span>
+
+                    {/* =================================================
+                        NOMBRE SPECTATEURS
+                    ================================================= */}
+
+                    <span className="live-viewers">
+                      👁️ {viewers}{" "}
+                      spectateur
+                      {viewers !== 1
+                        ? "s"
+                        : ""}
                     </span>
 
                   </div>

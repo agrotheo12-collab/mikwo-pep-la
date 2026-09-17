@@ -6064,19 +6064,11 @@ app.post(
           $1,$2,NOW()
 
         )
-
-        ON CONFLICT (
-
-          id_live,
-
-          session_id
-
-        )
-
+          
+        ON CONFLICT (session_id)
         DO UPDATE SET
-
+          id_live = EXCLUDED.id_live,
           last_seen = NOW()
-
         `,
 
         [
