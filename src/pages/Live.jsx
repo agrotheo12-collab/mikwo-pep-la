@@ -24,23 +24,28 @@ function getYouTubeEmbedUrl(url) {
       let videoId = "";
 
       if (hostname.includes("youtu.be")) {
-        videoId = parsed.pathname.replace("/", "").split("/")[0];
+        videoId = parsed.pathname
+          .replace("/", "")
+          .split("/")[0];
       }
 
       if (parsed.pathname.includes("/live/")) {
         videoId =
-          parsed.pathname.split("/live/")[1]?.split("/")[0] || "";
+          parsed.pathname
+            .split("/live/")[1]
+            ?.split("/")[0] || "";
       }
 
       if (parsed.pathname.includes("/watch")) {
-        videoId = parsed.searchParams.get("v") || "";
+        videoId =
+          parsed.searchParams.get("v") || "";
       }
 
-      if (
-        parsed.pathname.includes("/embed/")
-      ) {
+      if (parsed.pathname.includes("/embed/")) {
         videoId =
-          parsed.pathname.split("/embed/")[1]?.split("/")[0] || "";
+          parsed.pathname
+            .split("/embed/")[1]
+            ?.split("/")[0] || "";
       }
 
       if (videoId) {
@@ -48,7 +53,10 @@ function getYouTubeEmbedUrl(url) {
       }
     }
   } catch (error) {
-    console.error("URL YouTube invalide :", error);
+    console.error(
+      "URL YouTube invalide :",
+      error
+    );
   }
 
   return "";
@@ -75,7 +83,9 @@ function isFacebookUrl(url) {
 }
 
 function getFacebookEmbedUrl(url) {
-  if (!url || !isFacebookUrl(url)) return "";
+  if (!url || !isFacebookUrl(url)) {
+    return "";
+  }
 
   return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(
     url
@@ -103,7 +113,9 @@ function isTikTokUrl(url) {
 }
 
 function getTikTokEmbedUrl(url) {
-  if (!url || !isTikTokUrl(url)) return "";
+  if (!url || !isTikTokUrl(url)) {
+    return "";
+  }
 
   return url;
 }
@@ -129,7 +141,9 @@ function isZoomUrl(url) {
 }
 
 function getZoomEmbedUrl(url) {
-  if (!url || !isZoomUrl(url)) return "";
+  if (!url || !isZoomUrl(url)) {
+    return "";
+  }
 
   return url;
 }
@@ -146,8 +160,12 @@ function isHlsUrl(url) {
   return (
     value.includes(".m3u8") ||
     value.includes("m3u8") ||
-    value.includes("application/vnd.apple.mpegurl") ||
-    value.includes("application/x-mpegurl")
+    value.includes(
+      "application/vnd.apple.mpegurl"
+    ) ||
+    value.includes(
+      "application/x-mpegurl"
+    )
   );
 }
 
@@ -160,15 +178,25 @@ function Live() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [playerError, setPlayerError] = useState("");
+  const [isPlaying, setIsPlaying] =
+    useState(false);
 
-  const [quality, setQuality] = useState("auto");
-  const [availableQualities, setAvailableQualities] = useState([]);
+  const [playerError, setPlayerError] =
+    useState("");
+
+  const [quality, setQuality] =
+    useState("auto");
+
+  const [
+    availableQualities,
+    setAvailableQualities,
+  ] = useState([]);
+
+  const [shareMessage, setShareMessage] =
+    useState("");
 
   const videoRef = useRef(null);
   const hlsRef = useRef(null);
-
   const sessionIdRef = useRef(null);
 
   // =====================================================
@@ -205,7 +233,9 @@ function Live() {
       setLoading(true);
       setError("");
 
-      const response = await fetch(`${API_URL}/api/live`);
+      const response = await fetch(
+        `${API_URL}/api/live`
+      );
 
       const data = await response.json();
 
@@ -218,7 +248,10 @@ function Live() {
 
       setLive(data.live || null);
     } catch (err) {
-      console.error(err);
+      console.error(
+        "Erreur chargement live :",
+        err
+      );
 
       setError(
         err.message ||
@@ -249,22 +282,26 @@ function Live() {
   // =====================================================
 
   useEffect(() => {
-    if (!live) return;
+    if (!live?.id_live) return;
 
     const sessionId = getSessionId();
 
     const envoyerPresence = async () => {
       try {
-        await fetch(`${API_URL}/api/live/viewer`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            session_id: sessionId,
-            id_live: live.id_live,
-          }),
-        });
+        await fetch(
+          `${API_URL}/api/live/viewer`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+            body: JSON.stringify({
+              session_id: sessionId,
+              id_live: live.id_live,
+            }),
+          }
+        );
       } catch (err) {
         console.error(
           "Erreur présence spectateur :",
@@ -303,16 +340,22 @@ function Live() {
   const setupHls = () => {
     const video = videoRef.current;
 
-    if (!video || !live?.stream_url) return;
+    if (!video || !live?.stream_url) {
+      return;
+    }
 
-    const streamUrl = live.stream_url.trim();
+    const streamUrl =
+      live.stream_url.trim();
 
     destroyHls();
 
     setPlayerError("");
     setAvailableQualities([]);
 
-    // Safari / iPhone / iPad
+    // =================================================
+    // SAFARI / IPHONE / IPAD
+    // =================================================
+
     if (
       video.canPlayType(
         "application/vnd.apple.mpegurl"
@@ -330,11 +373,13 @@ function Live() {
       return;
     }
 
-    // Chrome / Edge / Firefox
+    // =================================================
+    // CHROME / EDGE / FIREFOX
+    // =================================================
+
     if (Hls.isSupported()) {
       const hls = new Hls({
         enableWorker: true,
-
         startLevel: -1,
 
         maxBufferLength: 20,
@@ -358,13 +403,16 @@ function Live() {
       hls.on(
         Hls.Events.MANIFEST_PARSED,
         () => {
-          const levels = hls.levels || [];
+          const levels =
+            hls.levels || [];
 
           const qualities = levels
             .map((level, index) => ({
               index,
-              height: level.height || 0,
-              bitrate: level.bitrate || 0,
+              height:
+                level.height || 0,
+              bitrate:
+                level.bitrate || 0,
             }))
             .filter(
               (item) =>
@@ -400,11 +448,13 @@ function Live() {
 
           if (data.fatal) {
             switch (data.type) {
-              case Hls.ErrorTypes.NETWORK_ERROR:
+              case Hls.ErrorTypes
+                .NETWORK_ERROR:
                 hls.startLoad();
                 break;
 
-              case Hls.ErrorTypes.MEDIA_ERROR:
+              case Hls.ErrorTypes
+                .MEDIA_ERROR:
                 hls.recoverMediaError();
                 break;
 
@@ -430,40 +480,95 @@ function Live() {
     );
   };
 
-const handlePlay = () => {
-  setPlayerError("");
+  // =====================================================
+  // LANCER LE LIVE
+  // =====================================================
 
-    // ======================================================
-  // PARTAGE DU DIRECT
-  // ======================================================
+  const handlePlay = () => {
+    setPlayerError("");
+
+    if (!live) {
+      setPlayerError(
+        "La diffusion en direct n'est pas disponible pour le moment."
+      );
+
+      return;
+    }
+
+    if (
+      String(live.statut || "")
+        .trim()
+        .toLowerCase() !== "live"
+    ) {
+      setPlayerError(
+        "Le direct est actuellement hors ligne."
+      );
+
+      setIsPlaying(false);
+
+      return;
+    }
+
+    if (
+      !live.stream_url ||
+      !live.stream_url.trim()
+    ) {
+      setPlayerError(
+        "L'URL du direct n'est pas configurée."
+      );
+
+      return;
+    }
+
+    setIsPlaying(true);
+  };
+
+  // =====================================================
+  // PARTAGER LE DIRECT
+  // =====================================================
 
   const handleShare = async () => {
-    const shareUrl = window.location.href;
+    const shareUrl =
+      window.location.href;
 
     const shareData = {
       title:
         live?.titre ||
         "Mikwo Pèp La TV — Direct",
+
       text:
         "Regardez le direct de Mikwo Pèp La TV.",
+
       url: shareUrl,
     };
 
     setShareMessage("");
 
     try {
+      // =================================================
+      // PARTAGE NATIF
+      // =================================================
+
       if (
         navigator.share &&
-        typeof navigator.share === "function"
+        typeof navigator.share ===
+          "function"
       ) {
-        await navigator.share(shareData);
+        await navigator.share(
+          shareData
+        );
+
         return;
       }
 
+      // =================================================
+      // COPIER AVEC CLIPBOARD
+      // =================================================
+
       if (
         navigator.clipboard &&
-        typeof navigator.clipboard.writeText ===
-          "function"
+        typeof navigator.clipboard
+          .writeText === "function"
       ) {
         await navigator.clipboard.writeText(
           shareUrl
@@ -480,19 +585,33 @@ const handlePlay = () => {
         return;
       }
 
+      // =================================================
+      // FALLBACK
+      // =================================================
+
       const textarea =
-        document.createElement("textarea");
+        document.createElement(
+          "textarea"
+        );
 
       textarea.value = shareUrl;
-      textarea.style.position = "fixed";
+
+      textarea.style.position =
+        "fixed";
+
       textarea.style.opacity = "0";
 
-      document.body.appendChild(textarea);
+      document.body.appendChild(
+        textarea
+      );
+
       textarea.select();
 
       document.execCommand("copy");
 
-      document.body.removeChild(textarea);
+      document.body.removeChild(
+        textarea
+      );
 
       setShareMessage(
         "Lien du direct copié."
@@ -502,7 +621,11 @@ const handlePlay = () => {
         setShareMessage("");
       }, 3000);
     } catch (err) {
-      if (err?.name === "AbortError") {
+      // L'utilisateur a fermé
+      // la fenêtre de partage
+      if (
+        err?.name === "AbortError"
+      ) {
         return;
       }
 
@@ -521,156 +644,108 @@ const handlePlay = () => {
     }
   };
 
-  // ============================================
-  // PA GEN LIVE
-  // ============================================
-
-  if (!live) {
-    setPlayerError(
-      "La diffusion en direct n'est pas disponible pour le moment."
-    );
-
-    return;
-  }
-
-  // ============================================
-  // LIVE HORS LIGNE
-  // ============================================
-
-  if (
-    String(live.statut || "")
-      .trim()
-      .toLowerCase() !== "live"
-  ) {
-    setPlayerError(
-      "Le direct est actuellement hors ligne."
-    );
-
-    setIsPlaying(false);
-
-    return;
-  }
-
-  // ============================================
-  // URL MANKE
-  // ============================================
-
-  if (
-    !live.stream_url ||
-    !live.stream_url.trim()
-  ) {
-    setPlayerError(
-      "L'URL du direct n'est pas configurée."
-    );
-
-    return;
-  }
-
-  // ============================================
-  // LANCER LE LIVE
-  // ============================================
-
-  setIsPlaying(true);
-};
-
   // =====================================================
   // INITIALISER LE PLAYER
   // =====================================================
 
   useEffect(() => {
     if (
-      isPlaying &&
-      live &&
-      live.stream_url
+      !isPlaying ||
+      !live ||
+      !live.stream_url
     ) {
-      const sourceType = String(
+      return;
+    }
+
+    const sourceType =
+      String(
         live.source_type || ""
       ).toLowerCase();
 
-      const streamUrl =
-        live.stream_url;
+    const streamUrl =
+      live.stream_url;
 
-      const youtubeUrl =
-        getYouTubeEmbedUrl(
-          streamUrl
-        );
+    const youtubeUrl =
+      getYouTubeEmbedUrl(
+        streamUrl
+      );
 
-      const facebookUrl =
-        getFacebookEmbedUrl(
-          streamUrl
-        );
+    const facebookUrl =
+      getFacebookEmbedUrl(
+        streamUrl
+      );
 
-      const tiktokUrl =
-        getTikTokEmbedUrl(
-          streamUrl
-        );
+    const tiktokUrl =
+      getTikTokEmbedUrl(
+        streamUrl
+      );
 
-      const zoomUrl =
-        getZoomEmbedUrl(
-          streamUrl
-        );
+    const zoomUrl =
+      getZoomEmbedUrl(
+        streamUrl
+      );
 
-      // =================================================
-      // YOUTUBE
-      // =================================================
+    // =================================================
+    // YOUTUBE
+    // =================================================
 
-      if (
-        sourceType === "youtube" ||
-        youtubeUrl
-      ) {
-        return;
-      }
+    if (
+      sourceType === "youtube" ||
+      youtubeUrl
+    ) {
+      return;
+    }
 
-      // =================================================
-      // FACEBOOK
-      // =================================================
+    // =================================================
+    // FACEBOOK
+    // =================================================
 
-      if (
-        sourceType === "facebook" ||
-        facebookUrl
-      ) {
-        return;
-      }
+    if (
+      sourceType === "facebook" ||
+      facebookUrl
+    ) {
+      return;
+    }
 
-      // =================================================
-      // TIKTOK
-      // =================================================
+    // =================================================
+    // TIKTOK
+    // =================================================
 
-      if (
-        sourceType === "tiktok" ||
-        tiktokUrl
-      ) {
-        return;
-      }
+    if (
+      sourceType === "tiktok" ||
+      tiktokUrl
+    ) {
+      return;
+    }
 
-      // =================================================
-      // ZOOM
-      // =================================================
+    // =================================================
+    // ZOOM
+    // =================================================
 
-      if (
-        sourceType === "zoom" ||
-        zoomUrl
-      ) {
-        return;
-      }
+    if (
+      sourceType === "zoom" ||
+      zoomUrl
+    ) {
+      return;
+    }
 
-      // =================================================
-      // HLS
-      // =================================================
+    // =================================================
+    // HLS
+    // =================================================
 
-      if (
-        sourceType === "hls" ||
-        isHlsUrl(streamUrl)
-      ) {
-        const timer = setTimeout(() => {
+    if (
+      sourceType === "hls" ||
+      isHlsUrl(streamUrl)
+    ) {
+      const timer =
+        setTimeout(() => {
           setupHls();
         }, 50);
 
-        return () => {
-          clearTimeout(timer);
-          destroyHls();
-        };
-      }
+      return () => {
+        clearTimeout(timer);
+        destroyHls();
+      };
     }
 
     return () => {
@@ -685,21 +760,25 @@ const handlePlay = () => {
   // CHOISIR QUALITÉ
   // =====================================================
 
-  const changerQualite = (value) => {
+  const changerQualite = (
+    value
+  ) => {
     setQuality(value);
 
     if (!hlsRef.current) {
       return;
     }
 
-    const hls = hlsRef.current;
+    const hls =
+      hlsRef.current;
 
     if (value === "auto") {
       hls.currentLevel = -1;
       return;
     }
 
-    const selected = Number(value);
+    const selected =
+      Number(value);
 
     if (
       Number.isInteger(selected)
@@ -791,7 +870,8 @@ const handlePlay = () => {
       <section
         className="live-hero"
         style={{
-          backgroundImage: `url(${cover})`,
+          backgroundImage:
+            `url(${cover})`,
         }}
       >
         <div className="live-hero-overlay"></div>
@@ -829,11 +909,13 @@ const handlePlay = () => {
           {loading ? (
 
             <div className="live-loading">
+
               <div className="live-spinner"></div>
 
               <span>
                 Chargement du direct...
               </span>
+
             </div>
 
           ) : error ? (
@@ -846,7 +928,15 @@ const handlePlay = () => {
 
             <div className="live-layout">
 
+              {/* =================================================
+                  MAIN
+              ================================================= */}
+
               <div className="live-main">
+
+                {/* =================================================
+                    PLAYER
+                ================================================= */}
 
                 <div
                   className={
@@ -863,9 +953,11 @@ const handlePlay = () => {
                     <div
                       className="live-player-placeholder"
                       style={{
-                        backgroundImage: `url(${cover})`,
+                        backgroundImage:
+                          `url(${cover})`,
                       }}
                     >
+
                       <div className="live-placeholder-overlay"></div>
 
                       <div className="live-placeholder-content">
@@ -926,7 +1018,7 @@ const handlePlay = () => {
                           }
                           allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
                           allowFullScreen
-                        ></iframe>
+                        />
 
                       ) : isFacebook &&
                         facebookEmbedUrl ? (
@@ -946,7 +1038,7 @@ const handlePlay = () => {
                           }
                           allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
                           allowFullScreen
-                        ></iframe>
+                        />
 
                       ) : isTikTok &&
                         tiktokEmbedUrl ? (
@@ -966,7 +1058,7 @@ const handlePlay = () => {
                           }
                           allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
                           allowFullScreen
-                        ></iframe>
+                        />
 
                       ) : isZoom &&
                         zoomEmbedUrl ? (
@@ -986,7 +1078,7 @@ const handlePlay = () => {
                           }
                           allow="autoplay; encrypted-media; microphone; camera; fullscreen"
                           allowFullScreen
-                        ></iframe>
+                        />
 
                       ) : isHls ? (
 
@@ -1009,6 +1101,7 @@ const handlePlay = () => {
 
                           {availableQualities.length >
                             0 && (
+
                             <div className="live-quality">
 
                               <label htmlFor="quality">
@@ -1024,12 +1117,14 @@ const handlePlay = () => {
                                   )
                                 }
                               >
+
                                 <option value="auto">
                                   Auto — recommandé
                                 </option>
 
                                 {availableQualities.map(
                                   (item) => (
+
                                     <option
                                       key={
                                         item.index
@@ -1040,13 +1135,15 @@ const handlePlay = () => {
                                     >
                                       {item.height}p
                                     </option>
+
                                   )
                                 )}
+
                               </select>
 
                             </div>
-                          )}
 
+                          )}
                         </>
 
                       ) : (
@@ -1096,12 +1193,14 @@ const handlePlay = () => {
                   <div className="live-info-top">
 
                     <span className="live-status">
+
                       <span className="live-status-dot"></span>
 
                       {live?.statut ===
                       "live"
                         ? "EN DIRECT"
                         : "HORS LIGNE"}
+
                     </span>
 
                     <span className="live-type">
@@ -1122,6 +1221,42 @@ const handlePlay = () => {
 
                 </div>
 
+                {/* =================================================
+                    PARTAGER LE DIRECT
+                ================================================= */}
+
+                <div className="live-share">
+
+                  <button
+                    type="button"
+                    className="live-share-button"
+                    onClick={
+                      handleShare
+                    }
+                    aria-label="Partager le direct"
+                  >
+
+                    <span className="live-share-icon">
+                      ↗️
+                    </span>
+
+                    <span>
+                      Partager le direct
+                    </span>
+
+                  </button>
+
+                  {shareMessage && (
+                    <span
+                      className="live-share-message"
+                      role="status"
+                    >
+                      {shareMessage}
+                    </span>
+                  )}
+
+                </div>
+
               </div>
 
               {/* =================================================
@@ -1131,6 +1266,7 @@ const handlePlay = () => {
               <aside className="live-sidebar">
 
                 <div className="live-sidebar-header">
+
                   <span>
                     MIKWO PÈP LA TV
                   </span>
@@ -1138,14 +1274,17 @@ const handlePlay = () => {
                   <h2>
                     Votre Web TV
                   </h2>
+
                 </div>
 
                 <div className="live-sidebar-content">
 
                   <div className="live-sidebar-item">
+
                     <span>📺</span>
 
                     <div>
+
                       <strong>
                         Direct
                       </strong>
@@ -1155,13 +1294,17 @@ const handlePlay = () => {
                         émissions en temps
                         réel.
                       </p>
+
                     </div>
+
                   </div>
 
                   <div className="live-sidebar-item">
+
                     <span>📰</span>
 
                     <div>
+
                       <strong>
                         Actualités
                       </strong>
@@ -1170,13 +1313,17 @@ const handlePlay = () => {
                         L'information au
                         service du peuple.
                       </p>
+
                     </div>
+
                   </div>
 
                   <div className="live-sidebar-item">
+
                     <span>🎥</span>
 
                     <div>
+
                       <strong>
                         Vidéos
                       </strong>
@@ -1185,7 +1332,9 @@ const handlePlay = () => {
                         Retrouvez nos
                         contenus vidéo.
                       </p>
+
                     </div>
+
                   </div>
 
                 </div>
@@ -1204,6 +1353,7 @@ const handlePlay = () => {
           )}
 
         </div>
+
       </section>
 
       {/* =================================================
@@ -1235,6 +1385,7 @@ const handlePlay = () => {
           <div className="live-types-grid">
 
             <article className="live-type-card">
+
               <span>🔴</span>
 
               <h3>
@@ -1246,9 +1397,11 @@ const handlePlay = () => {
                 importants au moment où
                 ils se produisent.
               </p>
+
             </article>
 
             <article className="live-type-card">
+
               <span>📡</span>
 
               <h3>
@@ -1260,9 +1413,11 @@ const handlePlay = () => {
                 automatiquement la qualité
                 à la connexion disponible.
               </p>
+
             </article>
 
             <article className="live-type-card">
+
               <span>📱</span>
 
               <h3>
@@ -1274,11 +1429,13 @@ const handlePlay = () => {
                 ordinateur ou télévision
                 compatible.
               </p>
+
             </article>
 
           </div>
 
         </div>
+
       </section>
 
       {/* =================================================
@@ -1331,6 +1488,7 @@ const handlePlay = () => {
           </div>
 
         </div>
+
       </section>
 
     </main>
