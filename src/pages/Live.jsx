@@ -536,8 +536,9 @@ function Live() {
         live?.titre ||
         "Mikwo Pèp La TV — Direct",
 
-      text:
-        "Regardez le direct de Mikwo Pèp La TV.",
+      text: live?.description
+        ? `Regarder en direct : ${live.description}`
+        : "Regarder en direct sur Mikwo Pèp La TV.",
 
       url: shareUrl,
     };
