@@ -747,3 +747,123 @@
     transition: none;
   }
 }
+
+/* ======================================================
+   BOUTON PARTAGE DU DIRECT
+====================================================== */
+
+.live-share {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+  margin-bottom: 22px;
+}
+
+.live-share-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+
+  min-height: 46px;
+  padding: 0 20px;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: #0057a8;
+  color: #ffffff;
+
+  font-size: 14px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.12);
+
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.live-share-button:hover {
+  background: #004685;
+
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 7px 18px rgba(0, 0, 0, 0.18);
+}
+
+.live-share-button:active {
+  transform: translateY(0);
+}
+
+.live-share-button:focus-visible {
+  outline: 3px solid #d71920;
+  outline-offset: 3px;
+}
+
+.live-share-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 25px;
+  height: 25px;
+
+  border-radius: 50%;
+
+  background: rgba(255, 255, 255, 0.18);
+
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.live-share-message {
+  display: inline-flex;
+  align-items: center;
+
+  min-height: 40px;
+  padding: 0 14px;
+
+  border-radius: 7px;
+
+  background: #f3ead8;
+  color: #111111;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ======================================================
+   MOBILE
+====================================================== */
+
+@media (max-width: 600px) {
+  .live-share {
+    width: 100%;
+    margin-top: 14px;
+    margin-bottom: 18px;
+  }
+
+  .live-share-button {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 16px;
+
+    font-size: 14px;
+  }
+
+  .live-share-message {
+    width: 100%;
+    justify-content: center;
+
+    min-height: 40px;
+  }
+}

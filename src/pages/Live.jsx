@@ -433,6 +433,94 @@ function Live() {
 const handlePlay = () => {
   setPlayerError("");
 
+    // ======================================================
+  // PARTAGE DU DIRECT
+  // ======================================================
+
+  const handleShare = async () => {
+    const shareUrl = window.location.href;
+
+    const shareData = {
+      title:
+        live?.titre ||
+        "Mikwo Pèp La TV — Direct",
+      text:
+        "Regardez le direct de Mikwo Pèp La TV.",
+      url: shareUrl,
+    };
+
+    setShareMessage("");
+
+    try {
+      if (
+        navigator.share &&
+        typeof navigator.share === "function"
+      ) {
+        await navigator.share(shareData);
+        return;
+      }
+
+      if (
+        navigator.clipboard &&
+        typeof navigator.clipboard.writeText ===
+          "function"
+      ) {
+        await navigator.clipboard.writeText(
+          shareUrl
+        );
+
+        setShareMessage(
+          "Lien du direct copié."
+        );
+
+        setTimeout(() => {
+          setShareMessage("");
+        }, 3000);
+
+        return;
+      }
+
+      const textarea =
+        document.createElement("textarea");
+
+      textarea.value = shareUrl;
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+
+      document.body.appendChild(textarea);
+      textarea.select();
+
+      document.execCommand("copy");
+
+      document.body.removeChild(textarea);
+
+      setShareMessage(
+        "Lien du direct copié."
+      );
+
+      setTimeout(() => {
+        setShareMessage("");
+      }, 3000);
+    } catch (err) {
+      if (err?.name === "AbortError") {
+        return;
+      }
+
+      console.error(
+        "Erreur partage :",
+        err
+      );
+
+      setShareMessage(
+        "Impossible de partager le direct."
+      );
+
+      setTimeout(() => {
+        setShareMessage("");
+      }, 3000);
+    }
+  };
+
   // ============================================
   // PA GEN LIVE
   // ============================================
